@@ -3,146 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Pembacaan Alkitab - Pondok Pemulihan Papua</title>
+    <title>Pondok Pemulihan Papua</title>
     <style>
-        /* BAGROUND UTAMA */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            text-align: center;
-            background: linear-gradient(135deg, #093b5c 0%, #0d568c 100%);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-        }
-
-       /* 1. Atur Kontainer Card agar isinya rapat */
-        .card {
-            background: linear-gradient(to bottom, #d6b35d 0%, #e1c16e 100%);
-            padding: 30px 20px; /* Padding atas-bawah kita kecilkan sedikit */
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            width: 90%;
-            max-width: 400px;
-            border: 3px solid #b28a4a;
-            box-sizing: border-box;
-            display: flex; /* Gunakan flex agar mudah mengatur kerapatan */
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* 2. Ukuran Logo & Margin Bawah diperkecil */
-        .main-logo {
-            width: 120px;
-            height: auto;
-            margin-bottom: 5px; /* Kecilkan margin agar tulisan nempel */
-        }
-
-        /* 3. PERBAIKAN TULISAN JUDUL (Hitam & Outline Putih) */
-        h2 {
-            color: black; /* Warna Teks Utama */
-            margin: 0; /* Hilangkan margin bawaan agar rapat ke logo */
-            font-size: 1.4em;
-            font-weight: bold;
-            text-transform: uppercase; /* Agar PONDOK PEMULIHAN PAPUA jadi besar semua */
-
-            /* EFEK OUTLINE PUTIH */
-            text-shadow:
-                -1.5px -1.5px 0 white,
-                 1.5px -1.5px 0 white,
-                -1.5px 1.5px 0 white,
-                 1.5px 1.5px 0 white;
-        }
-
-        /* 4. Margin untuk elemen di bawah h2 */
-        .komsel {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: white;
-            background: #0d568c;
-            padding: 5px 15px;
-            border-radius: 10px;
-            display: inline-block;
-            margin-top: 15px; /* Beri jarak sedikit dari h2 */
-            margin-bottom: 10px;
-        }
-
-        .main-logo { width: 120px; height: auto; margin-bottom: 10px; }
-        h2 { color: #0d568c; margin: 5px 0; font-size: 1.4em; }
-        .komsel { font-size: 1.1em; font-weight: bold; color: white; background: #0d568c; padding: 5px 15px; border-radius: 10px; display: inline-block; margin-bottom: 10px; }
-
-        /* BOX INFO BACAAN */
-        .info {
-            font-size: 1.2em;
-            margin: 20px 0;
-            color: #0d568c;
-            font-weight: bold;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px solid #0d568c;
-            display: block;
-        }
-
-        /* PERBAIKAN KOLOM NAMA */
-        input {
-            width: 100%; /* Menggunakan lebar penuh kontainer */
-            padding: 15px;
-            margin: 10px 0 20px 0;
-            border-radius: 10px;
-            border: 2px solid #0d568c;
-            background: #ffffff; /* Putih bersih agar teks terlihat jelas */
-            color: #333;
-            font-size: 1.1em;
-            box-sizing: border-box; /* Penting agar padding tidak melebarkan kotak */
-            text-align: center;
-        }
-
-        input::placeholder {
-            color: #999;
-            opacity: 1;
-        }
-
-        button {
-            background: linear-gradient(to bottom, #25D366 0%, #1ea652 100%);
-            color: white; border: none; padding: 18px;
-            border-radius: 12px; font-size: 1.2em;
-            cursor: pointer; width: 100%;
-            font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+        img.logo { width: 100px; margin-bottom: 15px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .strength { font-size: 12px; margin-top: -5px; margin-bottom: 10px; text-align: left; padding-left: 15px; }
+        .weak { color: red; }
+        .strong { color: green; }
+        
+        /* Layar Loading */
+        #loading-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin-top: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <img src="logo_pondok.png" alt="Logo" class="main-logo">
+<div id="loading-screen">
+    <img src="logo_pondok.png" alt="Logo" class="logo">
+    <div class="spinner"></div>
+    <p>Mohon Tunggu...</p>
+</div>
 
-    <h2>Pondok Pemulihan Papua</h2>
-
-    <div class="komsel">Aplikasi Komsel Integrasi</div>
-
-    <div id="tanggal-hari-ini" style="color: #0d568c; font-weight: bold; margin-top: 10px;"></div>
-    <div class="info" id="tugas-baca">Menghitung jadwal...</div>
-
-    <input type="text" id="nama-user" placeholder="Masukkan Nama Kamu">
-    <button onclick="kirimWA()">Kirim Laporan ke WA</button>
+<div id="auth-form" class="card">
+    <img src="logo_pondok.png" alt="Logo" class="logo">
+    <h3>Pendaftaran Anggota</h3>
+    <input type="text" id="nama" placeholder="Nama Lengkap">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="pass" placeholder="Password" oninput="validatePassword(this.value)">
+    <div id="strength-text" class="strength">Kekuatan Password: -</div>
+    <button onclick="prosesLogin()">Daftar / Login</button>
 </div>
 
 <script>
-    const daftarKitab = [ {nama: "Kejadian", pasal: 50}, {nama: "Keluaran", pasal: 40}, {nama: "Imamat", pasal: 27}, {nama: "Bilangan", pasal: 36}, {nama: "Ulangan", pasal: 34}, {nama: "Yosua", pasal: 24}, {nama: "Hakim-hakim", pasal: 21}, {nama: "Rut", pasal: 4}, {nama: "1 Samuel", pasal: 31}, {nama: "2 Samuel", pasal: 24}, {nama: "1 Raja-raja", pasal: 22}, {nama: "2 Raja-raja", pasal: 25}, {nama: "1 Tawarikh", pasal: 29}, {nama: "2 Tawarikh", pasal: 36}, {nama: "Ezra", pasal: 10}, {nama: "Nehemia", pasal: 13}, {nama: "Ester", pasal: 10}, {nama: "Ayub", pasal: 42}, {nama: "Mazmur", pasal: 150}, {nama: "Amsal", pasal: 31}, {nama: "Pengkhotbah", pasal: 12}, {nama: "Kidung Agung", pasal: 8}, {nama: "Yesaya", pasal: 66}, {nama: "Yeremia", pasal: 52}, {nama: "Ratapan", pasal: 5}, {nama: "Yehezkiel", pasal: 48}, {nama: "Daniel", pasal: 12}, {nama: "Hosea", pasal: 14}, {nama: "Yoel", pasal: 3}, {nama: "Amos", pasal: 9}, {nama: "Obaja", pasal: 1}, {nama: "Yunus", pasal: 4}, {nama: "Mikha", pasal: 7}, {nama: "Nahum", pasal: 3}, {nama: "Habakuk", pasal: 3}, {nama: "Zefanya", pasal: 3}, {nama: "Hagai", pasal: 2}, {nama: "Zakharia", pasal: 14}, {nama: "Maleakhi", pasal: 4}, {nama: "Matius", pasal: 28}, {nama: "Markus", pasal: 16}, {nama: "Lukas", pasal: 24}, {nama: "Yohanes", pasal: 21}, {nama: "Kisah Para Rasul", pasal: 28}, {nama: "Roma", pasal: 16}, {nama: "1 Korintus", pasal: 16}, {nama: "2 Korintus", pasal: 13}, {nama: "Galatia", pasal: 6}, {nama: "Efesus", pasal: 6}, {nama: "Filipi", pasal: 4}, {nama: "Kolose", pasal: 4}, {nama: "1 Tesalonika", pasal: 5}, {nama: "2 Tesalonika", pasal: 3}, {nama: "1 Timotius", pasal: 6}, {nama: "2 Timotius", pasal: 4}, {nama: "Titus", pasal: 3}, {nama: "Filemon", pasal: 1}, {nama: "Ibrani", pasal: 13}, {nama: "Yakobus", pasal: 5}, {nama: "1 Petrus", pasal: 5}, {nama: "2 Petrus", pasal: 3}, {nama: "1 Yohanes", pasal: 5}, {nama: "2 Yohanes", pasal: 1}, {nama: "3 Yohanes", pasal: 1}, {nama: "Yudas", pasal: 1}, {nama: "Wahyu", pasal: 22} ];
-    function dapatkanBacaan(selisihHari) { let totalPasalDilewati = selisihHari * 4; let startPasalGlobal = 0; for(let i=0; i<37; i++) startPasalGlobal += daftarKitab[i].pasal; startPasalGlobal += 5; let targetPasalGlobal = ((startPasalGlobal + totalPasalDilewati - 1) % 1189) + 1; let count = 0; for (let kitab of daftarKitab) { if (targetPasalGlobal > count && targetPasalGlobal <= count + kitab.pasal) { let mulai = targetPasalGlobal - count; let sisaDiKitabIni = kitab.pasal - mulai; if (sisaDiKitabIni >= 3) return `${kitab.nama} ${mulai}-${mulai+3}`; let indexSekarang = daftarKitab.indexOf(kitab); let kitabNext = daftarKitab[(indexSekarang + 1) % daftarKitab.length]; return `${kitab.nama} ${mulai}-${kitab.pasal} & ${kitabNext.nama} 1-${3 - sisaDiKitabIni}`; } count += kitab.pasal; } }
-    const hariIni = new Date();
-    const tglMulai = new Date("2026-03-11");
-    const selisih = Math.floor((hariIni - tglMulai) / (1000 * 60 * 60 * 24));
-    const bacaanRutin = dapatkanBacaan(selisih);
-    const amsalHariIni = "Amsal " + hariIni.getDate();
-    document.getElementById('tanggal-hari-ini').innerText = hariIni.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    document.getElementById('tugas-baca').innerText = bacaanRutin + " & " + amsalHariIni;
-    function kirimWA() { const nama = document.getElementById('nama-user').value; if (!nama) { alert("Masukkan nama dulu ya!"); return; } const pesan = `Laporan Pembacaan Alkitab ✅\nKomsel: JC 5\nNama: ${nama}\nBacaan: ${bacaanRutin} & ${amsalHariIni}\nStatus: SELESAI TUHAN BERKATI.`; window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(pesan); }
+    function validatePassword(pass) {
+        let text = document.getElementById('strength-text');
+        // Syarat: Minimal 8 karakter, 1 Huruf Besar, 1 Angka, 1 Simbol
+        let regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        
+        if (pass.length === 0) {
+            text.innerHTML = "Kekuatan Password: -";
+            text.className = "strength";
+        } else if (regex.test(pass)) {
+            text.innerHTML = "Kekuatan Password: **Strong**";
+            text.className = "strength strong";
+        } else {
+            text.innerHTML = "Kekuatan Password: **Weak** (Butuh Huruf Besar, Angka, & Simbol)";
+            text.className = "strength weak";
+        }
+    }
+
+    function prosesLogin() {
+        let email = document.getElementById('email').value;
+        let pass = document.getElementById('pass').value;
+
+        // Cek Akses Admin
+        if (email === "admin@mail.com" && pass === "admin2026") {
+            startLoading("Selamat Datang Admin!");
+            return;
+        }
+
+        // Cek Validasi standar (Untuk User Umum)
+        if (email !== "" && pass !== "") {
+            startLoading("Pendaftaran Berhasil!");
+        } else {
+            alert("Harap isi semua data!");
+        }
+    }
+
+    function startLoading(msg) {
+        document.getElementById('auth-form').style.display = 'none';
+        document.getElementById('loading-screen').style.display = 'flex';
+        
+        setTimeout(() => {
+            // Ganti ini dengan halaman laporan kamu setelah login berhasil
+            alert(msg);
+            window.location.href = "halaman_laporan.html"; 
+        }, 3000);
+    }
 </script>
 </body>
-
 </html>
