@@ -27,13 +27,14 @@
 
         .card-header { background: #0056b3; height: 80px; }
         .avatar { 
-            width: 100px; height: 100px; background: #ddd; 
+            width: 100px; height: 100px; background-color: #ddd; 
             border-radius: 50%; border: 5px solid white; 
             margin-top: -50px; display: inline-block;
-            object-fit: cover;
+            background-size: cover;
+            background-position: center;
         }
 
-        .info h2 { margin: 10px 0 5px 0; color: #333; }
+        .info h2 { margin: 10px 0 5px 0; color: #333; font-size: 22px; }
         .info p { margin: 2px 0; color: #666; font-size: 14px; }
         .status-badge { 
             display: inline-block; background: #28a745; color: white; 
@@ -52,11 +53,12 @@
             cursor: pointer; transition: 0.3s;
         }
         .menu-item:active { transform: scale(0.95); }
-        .menu-item i { font-size: 24px; display: block; margin-bottom: 10px; }
+        .menu-item span { font-size: 28px; display: block; margin-bottom: 8px; }
 
         .btn-logout {
             margin-top: 30px; color: #dc3545; font-weight: bold;
             cursor: pointer; text-decoration: none; font-size: 14px;
+            padding: 10px;
         }
     </style>
 </head>
@@ -68,7 +70,7 @@
 
 <div class="profile-card">
     <div class="card-header"></div>
-    <div class="avatar" style="background-image: url('https://ui-avatars.com/api/?name=Member&background=random'); background-size: cover;"></div>
+    <div class="avatar" id="userAvatar"></div>
     
     <div class="info">
         <h2 id="userName">Memuat Nama...</h2>
@@ -80,32 +82,22 @@
 
 <div class="menu-grid">
     <div class="menu-item" onclick="alert('Fitur segera hadir!')">
-        <span>📢</span><br>Informasi
+        <span>📢</span>Informasi
     </div>
     <div class="menu-item" onclick="alert('Fitur segera hadir!')">
-        <span>📅</span><br>Kegiatan
+        <span>📅</span>Kegiatan
     </div>
     <div class="menu-item" onclick="alert('Fitur segera hadir!')">
-        <span>📂</span><br>Dokumen
+        <span>📂</span>Dokumen
     </div>
     <div class="menu-item" onclick="alert('Fitur segera hadir!')">
-        <span>💬</span><br>Chat Grup
+        <span>💬</span>Chat Grup
     </div>
 </div>
 
-<a class="btn-logout" onclick="logout()">Keluar Aplikasi</a>
+<div class="btn-logout" onclick="logout()">Keluar Aplikasi</div>
 
 <script>
-    // Ambil data dari penyimpanan lokal (Opsional jika ingin simpan sesi)
-    // Untuk saat ini, kita biarkan statis atau ambil dari parameter URL jika perlu.
-    
-    function logout() {
-        if(confirm("Apakah Anda ingin keluar?")) {
-            window.location.href = "login.html";
-        }
-    }
-
-   <script>
     // FUNGSI MEMUAT DATA SAAT HALAMAN DIBUKA
     window.onload = function() {
         const nama = localStorage.getItem("namaUser");
@@ -124,15 +116,15 @@
         document.getElementById("userJabatan").innerText = jabatan;
         document.getElementById("userWilayah").innerText = wilayah;
         
-        // Update Avatar Inisial berdasarkan nama
+        // Update Avatar Inisial berdasarkan nama secara otomatis
         const avatarUrl = "https://ui-avatars.com/api/?name=" + encodeURIComponent(nama) + "&background=random&color=fff&size=128";
-        document.querySelector(".avatar").style.backgroundImage = "url('" + avatarUrl + "')";
+        document.getElementById("userAvatar").style.backgroundImage = "url('" + avatarUrl + "')";
     };
 
     // FUNGSI LOGOUT
     function logout() {
         if(confirm("Apakah Anda ingin keluar?")) {
-            localStorage.clear(); // Hapus semua data sesi
+            localStorage.clear(); // Bersihkan data sesi agar aman
             window.location.href = "login.html";
         }
     }
