@@ -3,176 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pondok Pemulihan Papua</title>
+    <title>Login - Pondok Pemulihan Papua</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 340px; text-align: center; }
-        img.logo { width: 100px; margin-bottom: 15px; }
-        h2 { color: #333; margin: 0; font-size: 22px; }
-        p.subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
-        
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; background: #fafafa; }
-        
-        .pass-container { 
-            position: relative; 
-            width: 100%; 
-            margin-top: 8px;
-        }
-
-        .pass-container input {
-            padding-right: 45px;
-            margin: 0;
-        }
-
-        .toggle-pass { 
-            position: absolute; 
-            right: 15px; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            cursor: pointer; 
-            color: #777; 
-            font-size: 18px; 
-            z-index: 10; 
-            user-select: none;
-        }
-
-        .info-text { font-size: 11px; color: #666; text-align: left; margin-top: 5px; margin-bottom: 5px; line-height: 1.4; }
-        
-        button { width: 100%; padding: 14px; background-color: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; transition: 0.3s; }
-        button:hover { background-color: #218838; }
-
-        .strength { font-size: 11px; text-align: left; margin-bottom: 10px; font-weight: bold; }
-        .weak { color: #dc3545; }
-        .strong { color: #28a745; }
-        
-        #loading-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #ffd700; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-top: 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .login-link { margin-top: 15px; font-size: 13px; color: #666; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        .logo { width: 80px; height: 80px; margin-bottom: 10px; border-radius: 50%; }
+        h2 { color: #1c1e21; margin-bottom: 5px; }
+        p { color: #606770; font-size: 14px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dddfe2; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 12px; background-color: #0084ff; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #0073e6; }
+        .footer-link { margin-top: 20px; font-size: 13px; color: #606770; }
+        .footer-link a { color: #0084ff; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="loading-screen">
+<div class="login-container">
     <img src="logo_pondok.png" alt="Logo" class="logo">
-    <div class="spinner"></div>
-    <p id="loading-text">Menghubungkan ke Pusat...</p>
-</div>
+    <h2>Masuk Aplikasi</h2>
+    <p>Gunakan Email & Password Anda</p>
 
-<div id="auth-form" class="card">
-    <img src="logo_pondok.png" alt="Logo" class="logo">
-    <h2>Registrasi Anggota</h2>
-    <p class="subtitle">Layanan Pondok Pemulihan Papua</p>
-    
-    <input type="text" id="nama" placeholder="Nama Lengkap">
-    <input type="text" id="nohp" placeholder="No. WhatsApp">
-    
-    <select id="wilayah">
-        <option value="" disabled selected>Pilih Wilayah Komsel</option>
-        <option value="JC 1">JC 1</option>
-        <option value="JC 2">JC 2</option>
-        <option value="JC 3">JC 3</option>
-        <option value="JC 4">JC 4</option>
-        <option value="JC 5">JC 5</option>
-    </select>
+    <input type="email" id="email" placeholder="Alamat Email">
+    <input type="password" id="password" placeholder="Kata Sandi">
 
-    <select id="jabatan">
-        <option value="" disabled selected>Pilih Jabatan</option>
-        <option value="Ketua PKS">Ketua PKS</option>
-        <option value="Anggota">Anggota Komsel</option>
-    </select>
+    <button type="button" onclick="prosesLogin()">Masuk Sekarang</button>
 
-    <input type="email" id="email" placeholder="Email Aktif">
-    
-    <div class="pass-container">
-        <input type="password" id="pass" placeholder="Password Baru" oninput="validatePassword(this.value)">
-        <span class="toggle-pass" onclick="togglePassword()">👁️</span>
-    </div>
-    <p class="info-text">⚠️ <i>Password harus terdiri dari Huruf Besar, Simbol, dan Angka (Min. 8 Karakter).</i></p>
-    <div id="strength-text" class="strength">Kekuatan: -</div>
-    
-    <button onclick="prosesLogin()">DAFTAR SEKARANG</button>
-
-    <div class="login-link">
-        Sudah punya akun? <a href="login.html">Login di sini</a>
+    <div class="footer-link">
+        Belum punya akun? <br>
+        <a href="profile.html">Daftar Anggota Baru</a>
     </div>
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <script>
-    function togglePassword() {
-        const passInput = document.getElementById('pass');
-        const icon = document.querySelector('.toggle-pass');
-        if (passInput.type === 'password') {
-            passInput.type = 'text';
-            icon.innerText = '🔒'; 
-        } else {
-            passInput.type = 'password';
-            icon.innerText = '👁️';
-        }
-    }
+    // Konfigurasi Firebase Anda
+    const firebaseConfig = {
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+        authDomain: "boby-apps-project.firebaseapp.com",
+        projectId: "boby-apps-project",
+        storageBucket: "boby-apps-project.firebasestorage.app",
+        messagingSenderId: "125984859692",
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+    };
 
-    function validatePassword(pass) {
-        let text = document.getElementById('strength-text');
-        let regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (pass.length === 0) { 
-            text.innerHTML = "Kekuatan: -"; 
-            text.className = "strength"; 
-        } else if (regex.test(pass)) { 
-            text.innerHTML = "Kekuatan: **STRONG** (Sangat Baik)"; 
-            text.className = "strength strong"; 
-        } else { 
-            text.innerHTML = "Kekuatan: **WEAK** (Cek Syarat di Atas)"; 
-            text.className = "strength weak"; 
-        }
-    }
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
     function prosesLogin() {
-        const data = {
-            nama: document.getElementById('nama').value,
-            nohp: document.getElementById('nohp').value,
-            wilayah: document.getElementById('wilayah').value,
-            jabatan: document.getElementById('jabatan').value,
-            email: document.getElementById('email').value,
-            pass: document.getElementById('pass').value
-        };
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
-        const urlServer = "https://script.google.com/macros/s/AKfycbxzZYSuqJlKL4ytkLm41Bg6E4JJ023IethHm0Er8NfpaRRyBbXHCxZX4ex0peudZapspA/exec";
-
-        if (data.nama && data.wilayah && data.jabatan && data.email && data.pass) {
-            let regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-            if (!regex.test(data.pass)) {
-                alert("Password belum memenuhi syarat keamanan!");
-                return;
-            }
-
-            tampilkanLoading("Mendaftarkan Identitas...");
-            
-          fetch(urlServer, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams(data).toString()
-            }).then(() => {
-                // Tampilkan pesan sukses
-                alert("Pendaftaran Berhasil!\n\nStatus akun Anda saat ini: PENDING.\nSilakan cek EMAIL Anda dan klik LINK AKTIVASI untuk mulai menggunakan aplikasi.");
-                
-                // ARAHKAN KE LOGIN (Bukan ke Main Menu)
-                window.location.href = "login.html"; 
-            }).catch((err) => {
-                alert("Gagal koneksi: " + err);
-            });
-        } else {
-            alert("Harap lengkapi semua data!");
+        if (!email || !password) {
+            alert("Harap isi Email dan Password!");
+            return;
         }
-    }
 
-    function tampilkanLoading(pesan) {
-        document.getElementById('auth-form').style.display = 'none';
-        document.getElementById('loading-screen').style.display = 'flex';
-        document.getElementById('loading-text').innerText = pesan;
+        auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            // Login Berhasil
+            window.location.href = "main_menu.html";
+        })
+        .catch((error) => {
+            // Jika Gagal
+            let pesanError = "Gagal masuk. Periksa email dan password Anda.";
+            if (error.code === 'auth/user-not-found') pesanError = "Email tidak terdaftar!";
+            if (error.code === 'auth/wrong-password') pesanError = "Password salah!";
+            
+            alert(pesanError);
+            console.error(error.message);
+        });
     }
 </script>
+
 </body>
 </html>
-
