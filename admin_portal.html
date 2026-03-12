@@ -1,16 +1,65 @@
-// Bagian dalam fungsi loadUsers()
-snapshot.forEach(doc => {
-    const data = doc.data();
-    userList.innerHTML += `
-        <tr>
-            <td>${data.nama || '-'}</td>
-            <td>${data.alamat || '-'}</td>
-            <td>${data.no_hp || '-'}</td>
-            <td>${data.gol_darah || '-'}</td>
-            <td>${data.jabatan || 'Anggota'}</td> <td>${data.komsel || '-'}</td>
-            <td>
-                <button class="btn-edit" onclick="bukaEdit('${doc.id}')">Edit</button>
-                <button class="btn-hapus" onclick="hapusUser('${doc.id}')">Hapus</button>
-            </td>
-        </tr>`;
-});
+<div class="table-responsive">
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>Nama Lengkap</th>
+                <th>Email</th>
+                <th>Password</th> <th>No HP</th>
+                <th>Gol. Darah</th>
+                <th>Jabatan Komsel</th> <th>Komsel JC</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="userList">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    // Fungsi loadUsers untuk menyinkronkan data lengkap
+    async function loadUsers() {
+        const userList = document.getElementById("userList");
+        userList.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Sinkronisasi data...</td></tr>";
+
+        try {
+            const snapshot = await db.collection("users").get();
+            userList.innerHTML = "";
+            
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                userList.innerHTML += `
+                    <tr>
+                        <td>${data.nama || '-'}</td>
+                        <td>${data.email || '-'}</td>
+                        <td>${data.password || '******'}</td>
+                        <td>${data.no_hp || '-'}</td>
+                        <td>${data.gol_darah || '-'}</td>
+                        <td>${data.jabatan || 'Anggota'}</td>
+                        <td>${data.komsel || '-'}</td>
+                        <td style="display:flex; gap:5px;">
+                            <button class="btn-edit" onclick="bukaEdit('${doc.id}', '${data.nama}', '${data.email}', '${data.password}', '${data.no_hp}', '${data.gol_darah}', '${data.jabatan}', '${data.komsel}')">Edit</button>
+                            <button class="btn-hapus" onclick="hapusUser('${doc.id}')">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            alert("Gagal sinkronisasi: " + error.message);
+        }
+    }
+
+    // Update Fungsi Export PDF agar kolom email & jabatan ikut terbaca
+    function exportKePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');
+        doc.text("Laporan Database Anggota Pondok Pemulihan Papua", 14, 15);
+        
+        doc.autoTable({
+            html: '#userTable',
+            startY: 25,
+            columns: [0, 1, 3, 4, 5, 6], // Mengekspor data penting saja ke PDF
+            headStyles: { fillColor: [0, 132, 255] }
+        });
+        doc.save("Database_Anggota_Papua.pdf");
+    }
+</script>
