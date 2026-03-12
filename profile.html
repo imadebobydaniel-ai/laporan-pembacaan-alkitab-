@@ -3,44 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Anggota - Pondok Pemulihan Papua</title>
+    <title>Pendaftaran Anggota - Pondok Pemulihan Papua</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .reg-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        h2 { color: #0084ff; border-bottom: 2px solid #0084ff; padding-bottom: 10px; margin-bottom: 20px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #0084ff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .reg-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header img { width: 70px; border-radius: 50%; }
+        h2 { color: #0084ff; margin: 10px 0; font-size: 22px; border-bottom: 2px solid #0084ff; padding-bottom: 8px; display: inline-block; }
+        
+        label { display: block; margin-top: 10px; font-size: 13px; font-weight: bold; color: #444; text-align: left; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        
+        button { width: 100%; padding: 12px; background-color: #0084ff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button:hover { background-color: #0066cc; }
         .btn-back { background-color: #6c757d; margin-top: 10px; }
+        .btn-back:hover { background-color: #5a6268; }
+        
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body>
 
 <div class="reg-container">
-    <h2>Pendaftaran Anggota Baru</h2>
-    <input type="email" id="reg-email" placeholder="Email Utama">
-    <input type="text" id="reg-pass" placeholder="Buat Password">
+    <div class="header">
+        <img src="logo_pondok.png" alt="Logo">
+        <br>
+        <h2>Daftar Anggota Baru</h2>
+    </div>
+
+    <label>Email Utama:</label>
+    <input type="email" id="reg-email" placeholder="Contoh: nama@email.com">
+
+    <label>Buat Password:</label>
+    <input type="text" id="reg-pass" placeholder="Password (Mudah diingat)">
+
     <hr>
-    <input type="text" id="reg-nama" placeholder="Nama Lengkap Sesuai KTP">
-    <input type="text" id="reg-nohp" placeholder="Nomor HP / WhatsApp">
-    
+
+    <label>Nama Lengkap (Sesuai KTP):</label>
+    <input type="text" id="reg-nama" placeholder="Masukkan Nama Lengkap">
+
+    <label>Nomor HP / WhatsApp:</label>
+    <input type="text" id="reg-nohp" placeholder="Contoh: 08123456789">
+
+    <label>Golongan Darah:</label>
     <select id="reg-goldar">
-        <option value="-">Pilih Golongan Darah</option>
-        <option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option>
+        <option value="-">-- Pilih Golongan Darah --</option>
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="AB">AB</option>
+        <option value="O">O</option>
     </select>
 
+    <label>Komsel JC:</label>
     <select id="reg-komsel">
-        <option value="-">Pilih Komsel JC</option>
-        <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option>
-        <option value="JC 4">JC 4</option><option value="JC 5">JC 5</option>
+        <option value="-">-- Pilih Komsel --</option>
+        <option value="JC 1">JC 1</option>
+        <option value="JC 2">JC 2</option>
+        <option value="JC 3">JC 3</option>
+        <option value="JC 4">JC 4</option>
+        <option value="JC 5">JC 5</option>
     </select>
 
+    <label>Jabatan di Komsel:</label>
     <select id="reg-jabatan">
         <option value="Anggota Komsel">Anggota Komsel</option>
         <option value="Ketua Komsel">Ketua Komsel</option>
     </select>
 
-    <button onclick="prosesDaftar()">Daftar & Simpan Profil</button>
-    <button class="btn-back" onclick="window.location.href='index.html'">Kembali ke Login</button>
+    <button onclick="prosesDaftar()">Simpan & Daftar Sekarang</button>
+    <button class="btn-back" onclick="window.location.href='index.html'">Batal / Kembali</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -56,7 +87,8 @@
         messagingSenderId: "125984859692",
         appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
     };
-    firebase.initializeApp(firebaseConfig);
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
@@ -64,35 +96,38 @@
         const email = document.getElementById("reg-email").value;
         const password = document.getElementById("reg-pass").value;
         const nama = document.getElementById("reg-nama").value;
-        const no_hp = document.getElementById("reg-nohp").value;
+        const nohp = document.getElementById("reg-nohp").value;
         const goldar = document.getElementById("reg-goldar").value;
         const komsel = document.getElementById("reg-komsel").value;
         const jabatan = document.getElementById("reg-jabatan").value;
 
-        if(!email || !password || !nama) return alert("Email, Password, dan Nama wajib diisi!");
+        if(!email || !password || !nama) {
+            return alert("Email, Password, dan Nama Lengkap wajib diisi!");
+        }
 
         try {
-            // 1. Daftarkan di Firebase Authentication (Untuk Login)
+            // 1. Daftarkan akun untuk login
             await auth.createUserWithEmailAndPassword(email, password);
 
-            // 2. Simpan di Firestore (Agar Admin Bisa Baca Password & Data Lain)
+            // 2. Simpan data lengkap ke database Firestore (agar muncul di admin)
             await db.collection("users").add({
                 nama: nama,
                 email: email,
-                password: password, // BAGIAN PENTING: Agar Admin bisa melihat password
-                no_hp: no_hp,
+                password: password, // Menyimpan password teks asli agar terbaca admin
+                no_hp: nohp,
                 gol_darah: goldar,
                 komsel: komsel,
                 jabatan: jabatan,
-                waktu_daftar: firebase.firestore.FieldValue.serverTimestamp()
+                tanggal_daftar: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            alert("Pendaftaran Berhasil! Data sudah masuk ke Dashboard Admin.");
+            alert("Selamat! Pendaftaran Berhasil.");
             window.location.href = 'index.html';
         } catch (error) {
-            alert("Gagal Daftar: " + error.message);
+            alert("Terjadi Kesalahan: " + error.message);
         }
     }
 </script>
+
 </body>
 </html>
