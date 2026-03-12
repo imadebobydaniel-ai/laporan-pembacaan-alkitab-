@@ -2,158 +2,89 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Pondok Pemulihan Papua</title>
     <style>
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
-        body { display: flex; justify-content: center; align-items: center; }
-        .card { background: white; padding: 20px 15px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); width: 85%; max-width: 300px; text-align: center; }
-        img.logo { width: 60px; margin-bottom: 5px; } 
-        h2 { color: #333; margin: 0; font-size: 20px; }
-        p.subtitle { color: #666; font-size: 11px; margin: 2px 0 10px 0; }
-        
-        .password-container { 
-            position: relative; 
-            width: 100%; 
-            margin: 5px 0; 
-            display: flex;
-            align-items: center;
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f0f2f5; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; 
         }
-        
+        .card { 
+            background: white; padding: 30px; border-radius: 20px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1); width: 85%; max-width: 350px; 
+            text-align: center;
+        }
         input { 
-            width: 100%; 
-            padding: 10px 40px 10px 12px;
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            font-size: 14px; 
-            background: #fafafa; 
+            width: 100%; padding: 12px; margin: 10px 0; 
+            border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; 
         }
-        
-        .toggle-password {
-            position: absolute;
-            right: 10px;
-            cursor: pointer;
-            z-index: 10;
-            padding: 5px;
-            font-size: 16px;
-            user-select: none;
+        button { 
+            width: 100%; padding: 12px; background-color: #007bff; 
+            color: white; border: none; border-radius: 8px; 
+            cursor: pointer; font-weight: bold; margin-top: 10px;
         }
-
-        .btn-masuk { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 10px; }
-        .footer-link { margin-top: 12px; font-size: 13px; color: #666; }
-        .admin-area { margin-top: 15px; padding: 10px; cursor: pointer; display: inline-block; }
-        .btn-admin { color: #ccc; font-size: 10px; text-decoration: underline; }
-        #loading { display: none; margin-top: 5px; color: #007bff; font-size: 11px; font-weight: bold; }
-
-        #adminModal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 250px; text-align: center; }
-        .btn-batal { background: #6c757d; color: white; margin-top: 8px; width: 100%; border: none; padding: 10px; border-radius: 8px; }
+        button:hover { background-color: #0056b3; }
+        .error { color: red; font-size: 12px; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <img src="logo_pondok.png" alt="Logo" class="logo">
-    <h2>Login</h2>
-    <p class="subtitle">Pondok Pemulihan Papua</p>
+    <img src="https://via.placeholder.com/60" alt="Logo" style="margin-bottom: 10px;">
+    <h2>Masuk Aplikasi</h2>
+    <p style="color: #666; font-size: 13px;">Gunakan Nomor KTP Anda untuk masuk</p>
     
-    <input type="email" id="email" placeholder="Email Terdaftar" style="margin-bottom: 5px;">
+    <input type="text" id="loginKtp" placeholder="Masukkan Nomor KTP">
+    <div id="errorMessage" class="error">Nomor KTP tidak terdaftar!</div>
     
-    <div class="password-container">
-        <input type="password" id="pass" placeholder="Password">
-        <span class="toggle-password" onclick="togglePass('pass', this)">👁️</span>
-    </div>
-    
-    <div id="loading">MENGHUBUNGKAN...</div>
-    <button class="btn-masuk" onclick="cekLogin()">MASUK</button>
-
-    <div class="footer-link">Baru? <a href="index.html">Daftar</a></div>
-
-    <div class="admin-area" onclick="openAdminModal()">
-        <span class="btn-admin">[ Admin Portal ]</span>
-    </div>
+    <button onclick="prosesLogin()">Masuk</button>
 </div>
 
-<div id="adminModal">
-    <div class="modal-content">
-        <h4 style="margin:0 0 10px 0">Akses Admin</h4>
-        <div class="password-container">
-            <input type="password" id="adminPass" placeholder="Password Admin">
-            <span class="toggle-password" onclick="togglePass('adminPass', this)">👁️</span>
-        </div>
-        <button class="btn-masuk" onclick="validasiAdmin()">KONFIRMASI</button>
-        <button class="btn-batal" onclick="closeAdminModal()">BATAL</button>
-    </div>
-</div>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-    function togglePass(inputId, iconElement) {
-        const x = document.getElementById(inputId);
-        if (x.type === "password") {
-            x.type = "text";
-            iconElement.innerText = "🔒"; 
-        } else {
-            x.type = "password";
-            iconElement.innerText = "👁️";
-        }
+    // Konfigurasi Firebase Anda
+    const firebaseConfig = {
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+        authDomain: "boby-apps-project.firebaseapp.com",
+        projectId: "boby-apps-project",
+        storageBucket: "boby-apps-project.firebasestorage.app",
+        messagingSenderId: "125984859692",
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
     }
+    const db = firebase.firestore();
 
-    function openAdminModal() { document.getElementById("adminModal").style.display = "flex"; }
-    function closeAdminModal() { document.getElementById("adminModal").style.display = "none"; document.getElementById("adminPass").value = ""; }
+    function prosesLogin() {
+        const ktpInput = document.getElementById("loginKtp").value;
+        const errorMsg = document.getElementById("errorMessage");
 
-    function validasiAdmin() {
-        const p = document.getElementById("adminPass").value.trim();
-        if (p === "admin2026") {
-            window.location.href = "admin_portal.html";
-        } else {
-            alert("Password Admin Salah!");
+        if (ktpInput === "") {
+            alert("Silakan masukkan nomor KTP!");
+            return;
         }
-    }
 
-    async function cekLogin() {
-        const email = document.getElementById('email').value.trim();
-        const pass = document.getElementById('pass').value.trim();
-        const btn = document.querySelector('.btn-masuk');
-        const loader = document.getElementById('loading');
-
-        if (!email || !pass) { alert("Email dan Password harus diisi!"); return; }
-
-        if(loader) loader.style.display = "block";
-        btn.disabled = true;
-        btn.innerText = "MEMPROSES...";
-
-        const urlServer = "https://script.google.com/macros/s/AKfycbzJLuAAvAPa97uw6lVUs2Dvrj0Jq1SU2Opwj6_7oAM9D7K0QTLiOdF6hUif1OxQDdQiBA/exec
-";
-
-        try {
-            // Kita tambahkan action=login agar Apps Script tahu apa yang harus dilakukan
-            const response = await fetch(`${urlServer}?action=login&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&_cache=${new Date().getTime()}`);
-            const result = await response.json();
-
-            if (result.status === "Aktif") {
-                // SIMPAN DATA KE MEMORI BROWSER
-                localStorage.setItem("namaUser", result.nama);
-                localStorage.setItem("jabatanUser", result.jabatan);
-                localStorage.setItem("wilayahUser", result.wilayah);
-
-                alert("Login Berhasil! Selamat Datang, " + result.nama);
-                window.location.href = "main_menu.html";
-            } else if (result.status === "Pending") {
-                alert("Akun belum AKTIF. Silakan hubungi Admin atau cek email.");
-            } else if (result.status === "Nonaktif") {
-                alert("Akun Anda telah dinonaktifkan.");
+        // Mencari user di Firestore berdasarkan nomor KTP
+        db.collection("users").where("no_ktp", "==", ktpInput).get()
+        .then((querySnapshot) => {
+            if (!querySnapshot.empty) {
+                // Jika ketemu, simpan ID sementara dan masuk ke menu
+                alert("Login Berhasil!");
+                window.location.href = "main.menu.html"; 
             } else {
-                alert("Email atau Password salah! (Status: " + result.status + ")");
+                // Jika tidak ketemu
+                errorMsg.style.display = "block";
             }
-        } catch (err) {
-            console.error(err);
-            alert("Gagal terhubung ke server. Pastikan internet aktif.");
-        } finally {
-            if(loader) loader.style.display = "none";
-            btn.disabled = false;
-            btn.innerText = "MASUK";
-        }
+        })
+        .catch((error) => {
+            console.error("Error login: ", error);
+        });
     }
 </script>
 
