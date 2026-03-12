@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Pondok Pemulihan Papua</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 340px; text-align: center; }
+        img.logo { width: 100px; margin-bottom: 15px; }
+        h2 { color: #333; margin: 0; font-size: 22px; }
+        p.subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; background: #fafafa; }
+        button { width: 100%; padding: 14px; background-color: #007bff; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; transition: 0.3s; }
+        button:hover { background-color: #0056b3; }
+        .footer-link { margin-top: 15px; font-size: 13px; color: #666; }
+        #loading { display: none; margin-top: 10px; color: #555; font-size: 13px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <img src="logo_pondok.png" alt="Logo" class="logo">
+    <h2>Selamat Datang</h2>
+    <p class="subtitle">Silakan Login ke Akun Anda</p>
+    
+    <input type="email" id="email" placeholder="Email Terdaftar">
+    <input type="password" id="pass" placeholder="Password">
+    
+    <div id="loading">Memeriksa Database...</div>
+    <button onclick="cekLogin()">MASUK</button>
+
+    <div class="footer-link">
+        Belum punya akun? <a href="index.html">Daftar di sini</a>
+    </div>
+</div>
+
+<script>
+    async function cekLogin() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        const loader = document.getElementById('loading');
+        const btn = document.querySelector('button');
+
+        if (!email || !pass) {
+            alert("Email dan Password tidak boleh kosong!");
+            return;
+        }
+
+        loader.style.display = "block";
+        btn.disabled = true;
+        
+        // GUNAKAN URL WEB APP APPS SCRIPT KAMU
+        const urlServer = "https://script.google.com/macros/s/AKfycbykw5ra1tq4mJ5JQZm-uumsZLnTnpdcCOGGPa_GlTWK5Xqt0U51pa2aytduIE3Y-VSeIA/exec";
+
+        try {
+            const response = await fetch(`${urlServer}?action=login&email=${email}&pass=${pass}`);
+            const result = await response.json();
+
+            if (result.status === "Aktif") {
+                alert("Login Berhasil!");
+                window.location.href = "main_menu.html";
+            } else if (result.status === "Pending") {
+                alert("Akun Anda belum AKTIF. Silakan klik Link Aktivasi di email Anda terlebih dahulu.");
+            } else {
+                alert("Email atau Password salah!");
+            }
+        } catch (err) {
+            alert("Gagal terhubung ke server. Pastikan internet stabil.");
+        } finally {
+            loader.style.display = "none";
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
