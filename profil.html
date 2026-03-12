@@ -8,18 +8,60 @@
         body { font-family: sans-serif; padding: 20px; background-color: #f4f4f4; }
         .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #0056b3; }
+        label { font-size: 14px; font-weight: bold; color: #333; }
     </style>
 </head>
+<body>
+
+<div class="form-container">
+    <h3>Lengkapi Profil Anda</h3>
+    
+    <form id="profileForm">
+        <label>Nama Lengkap:</label>
+        <input type="text" id="nama" placeholder="Masukkan Nama Lengkap">
+
+        <label>Nomor KTP:</label>
+        <input type="text" id="no_ktp" placeholder="16 Digit Nomor KTP" maxlength="16">
+
+        <label>Alamat Saat Ini:</label>
+        <textarea id="alamat" placeholder="Alamat lengkap..."></textarea>
+
+        <label>Golongan Darah:</label>
+        <select id="gol_darah">
+            <option value="">-- Pilih --</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="AB">AB</option>
+            <option value="O">O</option>
+        </select>
+
+        <label>Status Pernikahan:</label>
+        <select id="status_nikah">
+            <option value="">-- Pilih --</option>
+            <option value="Single">Single</option>
+            <option value="Nikah">Nikah</option>
+            <option value="Cerai Hidup">Cerai Hidup</option>
+            <option value="Cerai Mati">Cerai Mati</option>
+        </select>
+
+        <button type="button" onclick="simpanData()">Simpan Profil</button>
+    </form>
+
+    <button type="button" onclick="window.location.href='main.menu.html'" 
+            style="background-color: #6c757d; margin-top: 10px;">
+        Kembali ke Home
+    </button>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-    // 2. Konfigurasi Kunci Akses (Config) Proyek Anda
+    // 1. Konfigurasi Firebase (Sudah menggunakan API Key Anda)
     const firebaseConfig = {
-        apiKey: "AIzaSy...", // Saya sesuaikan dengan data dari Project Settings Anda
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
         projectId: "boby-apps-project",
         storageBucket: "boby-apps-project.firebasestorage.app",
@@ -28,14 +70,14 @@
         measurementId: "G-X14300RJL4"
     };
 
-    // 3. Mengaktifkan Firebase
+    // 2. Inisialisasi Firebase
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
 
-    // 4. Fungsi untuk menyimpan data
-    async function simpanProfil() {
+    // 3. Fungsi Simpan Data
+    async function simpanData() {
         const namaUser = document.getElementById('nama').value;
         const noKtp = document.getElementById('no_ktp').value;
         const alamatUser = document.getElementById('alamat').value;
@@ -48,8 +90,8 @@
         }
 
         try {
-            // Menyimpan ke koleksi "users" yang sudah Anda buat
-            await db.collection("users").doc("user_test").set({
+            // Menggunakan .add() agar setiap pendaftar memiliki ID dokumen unik (Otomatis)
+            await db.collection("users").add({
                 nama: namaUser,
                 no_ktp: noKtp,
                 alamat: alamatUser,
@@ -60,52 +102,15 @@
 
             alert("Profil berhasil disimpan ke Firebase!");
             
+            // --- Fitur Baru: Membersihkan Form otomatis ---
+            document.getElementById("profileForm").reset();
+            
         } catch (error) {
             console.error("Error:", error);
-            alert("Terjadi kesalahan: " + error.message);
+            alert("Terjadi kesalahan saat menyimpan: " + error.message);
         }
     }
 </script>
-
-<body>
-
-<div class="form-container">
-    <h3>Lengkapi Profil Anda</h3>
-    
-    <label>Nama Lengkap:</label>
-    <input type="text" id="nama" placeholder="Masukkan Nama Lengkap">
-
-    <label>Nomor KTP:</label>
-    <input type="text" id="no_ktp" placeholder="16 Digit Nomor KTP" maxlength="16">
-
-    <label>Alamat Saat Ini:</label>
-    <textarea id="alamat" placeholder="Alamat lengkap..."></textarea>
-
-    <label>Golongan Darah:</label>
-    <select id="gol_darah">
-        <option value="">-- Pilih --</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="AB">AB</option>
-        <option value="O">O</option>
-    </select>
-
-    <label>Status Pernikahan:</label>
-    <select id="status_nikah">
-        <option value="">-- Pilih --</option>
-        <option value="Single">Single</option>
-        <option value="Nikah">Nikah</option>
-        <option value="Cerai Hidup">Cerai Hidup</option>
-        <option value="Cerai Mati">Cerai Mati</option>
-    </select>
-
-    <button type="button" onclick="simpanData()">Simpan Profil</button>
-
-<button type="button" onclick="window.location.href='main.menu.html'" 
-        style="background-color: #6c757d; margin-top: 10px;">
-    Kembali ke Home
-</button>
-</div>
 
 </body>
 </html>
