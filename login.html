@@ -1,53 +1,165 @@
-async function cekLogin() {
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('pass').value.trim();
-    const loader = document.getElementById('loading');
-    const btn = document.querySelector('.btn-masuk');
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login - Pondok Pemulihan Papua</title>
+    <style>
+        /* Reset & Base Style */
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; justify-content: center; align-items: center; }
 
-    if (!email || !pass) {
-        alert("Email dan Password tidak boleh kosong!");
-        return;
+        /* Login Card */
+        .card { 
+            background: white; padding: 20px 15px; border-radius: 20px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1); width: 85%; max-width: 300px; 
+            text-align: center; position: relative; z-index: 1;
+        }
+
+        img.logo { width: 60px; margin-bottom: 5px; } 
+        h2 { color: #333; margin: 0; font-size: 20px; }
+        p.subtitle { color: #666; font-size: 11px; margin: 2px 0 10px 0; }
+        
+        input { 
+            width: 100%; padding: 10px 12px; margin: 5px 0; border: 1px solid #ddd; 
+            border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #fafafa; 
+        }
+        
+        .btn-masuk { 
+            width: 100%; padding: 12px; background-color: #007bff; color: white; 
+            border: none; border-radius: 8px; cursor: pointer; font-weight: bold; 
+            font-size: 15px; margin-top: 10px; transition: 0.3s;
+        }
+        .btn-masuk:disabled { background-color: #ccc; }
+
+        .footer-link { margin-top: 12px; font-size: 13px; color: #666; }
+        .footer-link a { color: #007bff; text-decoration: none; font-weight: bold; }
+
+        /* Admin Area */
+        .admin-area { margin-top: 15px; padding: 10px; cursor: pointer; display: inline-block; }
+        .btn-admin { color: #ccc; font-size: 10px; text-decoration: underline; }
+
+        /* Loading Text */
+        #loading { display: none; margin-top: 5px; color: #007bff; font-size: 11px; font-weight: bold; }
+
+        /* MODAL KHUSUS ADMIN */
+        #adminModal {
+            display: none; position: fixed; z-index: 10; left: 0; top: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.5); 
+            justify-content: center; align-items: center;
+        }
+        .modal-content { 
+            background: white; padding: 20px; border-radius: 15px; 
+            width: 250px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .btn-batal { background: #6c757d; color: white; margin-top: 8px; width: 100%; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <img src="logo_pondok.png" alt="Logo" class="logo">
+    <h2>Login</h2>
+    <p class="subtitle">Pondok Pemulihan Papua</p>
+    
+    <input type="email" id="email" placeholder="Email Terdaftar">
+    <input type="password" id="pass" placeholder="Password">
+    
+    <div id="loading">MENGHUBUNGKAN...</div>
+    <button class="btn-masuk" onclick="cekLogin()">MASUK</button>
+
+    <div class="footer-link">
+        Baru di sini? <a href="index.html">Daftar</a>
+    </div>
+
+    <div class="admin-area" onclick="openAdminModal()">
+        <span class="btn-admin">[ Admin Portal ]</span>
+    </div>
+</div>
+
+<div id="adminModal">
+    <div class="modal-content">
+        <h4 style="margin-top:0">Akses Administrator</h4>
+        <input type="password" id="adminPass" placeholder="Password Admin">
+        <button class="btn-masuk" onclick="validasiAdmin()">KONFIRMASI</button>
+        <button class="btn-batal" onclick="closeAdminModal()">BATAL</button>
+    </div>
+</div>
+
+<script>
+    // 1. LOGIKA MODAL ADMIN
+    const modal = document.getElementById("adminModal");
+
+    function openAdminModal() { 
+        modal.style.display = "flex"; 
+    }
+    
+    function closeAdminModal() { 
+        modal.style.display = "none"; 
+        document.getElementById("adminPass").value = ""; 
     }
 
-    // Tampilkan loading
-    loader.style.display = "block";
-    btn.disabled = true;
-    btn.innerText = "MENGHUBUNGKAN...";
+    function validasiAdmin() {
+        const p = document.getElementById("adminPass").value.trim();
+        if (p === "admin2026") {
+            window.location.href = "admin_portal.html";
+        } else {
+            alert("Password Admin Salah!");
+        }
+    }
 
-    // PASTI-KAN URL INI SAMA DENGAN DEPLOYMENT TERBARU ANDA
-    const urlServer = "https://script.google.com/macros/s/AKfycbxOFJcwB311Qcr6GNe6yQ6PZl7OcinjGx3XdFn7Sym-wsA4UZ5b1D7HCaoj2NvuscqREg/exec
+    // 2. LOGIKA LOGIN USER
+    async function cekLogin() {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('pass').value.trim();
+        const loader = document.getElementById('loading');
+        const btn = document.querySelector('.btn-masuk');
+
+        if (!email || !pass) {
+            alert("Harap isi Email dan Password!");
+            return;
+        }
+
+        if(loader) loader.style.display = "block";
+        btn.disabled = true;
+        btn.innerText = "PROSES...";
+
+        // URL APPS SCRIPT ANDA
+        const urlServer = "https://script.google.com/macros/s/AKfycbxOFJcwB311Qcr6GNe6yQ6PZl7OcinjGx3XdFn7Sym-wsA4UZ5b1D7HCaoj2NvuscqREg/exec
 ";
 
-    try {
-        // Tambahkan parameter unik agar tidak terkena cache di HP
-        const finalUrl = `${urlServer}?action=login&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&_cache=${new Date().getTime()}`;
-        
-        const response = await fetch(finalUrl, {
-            method: 'GET',
-            mode: 'cors', // Penting untuk HP
-            headers: { 'Content-Type': 'text/plain' }
-        });
+        try {
+            const finalUrl = `${urlServer}?action=login&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&_cache=${new Date().getTime()}`;
+            
+            const response = await fetch(finalUrl, {
+                method: 'GET',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain' }
+            });
 
-        if (!response.ok) throw new Error("Server tidak merespon");
+            if (!response.ok) throw new Error("Gagal terhubung");
 
-        const result = await response.json();
+            const result = await response.json();
 
-        if (result.status === "Aktif") {
-            alert("Login Berhasil!");
-            window.location.href = "main_menu.html";
-        } else if (result.status === "Pending") {
-            alert("Akun belum AKTIF. Silakan cek email aktivasi.");
-        } else if (result.status === "Nonaktif") {
-            alert("Akun dinonaktifkan oleh Admin.");
-        } else {
-            alert("Email atau Password salah!");
+            if (result.status === "Aktif") {
+                alert("Login Berhasil!");
+                window.location.href = "main_menu.html";
+            } else if (result.status === "Pending") {
+                alert("Akun belum AKTIF. Cek email aktivasi.");
+            } else if (result.status === "Nonaktif") {
+                alert("Akun dinonaktifkan Admin.");
+            } else {
+                alert("Email atau Password salah!");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Gagal koneksi. Pastikan URL Script benar dan internet aktif.");
+        } finally {
+            if(loader) loader.style.display = "none";
+            btn.disabled = false;
+            btn.innerText = "MASUK";
         }
-    } catch (err) {
-        console.error(err);
-        alert("Koneksi Gagal: Silakan pastikan internet aktif dan URL Script sudah benar.");
-    } finally {
-        loader.style.display = "none";
-        btn.disabled = false;
-        btn.innerText = "MASUK";
     }
-}
+</script>
+</body>
+</html>
