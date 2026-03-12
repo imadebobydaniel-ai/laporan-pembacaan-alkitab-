@@ -137,8 +137,14 @@
             const result = await response.json();
 
             if (result.status === "Aktif") {
-                alert("Login Berhasil! Selamat Datang.");
+                // SIMPAN DATA KE SESSION (Penyimpanan Lokal)
+                localStorage.setItem("namaUser", result.nama);
+                localStorage.setItem("jabatanUser", result.jabatan);
+                localStorage.setItem("wilayahUser", result.wilayah);
+
+                alert("Login Berhasil! Selamat Datang, " + result.nama);
                 window.location.href = "main_menu.html";
+            }
             } else {
                 // Memberitahu apa status yang terbaca di database
                 alert("Gagal Masuk. Status Akun: " + result.status + "\n(Pastikan Email & Password benar-benar sama)");
