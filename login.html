@@ -2,26 +2,79 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login - Pondok Pemulihan Papua</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 340px; text-align: center; }
-        img.logo { width: 100px; margin-bottom: 15px; }
-        h2 { color: #333; margin: 0; font-size: 22px; }
-        p.subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; background: #fafafa; }
+        /* Pengaturan Dasar agar tidak over-scroll */
+        html, body { height: 100%; margin: 0; overflow: hidden; }
         
-        /* Tombol Utama */
-        .btn-masuk { width: 100%; padding: 14px; background-color: #007bff; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; transition: 0.3s; }
-        .btn-masuk:hover { background-color: #0056b3; }
-        
-        /* Tombol Admin (Pintu Rahasia) */
-        .btn-admin { background: none; border: none; color: #999; font-size: 11px; margin-top: 20px; cursor: pointer; text-decoration: underline; }
-        .btn-admin:hover { color: #666; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f2f5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
 
-        .footer-link { margin-top: 15px; font-size: 13px; color: #666; }
-        #loading { display: none; margin-top: 10px; color: #555; font-size: 13px; font-weight: bold; }
+        .card { 
+            background: white; 
+            padding: 15px 20px; /* Diperkecil dari 25px */
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            width: 90%; 
+            max-width: 320px; 
+            text-align: center; 
+            box-sizing: border-box;
+        }
+
+        /* Mengecilkan Logo agar hemat ruang */
+        img.logo { width: 70px; margin-bottom: 5px; } 
+        
+        h2 { color: #333; margin: 5px 0 0 0; font-size: 18px; }
+        p.subtitle { color: #666; font-size: 12px; margin: 0 0 15px 0; }
+        
+        /* Input lebih ramping */
+        input { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 5px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 14px; 
+            background: #fafafa; 
+        }
+        
+        .btn-masuk { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 15px; 
+            margin-top: 10px; 
+            transition: 0.3s; 
+        }
+
+        .footer-link { margin-top: 12px; font-size: 12px; color: #666; }
+        
+        /* Tombol Admin dibuat lebih simpel agar tidak makan tempat */
+        .btn-admin { 
+            background: none; 
+            border: none; 
+            color: #bbb; 
+            font-size: 10px; 
+            margin-top: 15px; 
+            cursor: pointer; 
+            text-decoration: underline; 
+            display: block;
+            width: 100%;
+        }
+
+        #loading { display: none; margin-top: 5px; color: #007bff; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -29,7 +82,7 @@
 <div class="card">
     <img src="logo_pondok.png" alt="Logo" class="logo">
     <h2>Selamat Datang</h2>
-    <p class="subtitle">Silakan Login ke Akun Anda</p>
+    <p class="subtitle">Login ke Akun Anda</p>
     
     <input type="email" id="email" placeholder="Email Terdaftar">
     <input type="password" id="pass" placeholder="Password">
@@ -38,20 +91,18 @@
     <button class="btn-masuk" onclick="cekLogin()">MASUK</button>
 
     <div class="footer-link">
-        Belum punya akun? <a href="index.html">Daftar di sini</a>
+        Belum punya akun? <a href="index.html">Daftar</a>
     </div>
 
-    <button class="btn-admin" onclick="loginAdmin()">Login Administrator</button>
+    <button class="btn-admin" onclick="loginAdmin()">Administrator</button>
 </div>
 
 <script>
-    // Fungsi khusus untuk Admin agar tidak perlu ketik email manual
     function loginAdmin() {
         const p = prompt("Masukkan Password Master Admin:");
         if (p === "admin2026") {
-            alert("Akses Admin Diterima!");
             window.location.href = "admin_portal.html";
-        } else {
+        } else if (p !== null) {
             alert("Password Salah!");
         }
     }
@@ -63,11 +114,10 @@
         const btn = document.querySelector('.btn-masuk');
 
         if (!email || !pass) {
-            alert("Email dan Password tidak boleh kosong!");
+            alert("Isi Email dan Password!");
             return;
         }
 
-        // Logika Admin jika diketik manual di form
         if (email === "admin@pondok.com" && pass === "admin2026") {
             window.location.href = "admin_portal.html";
             return;
@@ -83,17 +133,16 @@
             const result = await response.json();
 
             if (result.status === "Aktif") {
-                alert("Login Berhasil!");
                 window.location.href = "main_menu.html";
             } else if (result.status === "Pending") {
-                alert("Akun Anda belum AKTIF. Silakan aktivasi melalui email.");
+                alert("Akun belum AKTIF. Cek email aktivasi!");
             } else if (result.status === "Nonaktif") {
-                alert("Akun Anda telah dinonaktifkan oleh Admin.");
+                alert("Akun dinonaktifkan Admin.");
             } else {
-                alert("Email atau Password salah!");
+                alert("Email/Password salah!");
             }
         } catch (err) {
-            alert("Gagal terhubung ke server.");
+            alert("Gagal koneksi.");
         } finally {
             loader.style.display = "none";
             btn.disabled = false;
