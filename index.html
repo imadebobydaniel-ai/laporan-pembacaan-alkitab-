@@ -121,53 +121,46 @@
         }
     }
 
- function prosesLogin() {
-    // Mengambil data dari input
-    const data = {
-        nama: document.getElementById('nama').value,
-        nohp: document.getElementById('nohp').value,
-        wilayah: document.getElementById('wilayah').value,
-        jabatan: document.getElementById('jabatan').value,
-        email: document.getElementById('email').value,
-        pass: document.getElementById('pass').value
-    };
+    function prosesLogin() {
+        // Mengambil data dari input form
+        const data = {
+            nama: document.getElementById('nama').value,
+            nohp: document.getElementById('nohp').value,
+            wilayah: document.getElementById('wilayah').value,
+            jabatan: document.getElementById('jabatan').value,
+            email: document.getElementById('email').value,
+            pass: document.getElementById('pass').value
+        };
 
-    // PASTI-KAN GANTI DENGAN LINK HASIL DEPLOY TERBARU KAMU
-    const urlServer = "https://script.google.com/macros/s/AKfycbwYGmNtFOmstK7M0Ov8oupgZ1WIVeILzHjQF9mOnu4iS4My0BxJ9cH7XkdXtPry2bSBlQ/exec";
+        // LINK WAJIB DI DALAM TANDA KUTIP
+        const urlServer = "https://script.google.com/macros/s/AKfycbwYGmNtFOmstK7M0Ov8oupgZ1WIVeILzHjQF9mOnu4iS4My0BxJ9cH7XkdXtPry2bSBlQ/exec";
 
-    if (data.nama && data.wilayah && data.jabatan && data.email && data.pass) {
-        // Cek syarat password (Min 8 karakter, Huruf Besar, Angka, Simbol)
-        let regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (!regex.test(data.pass)) {
-            alert("Password belum memenuhi syarat keamanan!");
-            return;
+        if (data.nama && data.wilayah && data.jabatan && data.email && data.pass) {
+            let regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!regex.test(data.pass)) {
+                alert("Password belum memenuhi syarat keamanan!");
+                return;
+            }
+
+            tampilkanLoading("Mendaftarkan Identitas...");
+            
+            // Gunakan URLSearchParams agar tembus ke Google Sheets tanpa error CORS
+            fetch(urlServer, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(data).toString()
+            }).then(() => {
+                alert("Pendaftaran Berhasil! Data sedang diproses ke database.");
+                window.location.href = "main_menu.html";
+            }).catch((err) => {
+                alert("Gagal koneksi ke server: " + err);
+                location.reload();
+            });
+        } else {
+            alert("Harap lengkapi semua data!");
         }
-
-        tampilkanLoading("Mendaftarkan Identitas...");
-
-        // Mengirim data menggunakan URLSearchParams (Cara paling stabil untuk Google Script)
-        fetch(urlServer, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(data).toString()
-        })
-        .then(() => {
-            alert("Pendaftaran Berhasil dikirim!");
-            window.location.href = "main_menu.html";
-        })
-        .catch(err => {
-            alert("Gagal koneksi: " + err);
-            location.reload(); // Refresh jika gagal
-        });
-    } else {
-        alert("Harap lengkapi semua data!");
     }
-}
-    }
-}
-    }
-}
 
     function tampilkanLoading(pesan) {
         document.getElementById('auth-form').style.display = 'none';
@@ -177,6 +170,7 @@
 </script>
 </body>
 </html>
+
 
 
 
