@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login User - Pondok Pemulihan</title>
+    <title>Login User - Pondok Pemulihan Papua</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .login-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        img { width: 70px; margin-bottom: 10px; }
+        img { width: 70px; margin-bottom: 10px; border-radius: 50%; }
         h2 { color: #333; margin-bottom: 5px; }
         p { color: #666; font-size: 14px; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #0084ff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-admin { background-color: #ff003c; }
+        button { width: 100%; padding: 12px; background-color: #0084ff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
+        .btn-admin { background-color: #ff003c; margin-top: 10px; }
         .link-daftar { display: block; margin-top: 15px; color: #0084ff; text-decoration: none; font-size: 14px; font-weight: bold; }
     </style>
 </head>
@@ -22,8 +22,10 @@
     <img src="logo_pondok.png" alt="Logo">
     <h2>Masuk Aplikasi</h2>
     <p>Gunakan Email & Password Anda</p>
+    
     <input type="email" id="loginEmail" placeholder="Email">
     <input type="password" id="loginPass" placeholder="Password">
+    
     <button onclick="prosesLogin()">Masuk Sekarang</button>
     
     <button class="btn-admin" onclick="window.location.href='login.html'">Akses Administrator</button>
@@ -50,7 +52,7 @@
         const password = document.getElementById("loginPass").value;
         try {
             await auth.signInWithEmailAndPassword(email, password);
-            // Sesuai file Abang: main.menu.html (pakai titik)
+            // LINK DIPERBAIKI: Sesuai file Abang main.menu.html
             window.location.href = 'main.menu.html';
         } catch (e) { alert("Gagal: " + e.message); }
     }
