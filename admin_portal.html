@@ -1,159 +1,44 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Pondok Pemulihan Papua</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
-        .admin-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1400px; margin: auto; }
-        h2 { color: #1c1e21; border-bottom: 3px solid #0084ff; padding-bottom: 12px; }
-        .toolbar { margin-bottom: 20px; display: flex; gap: 10px; }
-        
-        button { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; }
-        .btn-refresh { background-color: #28a745; }
-        .btn-pdf { background-color: #dc3545; }
-        .btn-back { background-color: #6c757d; }
-        
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th { background-color: #0084ff; color: white; padding: 15px; text-align: left; }
-        td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 13px; }
-
-        .btn-edit { background-color: #ffc107; color: #212529; padding: 6px 10px; border-radius: 4px; margin-right: 5px; }
-        .btn-hapus { background-color: #dc3545; color: white; padding: 6px 10px; border-radius: 4px; }
-
-        /* MODAL STYLE */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; text-align: center; }
-        .modal-content h3 { margin-top: 0; color: #0084ff; border-bottom: 2px solid #0084ff; padding-bottom: 10px; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-save { background-color: #0084ff; flex: 1; }
-        .btn-cancel { background-color: #6c757d; flex: 1; }
-    </style>
-</head>
-<body>
-
-<div class="admin-box">
-    <h2>Dashboard Administrator</h2>
-    <div class="toolbar">
-        <button class="btn-back" onclick="window.location.href='index.html'">⬅ Kembali</button>
-        <button class="btn-refresh" onclick="loadUsers()">🔄 Refresh Data</button>
-        <button class="btn-pdf" onclick="exportKePDF()">📄 Export PDF</button>
-    </div>
-
-    <table id="userTable">
-        <thead>
-            <tr>
-                <th>Nama Lengkap</th>
-                <th>Email</th>
-                <th>Password</th>
-                <th>No HP</th>
-                <th>Gol. Darah</th>
-                <th>Jabatan</th>
-                <th>Komsel JC</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="userList"></tbody>
-    </table>
-</div>
-
-<div id="editModal" class="modal">
+<div id="modalEdit" class="modal">
     <div class="modal-content">
-        <h3>Edit Data Anggota</h3>
-        <input type="hidden" id="edit-id">
-        <input type="text" id="edit-nama" placeholder="Nama Lengkap">
-        <input type="text" id="edit-nohp" placeholder="Nomor HP">
+        <h3 style="color: #0084ff; text-align: center; border-bottom: 2px solid #0084ff; padding-bottom: 10px;">Edit Data Anggota</h3>
         
-        <select id="edit-goldar">
-            <option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option>
-        </select>
+        <form id="formEdit">
+            <label>Nama Lengkap:</label>
+            <input type="text" id="editNama" placeholder="Masukkan Nama Lengkap" required>
 
-        <select id="edit-komsel">
-            <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option>
-            <option value="JC 4">JC 4</option><option value="JC 5">JC 5</option>
-        </select>
+            <label>Alamat Email:</label>
+            <input type="email" id="editEmail" placeholder="contoh@gmail.com">
 
-        <select id="edit-jabatan">
-            <option value="Anggota Komsel">Anggota Komsel</option>
-            <option value="Ketua Komsel">Ketua Komsel</option>
-        </select>
+            <label>Password:</label>
+            <input type="text" id="editPassword" placeholder="Masukkan Password Baru">
 
-        <div class="modal-btns">
-            <button class="btn-save" onclick="simpanPerubahan()">Simpan Perubahan</button>
-            <button class="btn-cancel" onclick="tutupModal()">Batal</button>
-        </div>
+            <label>Nomor HP / WhatsApp:</label>
+            <input type="text" id="editNoHP" placeholder="0812xxxxxx">
+
+            <label>Golongan Darah:</label>
+            <select id="editGolDarah">
+                <option value="">-- Pilih Gol. Darah --</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="AB">AB</option>
+                <option value="O">O</option>
+            </select>
+
+            <label>Jabatan:</label>
+            <select id="editJabatan">
+                <option value="">-- Pilih Jabatan --</option>
+                <option value="Anggota Komsel">Anggota Komsel</option>
+                <option value="Ketua Komsel">Ketua Komsel</option>
+                <option value="Pengurus">Pengurus</option>
+            </select>
+
+            <label>Komsel JC:</label>
+            <input type="text" id="editKomsel" placeholder="Contoh: JC 5">
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn-masuk" style="flex: 1;">Simpan Perubahan</button>
+                <button type="button" onclick="tutupModal()" class="btn-kembali" style="flex: 1; background: #6c757d;">Batal</button>
+            </div>
+        </form>
     </div>
 </div>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
-        authDomain: "boby-apps-project.firebaseapp.com",
-        projectId: "boby-apps-project",
-        storageBucket: "boby-apps-project.firebasestorage.app",
-        messagingSenderId: "125984859692",
-        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    async function loadUsers() {
-        const userList = document.getElementById("userList");
-        userList.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Memuat...</td></tr>";
-        const snapshot = await db.collection("users").get();
-        userList.innerHTML = "";
-        snapshot.forEach(doc => {
-            const d = doc.data();
-            userList.innerHTML += `
-                <tr>
-                    <td>${d.nama}</td><td>${d.email}</td><td style="color:red">${d.password}</td>
-                    <td>${d.no_hp}</td><td>${d.gol_darah}</td><td>${d.jabatan}</td><td>${d.komsel}</td>
-                    <td>
-                        <button class="btn-edit" onclick="bukaModal('${doc.id}', '${d.nama}', '${d.no_hp}', '${d.gol_darah}', '${d.komsel}', '${d.jabatan}')">Edit</button>
-                        <button class="btn-hapus" onclick="hapusUser('${doc.id}')">Hapus</button>
-                    </td>
-                </tr>`;
-        });
-    }
-
-    function bukaModal(id, nama, hp, goldar, komsel, jabatan) {
-        document.getElementById("edit-id").value = id;
-        document.getElementById("edit-nama").value = nama;
-        document.getElementById("edit-nohp").value = hp;
-        document.getElementById("edit-goldar").value = goldar;
-        document.getElementById("edit-komsel").value = komsel;
-        document.getElementById("edit-jabatan").value = jabatan;
-        document.getElementById("editModal").style.display = "block";
-    }
-
-    function tutupModal() { document.getElementById("editModal").style.display = "none"; }
-
-    async function simpanPerubahan() {
-        const id = document.getElementById("edit-id").value;
-        try {
-            await db.collection("users").doc(id).update({
-                nama: document.getElementById("edit-nama").value,
-                no_hp: document.getElementById("edit-nohp").value,
-                gol_darah: document.getElementById("edit-goldar").value,
-                komsel: document.getElementById("edit-komsel").value,
-                jabatan: document.getElementById("edit-jabatan").value
-            });
-            alert("Data Berhasil Diperbarui!");
-            tutupModal(); loadUsers();
-        } catch (e) { alert("Gagal: " + e.message); }
-    }
-
-    async function hapusUser(id) {
-        if(confirm("Hapus data ini?")) { await db.collection("users").doc(id).delete(); loadUsers(); }
-    }
-
-    window.onload = loadUsers;
-</script>
-</body>
-</html>
