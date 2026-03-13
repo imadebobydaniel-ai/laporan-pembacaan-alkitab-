@@ -3,55 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Pondok Pemulihan Papua</title>
+    <title>Login - Pondok Pemulihan</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        img { width: 80px; margin-bottom: 20px; }
+        h2 { margin-bottom: 10px; color: #333; }
+        p { color: #666; font-size: 14px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #0084ff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button:hover { background: #0073e6; }
+        .footer-link { margin-top: 20px; font-size: 14px; color: #0084ff; text-decoration: none; display: block; }
+    </style>
 </head>
-<body style="margin:0; background:#f0f2f5; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
+<body>
 
-    <div style="background:white; width:320px; padding:30px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.1); text-align:center;">
+<div class="login-box">
+    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgf_S-K89X7I2eO0O27-p_V-8-5YfBf_A6-O0-v-f-Z-L-x-F-E-Y-z-K-L-I/s1600/logo.png" alt="Logo">
+    <h2>Portal Admin</h2>
+    <p>Silakan masukkan password akses</p>
+    <input type="password" id="pass" placeholder="Password Administrator">
+    <button onclick="login()">Masuk Sekarang</button>
+    <a href="index.html" class="footer-link">Kembali ke Beranda</a>
+</div>
+
+<script>
+    function login() {
+        const passwordInput = document.getElementById('pass').value;
         
-        <div style="width:100%; margin-bottom:15px;">
-            <img src="logo_pondok.png?v=1.1" alt="Logo" style="width:80px; height:auto;">
-        </div>
-
-        <h2 style="margin:0 0 10px 0; display:block; width:100%; color:#333;">Masuk Aplikasi</h2>
-        
-        <p style="font-size:13px; color:#777; margin-bottom:20px;">Gunakan Nomor KTP Anda</p>
-
-        <input type="text" id="loginKtp" placeholder="Masukkan Nomor KTP" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; box-sizing:border-box;">
-        
-        <div id="errorMessage" style="color:red; font-size:12px; display:none; margin-bottom:10px;">Data tidak ditemukan!</div>
-
-        <button onclick="prosesLogin()" style="width:100%; padding:12px; background:#007bff; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Masuk Sekarang</button>
-        
-        <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
-            <a href="profile.html" style="color:#007bff; text-decoration:none; font-size:14px;">Daftar Anggota Baru</a>
-        </div>
-
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
-            authDomain: "boby-apps-project.firebaseapp.com",
-            projectId: "boby-apps-project",
-            storageBucket: "boby-apps-project.firebasestorage.app",
-            messagingSenderId: "125984859692",
-            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.firestore();
-
-        function prosesLogin() {
-            const ktp = document.getElementById("loginKtp").value;
-            const err = document.getElementById("errorMessage");
-            if(!ktp) return alert("Isi KTP!");
-            db.collection("users").where("no_ktp", "==", ktp).get().then(s => {
-                if(!s.empty) window.location.href="main.menu.html";
-                else err.style.display="block";
-            });
+        // Cek password sesuai permintaan Abang
+        if (passwordInput === "admin 2026") {
+            window.location.href = "admin_portal.html";
+        } else {
+            alert("Password Salah! Akses Ditolak.");
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
