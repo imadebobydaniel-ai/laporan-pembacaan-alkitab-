@@ -14,7 +14,7 @@
         button:hover { background-color: #0073e6; }
         .btn-admin { background-color: #ff003c; }
         .btn-admin:hover { background-color: #d60032; }
-        .link-action { display: block; margin-top: 15px; color: #0084ff; text-decoration: none; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .link-action { display: block; margin-top: 15px; color: #0084ff; text-decoration: none; font-size: 14px; font-weight: bold; }
         .link-action:hover { text-decoration: underline; }
     </style>
 </head>
@@ -57,7 +57,7 @@
         try {
             await auth.signInWithEmailAndPassword(email, pass);
             window.location.href = 'main.menu.html';
-        } catch (e) { alert("Email atau Password salah!"); }
+        } catch (e) { alert("Error: " + e.message); }
     }
 
     function aksesAdmin() {
