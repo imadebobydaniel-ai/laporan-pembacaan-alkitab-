@@ -95,23 +95,27 @@
     const email = document.getElementById('login_email').value.trim();
     const pass = document.getElementById('login_password').value.trim();
 
-    if(!email || !pass) return alert("Harap isi email dan password!");
+    if (!email || !pass) {
+        return alert("Harap isi email dan password!");
+    }
 
     try {
-        // Mencari user di collection "users" yang sesuai dengan input
-        const userRef = db.collection("users");
-        const q = await userRef.where("email", "==", email).where("password", "==", pass).get();
+        // Melakukan query ke collection 'users' berdasarkan email dan password
+        const querySnapshot = await db.collection("users")
+            .where("email", "==", email)
+            .where("password", "==", pass)
+            .get();
 
-        if(!q.empty) {
+        if (!querySnapshot.empty) {
             alert("Login Berhasil!");
-            // Mengarahkan ke menu utama setelah data ditemukan
-            window.location.href = "main_menu.html"; 
+            // Mengarahkan ke main_menu.html sesuai instruksi sebelumnya
+            window.location.href = "main_menu.html";
         } else {
-            alert("Data tidak ditemukan. Pastikan Email dan Password sudah terdaftar di Firebase.");
+            alert("Data tidak ditemukan. Periksa kembali Email dan Password di Firebase Console.");
         }
-    } catch(e) { 
-        console.error("Error Detail: ", e);
-        alert("Terjadi kesalahan koneksi: " + e.message); 
+    } catch (error) {
+        console.error("Error Login: ", error);
+        alert("Gagal terhubung ke database: " + error.message);
     }
 }
 </script>
