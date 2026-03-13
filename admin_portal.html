@@ -14,15 +14,15 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
         .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.1); max-width: 1200px; margin: auto; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0084ff; padding-bottom: 15px; margin-bottom: 25px; }
-        .btn-logout { background: #e74c3c; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
-        .btn-logout:hover { background: #c0392b; }
+        .btn-logout { background: #ff4757; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-logout:hover { background: #ff6b81; }
         
         .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
         .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-        .btn-refresh { background: #28a745; }
-        .btn-pdf { background: #0084ff; }
-        .btn-edit { background: #f1c40f; color: #333; }
-        .btn-delete { background: #34495e; }
+        .btn-refresh { background: #2ed573; }
+        .btn-pdf { background: #1e90ff; }
+        .btn-edit { background: #ffa502; color: #fff; }
+        .btn-delete { background: #2f3542; }
         .btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
         .table-container { width: 100%; overflow-x: auto; border-radius: 10px; border: 1px solid #eee; }
@@ -151,30 +151,47 @@
         if (confirm("Hapus data ini secara permanen?")) terpilih.forEach(c => c.closest('tr').remove());
     }
 
+    // FUNGSI PDF FINAL - ANTI GAGAL
     function eksporPDF() {
-        if (typeof window.jspdf === 'undefined') {
-            alert("Library PDF belum siap. Tunggu sebentar.");
+        // Cek apakah library jspdf sudah siap di browser
+        const pdfLib = window.jspdf || window.window?.jspdf;
+        
+        if (!pdfLib) {
+            alert("Sedang menghubungkan ke server PDF... Pastikan internet Abang aktif. Coba klik lagi dalam 3 detik.");
             return;
         }
-        const { jsPDF } = window.jspdf;
+
+        const { jsPDF } = pdfLib;
         const doc = new jsPDF('l', 'mm', 'a4');
+        
+        // Header PDF
+        doc.setFontSize(16);
+        doc.setTextColor(0, 132, 255);
         doc.text("LAPORAN DATA ANGGOTA PONDOK PEMULIHAN", 14, 15);
         
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Tanggal Cetak: " + new Date().toLocaleString('id-ID'), 14, 22);
+
+        // Ambil data dari tabel tanpa kolom checkbox
         doc.autoTable({
             html: '#tabelUtama',
-            startY: 25,
+            startY: 30,
             theme: 'grid',
-            headStyles: { fillColor: [0, 132, 255] },
-            // Mengabaikan kolom checkbox (kolom 0) agar tidak ikut ke PDF
-            bodyStyles: { fontSize: 9 },
-            didParseCell: function(data) {
-                if (data.column.index === 0) {
-                    data.cell.text = ''; // Kosongkan checkbox
-                }
-            }
+            headStyles: { fillColor: [0, 132, 255], fontStyle: 'bold' },
+            columns: [
+                { header: 'Nama Lengkap', dataKey: 1 },
+                { header: 'Email', dataKey: 2 },
+                { header: 'No HP / WA', dataKey: 3 },
+                { header: 'Gol', dataKey: 4 },
+                { header: 'Jabatan', dataKey: 5 },
+                { header: 'Komsel', dataKey: 6 }
+            ]
         });
-        doc.save("Data_Anggota_Papua.pdf");
+
+        doc.save("Data_Anggota_Pondok_Pemulihan.pdf");
     }
 </script>
+
 </body>
 </html>
