@@ -13,23 +13,25 @@
         .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 100%; margin: auto; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--red); padding-bottom: 15px; margin-bottom: 20px; }
         .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 14px; }
         .btn-refresh { background: var(--green); }
         .btn-edit { background: var(--orange); }
         .btn-delete { background: var(--dark); }
         .btn-logout { background: #666; text-decoration: none; }
         .table-wrap { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1500px; }
         th { background: var(--red); color: white; padding: 15px; text-align: left; font-size: 13px; }
         td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 13px; }
         .status-aktif { color: var(--green); font-weight: bold; }
-
-        /* Modal Edit */
+        
+        /* Modal Style */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 30px; border-radius: 15px; width: 95%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        /* Style khusus input yang tidak bisa diedit */
+        .readonly-field { background-color: #f8f9fa; cursor: not-allowed; color: #888; border: 1px dashed #ccc !important; }
         .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
     </style>
 </head>
@@ -54,9 +56,13 @@
                     <th style="width:20px;"><input type="checkbox" id="checkAll" onclick="pilihSemua(this)"></th>
                     <th>Nama Lengkap</th>
                     <th>Email</th>
-                    <th>Nomor HP</th>
-                    <th>Alamat Tinggal</th> <th>Jabatan Komsel</th> <th>Lokasi JC</th> <th>Gol. Darah</th>
-                    <th>Status Pernikahan</th> <th>Status</th>
+                    <th>Password</th> <th>Nomor HP</th>
+                    <th>Alamat Tinggal</th>
+                    <th>Jabatan Komsel</th>
+                    <th>Lokasi JC</th>
+                    <th>Gol. Darah</th>
+                    <th>Status Pernikahan</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody id="dataBody"></tbody>
@@ -68,8 +74,15 @@
     <div class="modal-content">
         <h3><i class="fas fa-user-edit"></i> Edit Data Anggota</h3>
         <input type="hidden" id="editId">
+        
         <div class="form-group"><label>Nama Lengkap</label><input type="text" id="editNama"></div>
         <div class="form-group"><label>Email</label><input type="email" id="editEmail"></div>
+        
+        <div class="form-group">
+            <label>Password (Hanya User yang bisa ubah di Profil)</label>
+            <input type="text" id="editPassword" class="readonly-field" readonly>
+        </div>
+
         <div class="form-group"><label>Nomor HP</label><input type="text" id="editHP"></div>
         <div class="form-group"><label>Alamat Tempat Tinggal</label><input type="text" id="editAlamat"></div>
         <div class="form-group">
@@ -99,7 +112,7 @@
             </select>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-refresh" style="flex:1; justify-content:center;" onclick="simpanEdit()">Update</button>
+            <button class="btn btn-refresh" style="flex:1; justify-content:center;" onclick="simpanEdit()">Update Data</button>
             <button class="btn btn-delete" style="flex:1; justify-content:center;" onclick="tutupModal()">Batal</button>
         </div>
     </div>
@@ -119,65 +132,85 @@
 
     async function muatData() {
         const tbody = document.getElementById('dataBody');
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Memperbarui...</td></tr>';
-        const snapshot = await db.collection("users").get();
-        tbody.innerHTML = "";
-        snapshot.forEach((doc) => {
-            const v = doc.data();
-            tbody.innerHTML += `
-                <tr>
-                    <td><input type="checkbox" class="userCheck" value="${doc.id}"></td>
-                    <td>${v.nama || '-'}</td>
-                    <td>${v.email || '-'}</td>
-                    <td>${v.no_hp || '-'}</td>
-                    <td>${v.alamat || '-'}</td>
-                    <td>${v.jabatan || '-'}</td>
-                    <td>${v.komsel || '-'}</td>
-                    <td>${v.gol_darah || '-'}</td>
-                    <td>${v.status_nikah || '-'}</td>
-                    <td class="status-aktif">Aktif</td>
-                </tr>`;
-        });
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Memperbarui Data...</td></tr>';
+        try {
+            const snapshot = await db.collection("users").get();
+            tbody.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const v = doc.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td><input type="checkbox" class="userCheck" value="${doc.id}"></td>
+                        <td>${v.nama || '-'}</td>
+                        <td>${v.email || '-'}</td>
+                        <td style="font-family: monospace; color: #d63031;">${v.password || '-'}</td>
+                        <td>${v.no_hp || '-'}</td>
+                        <td>${v.alamat || '-'}</td>
+                        <td>${v.jabatan || '-'}</td>
+                        <td>${v.komsel || '-'}</td>
+                        <td>${v.gol_darah || '-'}</td>
+                        <td>${v.status_nikah || '-'}</td>
+                        <td class="status-aktif">Aktif</td>
+                    </tr>`;
+            });
+        } catch (e) { alert("Error muat data: " + e.message); }
     }
 
     function pilihSemua(src) { document.querySelectorAll('.userCheck').forEach(cb => cb.checked = src.checked); }
 
     async function bukaModalEdit() {
         const sel = document.querySelector('.userCheck:checked');
-        if(!sel) return alert("Pilih satu data!");
-        const d = (await db.collection("users").doc(sel.value).get()).data();
-        document.getElementById('editId').value = sel.value;
-        document.getElementById('editNama').value = d.nama || "";
-        document.getElementById('editEmail').value = d.email || "";
-        document.getElementById('editHP').value = d.no_hp || "";
-        document.getElementById('editAlamat').value = d.alamat || "";
-        document.getElementById('editJabatan').value = d.jabatan || "";
-        document.getElementById('editJC').value = d.komsel || "";
-        document.getElementById('editDarah').value = d.gol_darah || "";
-        document.getElementById('editNikah').value = d.status_nikah || "";
-        document.getElementById('modalEdit').style.display = 'flex';
+        if(!sel) return alert("Pilih satu jemaat untuk diedit!");
+        
+        try {
+            const d = (await db.collection("users").doc(sel.value).get()).data();
+            document.getElementById('editId').value = sel.value;
+            document.getElementById('editNama').value = d.nama || "";
+            document.getElementById('editEmail').value = d.email || "";
+            document.getElementById('editPassword').value = d.password || ""; // Tampilkan Password
+            document.getElementById('editHP').value = d.no_hp || "";
+            document.getElementById('editAlamat').value = d.alamat || "";
+            document.getElementById('editJabatan').value = d.jabatan || "";
+            document.getElementById('editJC').value = d.komsel || "";
+            document.getElementById('editDarah').value = d.gol_darah || "";
+            document.getElementById('editNikah').value = d.status_nikah || "";
+            document.getElementById('modalEdit').style.display = 'flex';
+        } catch (e) { alert("Gagal mengambil data"); }
     }
 
     async function simpanEdit() {
         const id = document.getElementById('editId').value;
-        await db.collection("users").doc(id).update({
-            nama: document.getElementById('editNama').value,
-            email: document.getElementById('editEmail').value,
-            no_hp: document.getElementById('editHP').value,
-            alamat: document.getElementById('editAlamat').value,
-            jabatan: document.getElementById('editJabatan').value,
-            komsel: document.getElementById('editJC').value,
-            gol_darah: document.getElementById('editDarah').value,
-            status_nikah: document.getElementById('editNikah').value
-        });
-        alert("Data Berhasil Diperbarui!");
-        tutupModal(); muatData();
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = "Menyimpan...";
+
+        try {
+            await db.collection("users").doc(id).update({
+                nama: document.getElementById('editNama').value,
+                email: document.getElementById('editEmail').value,
+                // Password tidak dimasukkan ke update agar tidak berubah (ReadOnly)
+                no_hp: document.getElementById('editHP').value,
+                alamat: document.getElementById('editAlamat').value,
+                jabatan: document.getElementById('editJabatan').value,
+                komsel: document.getElementById('editJC').value,
+                gol_darah: document.getElementById('editDarah').value,
+                status_nikah: document.getElementById('editNikah').value
+            });
+            alert("Data Berhasil Diperbarui!");
+            tutupModal(); 
+            muatData();
+        } catch (error) {
+            alert("Gagal Update: " + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Update Data";
+        }
     }
 
     async function hapusTerpilih() {
         const sel = document.querySelectorAll('.userCheck:checked');
-        if(sel.length === 0) return alert("Pilih data!");
-        if(confirm("Hapus data terpilih?")) {
+        if(sel.length === 0) return alert("Pilih data yang ingin dihapus!");
+        if(confirm(`Hapus ${sel.length} data terpilih?`)) {
             for(let cb of sel) { await db.collection("users").doc(cb.value).delete(); }
             muatData();
         }
