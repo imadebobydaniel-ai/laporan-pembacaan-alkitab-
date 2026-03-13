@@ -12,7 +12,7 @@
 
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.1); max-width: 1200px; margin: auto; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.1); max-width: 1250px; margin: auto; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0084ff; padding-bottom: 15px; margin-bottom: 25px; }
         .btn-logout { background: #ff4757; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .btn-logout:hover { background: #ff6b81; }
@@ -26,13 +26,13 @@
         .btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
         .table-container { width: 100%; overflow-x: auto; border-radius: 10px; border: 1px solid #eee; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; background: #fff; }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; background: #fff; }
         th { background: #0084ff; color: white; padding: 15px; text-align: left; font-size: 14px; }
         td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }
         tr:hover { background: #f9f9f9; }
 
         .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 450px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
         .field { margin-bottom: 15px; }
         .field label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 6px; color: #666; }
         .field input, .field select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
@@ -60,6 +60,7 @@
                     <th style="width: 40px;"><input type="checkbox" id="checkAll" onclick="pilihSemua(this)"></th>
                     <th>Nama Lengkap</th>
                     <th>Email</th>
+                    <th>Password</th>
                     <th>No HP / WhatsApp</th>
                     <th>Gol. Darah</th>
                     <th>Jabatan</th>
@@ -71,6 +72,7 @@
                     <td><input type="checkbox" class="pilih-item"></td>
                     <td>Imade boby</td>
                     <td>imade.bobydaniel@gmail.com</td>
+                    <td>Bukadong821</td>
                     <td>081283393576</td>
                     <td>AB</td>
                     <td>Anggota Komsel</td>
@@ -86,6 +88,7 @@
         <h3 style="margin-top:0; border-bottom: 2px solid #0084ff; padding-bottom:10px;">Edit Data Anggota</h3>
         <div class="field"><label>Nama Lengkap:</label><input type="text" id="edNama"></div>
         <div class="field"><label>Email:</label><input type="text" id="edEmail"></div>
+        <div class="field"><label>Password:</label><input type="text" id="edPass"></div>
         <div class="field"><label>No HP:</label><input type="text" id="edHP"></div>
         <div class="field">
             <label>Gol. Darah:</label>
@@ -95,7 +98,7 @@
             <label>Jabatan:</label>
             <select id="edJab">
                 <option value="Ketua Komsel">Ketua Komsel</option>
-                <option value="Pengerja">Pengerja</option>
+                <option value="Pengerja">Wakil Ketua</option>
                 <option value="Anggota Komsel">Anggota Komsel</option>
             </select>
         </div>
@@ -121,22 +124,26 @@
         const terpilih = document.querySelectorAll('.pilih-item:checked');
         if (terpilih.length !== 1) return alert("Silakan pilih 1 data saja!");
         targetBaris = terpilih[0].closest('tr');
+        
         document.getElementById('edNama').value = targetBaris.cells[1].innerText;
         document.getElementById('edEmail').value = targetBaris.cells[2].innerText;
-        document.getElementById('edHP').value = targetBaris.cells[3].innerText;
-        document.getElementById('edGol').value = targetBaris.cells[4].innerText;
-        document.getElementById('edJab').value = targetBaris.cells[5].innerText;
-        document.getElementById('edJC').value = targetBaris.cells[6].innerText;
+        document.getElementById('edPass').value = targetBaris.cells[3].innerText;
+        document.getElementById('edHP').value = targetBaris.cells[4].innerText;
+        document.getElementById('edGol').value = targetBaris.cells[5].innerText;
+        document.getElementById('edJab').value = targetBaris.cells[6].innerText;
+        document.getElementById('edJC').value = targetBaris.cells[7].innerText;
+        
         document.getElementById('modalEdit').style.display = 'flex';
     }
 
     function simpanEdit() {
         targetBaris.cells[1].innerText = document.getElementById('edNama').value;
         targetBaris.cells[2].innerText = document.getElementById('edEmail').value;
-        targetBaris.cells[3].innerText = document.getElementById('edHP').value;
-        targetBaris.cells[4].innerText = document.getElementById('edGol').value;
-        targetBaris.cells[5].innerText = document.getElementById('edJab').value;
-        targetBaris.cells[6].innerText = document.getElementById('edJC').value;
+        targetBaris.cells[3].innerText = document.getElementById('edPass').value;
+        targetBaris.cells[4].innerText = document.getElementById('edHP').value;
+        targetBaris.cells[5].innerText = document.getElementById('edGol').value;
+        targetBaris.cells[6].innerText = document.getElementById('edJab').value;
+        targetBaris.cells[7].innerText = document.getElementById('edJC').value;
         tutupModal();
     }
 
@@ -151,47 +158,38 @@
         if (confirm("Hapus data ini secara permanen?")) terpilih.forEach(c => c.closest('tr').remove());
     }
 
-    // FUNGSI PDF FINAL - ANTI GAGAL
     function eksporPDF() {
-        // Cek apakah library jspdf sudah siap di browser
         const pdfLib = window.jspdf || window.window?.jspdf;
-        
         if (!pdfLib) {
-            alert("Sedang menghubungkan ke server PDF... Pastikan internet Abang aktif. Coba klik lagi dalam 3 detik.");
+            alert("Sedang memuat library PDF... Tunggu 3 detik dan klik lagi.");
             return;
         }
 
         const { jsPDF } = pdfLib;
         const doc = new jsPDF('l', 'mm', 'a4');
         
-        // Header PDF
         doc.setFontSize(16);
         doc.setTextColor(0, 132, 255);
         doc.text("LAPORAN DATA ANGGOTA PONDOK PEMULIHAN", 14, 15);
         
-        doc.setFontSize(10);
-        doc.setTextColor(100);
-        doc.text("Tanggal Cetak: " + new Date().toLocaleString('id-ID'), 14, 22);
-
-        // Ambil data dari tabel tanpa kolom checkbox
         doc.autoTable({
             html: '#tabelUtama',
-            startY: 30,
+            startY: 25,
             theme: 'grid',
-            headStyles: { fillColor: [0, 132, 255], fontStyle: 'bold' },
+            headStyles: { fillColor: [0, 132, 255] },
             columns: [
-                { header: 'Nama Lengkap', dataKey: 1 },
+                { header: 'Nama', dataKey: 1 },
                 { header: 'Email', dataKey: 2 },
-                { header: 'No HP / WA', dataKey: 3 },
-                { header: 'Gol', dataKey: 4 },
-                { header: 'Jabatan', dataKey: 5 },
-                { header: 'Komsel', dataKey: 6 }
+                { header: 'Password', dataKey: 3 },
+                { header: 'No HP', dataKey: 4 },
+                { header: 'Gol', dataKey: 5 },
+                { header: 'Jabatan', dataKey: 6 },
+                { header: 'Komsel', dataKey: 7 }
             ]
         });
 
         doc.save("Data_Anggota_Pondok_Pemulihan.pdf");
     }
 </script>
-
 </body>
 </html>
