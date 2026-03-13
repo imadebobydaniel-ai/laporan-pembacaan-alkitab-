@@ -13,29 +13,34 @@
         .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 1400px; margin: auto; }
         h2 { border-bottom: 3px solid #0084ff; padding-bottom: 10px; color: #1c1e21; margin-top: 0; }
         
-        .header-tools { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; text-decoration: none; display: inline-block; }
+        /* Navigasi & Tombol */
+        .header-tools { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; text-decoration: none; display: flex; align-items: center; font-size: 14px; }
         .btn-back { background: #6c757d; }
         .btn-refresh { background: #28a745; }
         .btn-pdf { background: #dc3545; }
 
-        /* TABEL UTAMA */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 1100px; }
-        th { background: #0084ff; color: white; padding: 15px 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; }
+        /* PERBAIKAN TABEL AGAR TIDAK TERPOTONG */
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; /* Munculkan scrollbar horizontal jika layar sempit */
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+        th { background: #0084ff; color: white; padding: 15px 12px; text-align: left; position: sticky; top: 0; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; background: #fff; }
         
-        /* TOMBOL AKSI */
-        .btn-edit { background: #ffc107; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+        /* Tombol di Dalam Tabel */
+        .btn-edit { background: #ffc107; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; color: #000; }
         .btn-hapus { background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
         /* MODAL EDIT */
         .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 30px; border-radius: 15px; width: 95%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-        
         label { display: block; font-weight: bold; margin-top: 15px; font-size: 14px; color: #444; }
         input, select { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-
         .btn-save { background: #0084ff; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 25px; font-size: 16px; }
         .btn-cancel { background: #e0e0e0; color: #333; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
@@ -61,7 +66,7 @@
                     <th>Gol. Darah</th>
                     <th>Jabatan</th>
                     <th>Komsel JC</th>
-                    <th>Aksi</th>
+                    <th style="min-width: 150px;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -86,19 +91,14 @@
 <div id="modalEdit" class="modal">
     <div class="modal-content">
         <h3>Edit Data Anggota</h3>
-        
         <label>Nama Lengkap:</label>
         <input type="text" id="editNama" value="Imade boby">
-        
         <label>Alamat Email:</label>
         <input type="email" id="editEmail" value="imade.bobydaniel@gmail.com">
-        
         <label>Password:</label>
         <input type="text" id="editPass" value="Bukadong821">
-        
-        <label>Nomor HP / WhatsApp:</label>
+        <label>Nomor HP:</label>
         <input type="text" id="editNoHP" value="081283393576">
-        
         <label>Golongan Darah:</label>
         <select id="editGolDarah">
             <option value="A">A</option>
@@ -106,7 +106,6 @@
             <option value="AB" selected>AB</option>
             <option value="O">O</option>
         </select>
-
         <label>Jabatan:</label>
         <select id="editJabatan">
             <option value="Ketua Komsel">Ketua Komsel</option>
@@ -114,7 +113,6 @@
             <option value="Anggota Komsel" selected>Anggota Komsel</option>
             <option value="Pengurus">Pengurus</option>
         </select>
-
         <label>Komsel JC:</label>
         <select id="editKomsel">
             <option value="JC 1">JC 1</option>
@@ -123,49 +121,32 @@
             <option value="JC 4">JC 4</option>
             <option value="JC 5" selected>JC 5</option>
         </select>
-
         <button class="btn-save" onclick="simpanPerubahan()">Simpan Perubahan</button>
         <button class="btn-cancel" onclick="tutupModal()">Batal</button>
     </div>
 </div>
 
 <script>
-    // Fungsi Tampilan Modal
     function bukaModalEdit() { document.getElementById('modalEdit').style.display = 'flex'; }
     function tutupModal() { document.getElementById('modalEdit').style.display = 'none'; }
-
-    function simpanPerubahan() {
-        alert("Perubahan Berhasil Disimpan!");
-        tutupModal();
-    }
-
-    // Fungsi Hapus Baris
+    function simpanPerubahan() { alert("Data Berhasil Diperbarui!"); tutupModal(); }
+    
     function hapusBaris(id, nama) {
-        if (confirm("Apakah Anda yakin ingin menghapus data '" + nama + "'?")) {
+        if (confirm("Hapus data '" + nama + "'?")) {
             const row = document.getElementById(id);
             if(row) row.remove();
-            alert("Data berhasil dihapus.");
         }
     }
 
-    // FUNGSI PDF (ANTI-GAGAL)
+    // FUNGSI PDF FINAL (ANTI-MACET)
     function generatePDF() {
         try {
             const { jsPDF } = window.jspdf;
-            if (!jsPDF) {
-                alert("Sistem PDF sedang loading, tunggu 2 detik lagi.");
-                return;
-            }
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
             
-            // Set Landscape agar tabel tidak sesak
-            const doc = new jsPDF('l', 'mm', 'a4');
-            
-            // Judul Laporan
             doc.setFontSize(18);
-            doc.setTextColor(0, 132, 255);
-            doc.text("PONDOK PEMULIHAN PAPUA - DATA ANGGOTA", 14, 15);
+            doc.text("DATA ANGGOTA PONDOK PEMULIHAN PAPUA", 14, 15);
             
-            // Generate Tabel (Abaikan kolom ke-7 yaitu kolom Aksi)
             doc.autoTable({ 
                 html: '#tabelAnggota', 
                 startY: 25,
@@ -183,10 +164,8 @@
             });
             
             doc.save("Laporan_Anggota_PPP.pdf");
-            alert("Download PDF Berhasil!");
         } catch (e) {
-            console.error(e);
-            alert("Gagal export PDF: " + e.message);
+            alert("Error: Library PDF belum termuat. Silakan tunggu 3 detik dan coba lagi.");
         }
     }
 </script>
