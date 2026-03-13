@@ -3,42 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Admin - Pondok Pemulihan</title>
+    <title>Database Administrator - Pondok Pemulihan</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.1); max-width: 1300px; margin: auto; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.1); max-width: 1400px; margin: auto; }
+        
+        /* Header & Toolbar sesuai setingan awal */
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #ff003c; padding-bottom: 15px; margin-bottom: 25px; }
-        .header h2 { margin: 0; color: #333; }
+        .header h2 { margin: 0; color: #333; display: flex; align-items: center; gap: 10px; }
         
         .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; display: flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 13px; }
         .btn-refresh { background: #2ed573; }
         .btn-edit { background: #ffa502; }
         .btn-delete { background: #2f3542; }
-        .btn-logout { background: #666; text-decoration: none; font-size: 14px; }
+        .btn-logout { background: #666; text-decoration: none; }
 
-        .table-container { width: 100%; overflow-x: auto; border-radius: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        th { background: #ff003c; color: white; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; color: #444; }
-        tr:hover { background-color: #f9f9f9; }
+        /* Tabel dengan kolom tambahan: Golongan Darah & Lokasi JC */
+        .table-container { width: 100%; overflow-x: auto; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        th { background: #ff003c; color: white; padding: 15px; text-align: left; font-size: 14px; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 13px; color: #444; }
+        tr:hover { background-color: #fff5f6; }
 
-        /* Modal Style */
-        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-        .field { margin-bottom: 15px; }
-        .field label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 5px; color: #555; }
-        .field input, .field select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+        /* Modal Edit Jemaat */
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 100%; max-width: 500px; box-shadow: 0 5px 25px rgba(0,0,0,0.3); }
+        .modal-header { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .field { margin-bottom: 12px; }
+        .field label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #555; }
+        .field input, .field select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .modal-footer { display: flex; gap: 10px; margin-top: 25px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2><i class="fas fa-users-cog"></i> Control Panel Admin</h2>
-        <a href="index.html" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+        <h2><i class="fas fa-database"></i> Database Administrator</h2>
+        <a href="index.html" class="btn btn-logout">Keluar</a>
     </div>
 
     <div class="toolbar">
@@ -48,7 +52,7 @@
     </div>
 
     <div class="table-container">
-        <table id="tabelUtama">
+        <table id="tabelAnggota">
             <thead>
                 <tr>
                     <th><input type="checkbox" id="checkAll" onclick="toggleAll(this)"></th>
@@ -57,6 +61,8 @@
                     <th>Password User</th>
                     <th>No HP</th>
                     <th>Jabatan</th>
+                    <th>Gol. Darah</th>
+                    <th>Lokasi JC</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -68,6 +74,8 @@
                     <td>Bukadong821</td>
                     <td>081283393576</td>
                     <td>Ketua Komsel</td>
+                    <td>O</td>
+                    <td>Sentani</td>
                     <td style="color: green; font-weight: bold;">Aktif</td>
                 </tr>
             </tbody>
@@ -77,19 +85,30 @@
 
 <div id="modalEdit" class="modal">
     <div class="modal-content">
-        <h3><i class="fas fa-edit"></i> Edit Data Anggota</h3>
-        <hr>
+        <div class="modal-header">
+            <h3><i class="fas fa-user-edit"></i> Edit Data Anggota</h3>
+        </div>
         <div class="field">
             <label>Nama Lengkap:</label>
             <input type="text" id="edNama">
         </div>
+        <div style="display: flex; gap: 10px;">
+            <div class="field" style="flex: 2;">
+                <label>Jabatan:</label>
+                <select id="edJabatan">
+                    <option value="Ketua Komsel">Ketua Komsel</option>
+                    <option value="Wakil Ketua Komsel">Wakil Ketua Komsel</option>
+                    <option value="Anggota Komsel">Anggota Komsel</option>
+                </select>
+            </div>
+            <div class="field" style="flex: 1;">
+                <label>Gol. Darah:</label>
+                <input type="text" id="edDarah" placeholder="A/B/O/AB">
+            </div>
+        </div>
         <div class="field">
-            <label>Jabatan:</label>
-            <select id="edJabatan">
-                <option value="Ketua Komsel">Ketua Komsel</option>
-                <option value="Wakil Ketua Komsel">Wakil Ketua Komsel</option>
-                <option value="Anggota Komsel">Anggota Komsel</option>
-            </select>
+            <label>Lokasi JC:</label>
+            <input type="text" id="edLokasi">
         </div>
         <div class="modal-footer">
             <button class="btn btn-refresh" style="flex:1; justify-content:center;" onclick="simpanEdit()">Update</button>
@@ -101,44 +120,41 @@
 <script>
     function toggleAll(source) {
         checkboxes = document.getElementsByClassName('pilih-item');
-        for(var i=0, n=checkboxes.length;i<n;i++) {
-            checkboxes[i].checked = source.checked;
-        }
+        for(var i=0; i<checkboxes.length; i++) checkboxes[i].checked = source.checked;
     }
 
     function bukaEditModal() {
         const terpilih = document.querySelectorAll('.pilih-item:checked');
-        if (terpilih.length !== 1) {
-            alert("Pilih satu data saja untuk diedit!");
-            return;
-        }
-        document.getElementById('modalEdit').style.display = 'flex';
-        // Ambil data dari baris tabel
+        if (terpilih.length !== 1) return alert("Pilih satu data saja untuk diedit!");
+        
         const row = terpilih[0].closest('tr');
         document.getElementById('edNama').value = row.cells[1].innerText;
         document.getElementById('edJabatan').value = row.cells[5].innerText;
+        document.getElementById('edDarah').value = row.cells[6].innerText;
+        document.getElementById('edLokasi').value = row.cells[7].innerText;
+        
+        document.getElementById('modalEdit').style.display = 'flex';
     }
 
-    function tutupModal() {
-        document.getElementById('modalEdit').style.display = 'none';
-    }
+    function tutupModal() { document.getElementById('modalEdit').style.display = 'none'; }
 
     function simpanEdit() {
-        const terpilih = document.querySelector('.pilih-item:checked').closest('tr');
-        terpilih.cells[1].innerText = document.getElementById('edNama').value;
-        terpilih.cells[5].innerText = document.getElementById('edJabatan').value;
-        alert("Data berhasil diperbarui secara lokal.");
+        const row = document.querySelector('.pilih-item:checked').closest('tr');
+        row.cells[1].innerText = document.getElementById('edNama').value;
+        row.cells[5].innerText = document.getElementById('edJabatan').value;
+        row.cells[6].innerText = document.getElementById('edDarah').value;
+        row.cells[7].innerText = document.getElementById('edLokasi').value;
+        alert("Data diperbarui!");
         tutupModal();
     }
 
     function hapusTerpilih() {
         const terpilih = document.querySelectorAll('.pilih-item:checked');
-        if (terpilih.length === 0) return alert("Pilih data yang ingin dihapus!");
+        if (terpilih.length === 0) return alert("Pilih data dulu!");
         if (confirm("Hapus data terpilih?")) {
             terpilih.forEach(cb => cb.closest('tr').remove());
         }
     }
 </script>
-
 </body>
 </html>
