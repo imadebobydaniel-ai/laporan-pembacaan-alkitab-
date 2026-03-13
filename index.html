@@ -108,9 +108,18 @@
         this.classList.toggle('fa-eye-slash');
     });
 
-    // Navigasi ke Admin
+    // Navigasi ke Admin dengan Proteksi Password admin2026
     function keHalamanAdmin() {
-        window.location.href = 'admin_portal.html';
+        let passwordAdmin = prompt("Masukkan Kata Sandi Administrator:", "");
+
+        if (passwordAdmin === "admin2026") {
+            alert("Akses Diterima! Selamat Datang Admin.");
+            window.location.href = 'admin_portal.html';
+        } else if (passwordAdmin === null) {
+            return; // User klik Batal
+        } else {
+            alert("Kata Sandi Salah! Anda tidak memiliki akses.");
+        }
     }
 
     // Simulasi Login
