@@ -11,8 +11,8 @@
         h2 { color: #333; margin-bottom: 5px; }
         p { color: #666; font-size: 14px; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #0084ff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        button:hover { background-color: #0073e6; }
+        button { width: 100%; padding: 12px; background-color: #0084ff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        button:hover { background-color: #0073e6; opacity: 0.9; }
         .btn-admin { background-color: #ff003c; margin-top: 10px; }
         .link-daftar { display: block; margin-top: 15px; color: #0084ff; text-decoration: none; font-size: 14px; font-weight: bold; }
     </style>
@@ -29,7 +29,7 @@
     <input type="email" id="loginEmail" placeholder="Alamat Email">
     <input type="password" id="loginPass" placeholder="Kata Sandi">
 
-    <button onclick="prosesLogin()">Masuk Sekarang</button>
+    <button id="btnLogin" onclick="prosesLogin()">Masuk Sekarang</button>
     <button class="btn-admin" onclick="window.location.href='admin_login.html'">Akses Administrator</button>
 
     <a href="register.html" class="link-daftar">Daftar Anggota Baru</a>
@@ -48,24 +48,49 @@
         appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
     };
 
+    // Inisialisasi Firebase
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
     async function prosesLogin() {
-        const email = document.getElementById("loginEmail").value;
-        const password = document.getElementById("loginPass").value;
+        const btn = document.getElementById("btnLogin");
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPass").value.trim();
 
         if (!email || !password) {
             alert("Silakan isi email dan password!");
             return;
         }
 
+        // Ubah tampilan tombol saat proses
+        btn.innerText = "Menghubungkan...";
+        btn.disabled = true;
+
         try {
-            await auth.signInWithEmailAndPassword(email, password);
-            // Ganti 'main_menu.html' dengan nama file halaman utama Abang yang sebenarnya
-            window.location.href = 'main_menu.html'; 
+            // Proses Login Firebase
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            console.log("Login sukses:", userCredential.user.email);
+
+            // Alihkan ke main_menu.html
+            // Jika file main_menu.html tidak terbuka, pastikan nama filenya sama persis (huruf kecil semua)
+            window.location.replace('main_menu.html');
+
         } catch (error) {
-            alert("Gagal Masuk: " + error.message);
+            btn.innerText = "Masuk Sekarang";
+            btn.disabled = false;
+            
+            console.error("Error Detail:", error.code);
+
+            // Pesan error spesifik agar Abang tahu masalahnya
+            if (error.code === 'auth/invalid-credential') {
+                alert("Email atau Password salah! Cek kembali data di Administrator.");
+            } else if (error.code === 'auth/network-request-failed') {
+                alert("Koneksi internet gagal. Periksa sinyal Anda.");
+            } else if (error.code === 'auth/user-not-found') {
+                alert("Email ini belum terdaftar di sistem.");
+            } else {
+                alert("Gagal Masuk: " + error.message);
+            }
         }
     }
 </script>
