@@ -66,10 +66,10 @@
 
     <label>Jabatan di Komsel:</label>
     <select id="reg-jabatan">
+        <option value="-">-- Pilih Jabatan --</option>
         <option value="Ketua Komsel">Ketua Komsel</option>
-         <option value="Ketua Komsel">Wakil Ketua Komsel</option>
+        <option value="Wakil Ketua Komsel">Wakil Ketua Komsel</option>
         <option value="Anggota Komsel">Anggota Komsel</option>
-       
     </select>
 
     <button onclick="prosesDaftar()">Simpan & Daftar Sekarang</button>
@@ -94,34 +94,39 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-   // Pastikan bagian simpan data (db.collection("users").add) seperti ini:
-async function prosesDaftar() {
-    const email = document.getElementById("reg-email").value;
-    const password = document.getElementById("reg-pass").value;
-    const nama = document.getElementById("reg-nama").value;
-    const nohp = document.getElementById("reg-nohp").value;
-    const goldar = document.getElementById("reg-goldar").value;
-    const komsel = document.getElementById("reg-komsel").value; // JC 1 - JC 5
-    const jabatan = document.getElementById("reg-jabatan").value; // Ketua/Anggota
+    async function prosesDaftar() {
+        const email = document.getElementById("reg-email").value;
+        const password = document.getElementById("reg-pass").value;
+        const nama = document.getElementById("reg-nama").value;
+        const nohp = document.getElementById("reg-nohp").value;
+        const goldar = document.getElementById("reg-goldar").value;
+        const komsel = document.getElementById("reg-komsel").value;
+        const jabatan = document.getElementById("reg-jabatan").value;
 
-    try {
-        await auth.createUserWithEmailAndPassword(email, password);
-        await db.collection("users").add({
-            nama: nama,
-            email: email,
-            password: password, // Agar password muncul di admin
-            no_hp: nohp,
-            gol_darah: goldar,
-            komsel: komsel,
-            jabatan: jabatan,
-            tanggal_daftar: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        alert("Pendaftaran Berhasil!");
-        window.location.href = 'index.html';
-    } catch (error) {
-        alert("Gagal: " + error.message);
+        // Validasi Sederhana agar tidak ada data kosong
+        if (!email || !password || !nama || goldar === "-" || komsel === "-" || jabatan === "-") {
+            alert("Mohon lengkapi semua data dan pilih Jabatan/Komsel!");
+            return;
+        }
+
+        try {
+            await auth.createUserWithEmailAndPassword(email, password);
+            await db.collection("users").add({
+                nama: nama,
+                email: email,
+                password: password, 
+                no_hp: nohp,
+                gol_darah: goldar,
+                komsel: komsel,
+                jabatan: jabatan,
+                tanggal_daftar: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert("Pendaftaran Berhasil!");
+            window.location.href = 'index.html';
+        } catch (error) {
+            alert("Gagal: " + error.message);
+        }
     }
-}
 </script>
 
 </body>
