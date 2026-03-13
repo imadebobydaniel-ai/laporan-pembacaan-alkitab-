@@ -4,129 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Pondok Pemulihan Papua</title>
-    <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: #f0f2f5; 
-            margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh;
-        }
-
-        .card { 
-            background: white; padding: 30px; border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 350px; 
-        }
-
-        /* STRUKTUR TABEL ANTI-BALAPAN */
-        .login-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .login-table td {
-            text-align: center;
-            padding: 5px 0;
-        }
-
-        .login-logo {
-            width: 90px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        h2 { 
-            margin: 10px 0 0 0 !important; 
-            color: #1c1e21;
-            font-size: 24px;
-            font-weight: bold;
-            display: block;
-        }
-
-        .subtitle { color: #666; font-size: 13px; margin: 10px 0 20px 0; }
-        
-        input { 
-            width: 100%; padding: 12px; margin: 8px 0; 
-            border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; 
-        }
-
-        .btn-login { 
-            width: 100%; padding: 12px; background-color: #007bff; 
-            color: white; border: none; border-radius: 10px; 
-            cursor: pointer; font-weight: bold; margin-top: 10px;
-        }
-
-        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
-        .btn-register { color: #007bff; text-decoration: none; font-size: 14px; font-weight: 600; }
-    </style>
 </head>
-<body>
+<body style="font-family: sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
 
-<div class="card">
-    <table class="login-table">
-        <tr>
-            <td>
-                <img src="logo_pondok.png" alt="Logo" class="login-logo">
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <h2>Masuk Aplikasi</h2>
-            </td>
-        </tr>
-    </table>
-    
-    <p class="subtitle">Gunakan Nomor KTP Anda untuk masuk</p>
-    
-    <input type="text" id="loginKtp" placeholder="Masukkan Nomor KTP">
-    <div id="errorMessage" style="color: red; font-size: 12px; margin-top: 5px; display: none;">Nomor KTP tidak ditemukan!</div>
-    
-    <button class="btn-login" onclick="prosesLogin()">Masuk Sekarang</button>
-    
-    <hr>
-    
-    <p style="font-size: 12px; color: #666; margin-bottom: 5px;">Belum punya akun?</p>
-    <a href="profile.html" class="btn-register">Daftar Anggota Baru</a>
-</div>
+    <div style="background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center;">
+        
+        <div style="display: block; width: 100%; margin-bottom: 20px;">
+            <img src="logo_pondok.png" alt="Logo" style="width: 100px; height: auto; display: block; margin: 0 auto;">
+        </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+        <div style="display: block; width: 100%; margin-bottom: 10px;">
+            <h2 style="margin: 0; color: #1c1e21; font-size: 24px; font-weight: bold;">Masuk Aplikasi</h2>
+        </div>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
-        authDomain: "boby-apps-project.firebaseapp.com",
-        projectId: "boby-apps-project",
-        storageBucket: "boby-apps-project.firebasestorage.app",
-        messagingSenderId: "125984859692",
-        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-    };
+        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Gunakan Nomor KTP Anda untuk masuk</p>
+        
+        <input type="text" id="loginKtp" placeholder="Masukkan Nomor KTP" style="width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
+        
+        <div id="errorMessage" style="color: red; font-size: 12px; margin-top: 5px; display: none;">Nomor KTP tidak ditemukan!</div>
+        
+        <button onclick="prosesLogin()" style="width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px; font-size: 16px;">
+            Masuk Sekarang
+        </button>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+        
+        <p style="font-size: 13px; color: #666; margin-bottom: 5px;">Belum punya akun?</p>
+        <a href="profile.html" style="color: #007bff; text-decoration: none; font-size: 14px; font-weight: 600;">Daftar Anggota Baru</a>
+    </div>
 
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const db = firebase.firestore();
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+            authDomain: "boby-apps-project.firebaseapp.com",
+            projectId: "boby-apps-project",
+            storageBucket: "boby-apps-project.firebasestorage.app",
+            messagingSenderId: "125984859692",
+            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.firestore();
 
-    function prosesLogin() {
-        const ktpInput = document.getElementById("loginKtp").value;
-        const errorMsg = document.getElementById("errorMessage");
-
-        if (ktpInput === "") {
-            alert("Silakan masukkan nomor KTP!");
-            return;
+        function prosesLogin() {
+            const ktpInput = document.getElementById("loginKtp").value;
+            const errorMsg = document.getElementById("errorMessage");
+            if (ktpInput === "") { alert("Silakan masukkan nomor KTP!"); return; }
+            db.collection("users").where("no_ktp", "==", ktpInput).get()
+            .then((querySnapshot) => {
+                if (!querySnapshot.empty) { window.location.href = "main.menu.html"; } 
+                else { errorMsg.style.display = "block"; }
+            });
         }
-
-        db.collection("users").where("no_ktp", "==", ktpInput).get()
-        .then((querySnapshot) => {
-            if (!querySnapshot.empty) {
-                alert("Selamat Datang!");
-                window.location.href = "main.menu.html"; 
-            } else {
-                errorMsg.style.display = "block";
-            }
-        })
-        .catch((error) => { console.error("Error login: ", error); });
-    }
-</script>
-
+    </script>
 </body>
 </html>
