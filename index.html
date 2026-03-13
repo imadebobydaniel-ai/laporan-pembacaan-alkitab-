@@ -3,75 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pondok Pemulihan Papua</title>
+    <title>Login - Pondok Pemulihan</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        img { width: 80px; margin-bottom: 10px; border-radius: 50%; }
-        h2 { color: #333; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #0084ff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-admin { background-color: #ff003c; }
-        .link-action { display: block; margin-top: 15px; color: #0084ff; text-decoration: none; font-size: 14px; font-weight: bold; padding: 10px; border: 1px dashed #0084ff; border-radius: 6px; }
+        .login-container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .logo { width: 100px; margin-bottom: 20px; }
+        h2 { color: #333; margin-bottom: 30px; }
+        .field { margin-bottom: 15px; text-align: left; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        
+        /* CSS UNTUK SIMBOL MATA */
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .eye-icon { 
+            position: absolute; 
+            right: 15px; 
+            cursor: pointer; 
+            font-size: 22px; 
+            color: #888; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
 
-        /* MODAL CUSTOM UNTUK HP */
-        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 300px; text-align: center; }
+        .btn-masuk { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-admin { width: 100%; padding: 12px; background-color: #ff0019; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .btn-daftar { width: 100%; padding: 12px; background: none; color: #007bff; border: 1px dashed #007bff; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; }
     </style>
 </head>
 <body>
 
 <div class="login-container">
-    <img src="logo_pondok.png" alt="Logo">
+    <img src="https://imadebobydaniel-ai.github.io/laporan-pembacaan-alkitab-/logo.png" alt="Logo" class="logo">
     <h2>Pondok Pemulihan</h2>
     
-    <input type="email" id="emailUser" placeholder="Email Anggota">
-    <input type="password" id="passUser" placeholder="Password">
-    <button onclick="loginUser()">Masuk Sekarang</button>
-    
-    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-    
-    <button class="btn-admin" onclick="bukaModalAdmin()">Akses Administrator</button>
-    
-    <a href="daftar.html" class="link-action">Daftar Anggota Baru</a>
-</div>
-
-<div id="modalAdmin" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-top:0;">Login Admin</h3>
-        <p style="font-size:12px; color:#666;">Masukkan PIN Khusus</p>
-        <input type="password" id="pinAdmin" placeholder="PIN Rahasia" style="text-align:center; font-size:18px;">
-        <button style="background-color:#ff003c;" onclick="cekPin()">Buka Database</button>
-        <button style="background-color:#999;" onclick="tutupModalAdmin()">Batal</button>
+    <div class="field">
+        <input type="email" id="login_email" placeholder="Email Anggota">
     </div>
+
+    <div class="field">
+        <div class="password-wrapper">
+            <input type="password" id="login_password" placeholder="Password">
+            <span class="eye-icon" 
+                  onmousedown="intip(true)" 
+                  onmouseup="intip(false)" 
+                  onmouseleave="intip(false)"
+                  ontouchstart="intip(true)" 
+                  ontouchend="intip(false)">
+                &#128065;
+            </span>
+        </div>
+    </div>
+
+    <button class="btn-masuk" onclick="prosesLogin()">Masuk Sekarang</button>
+    <button class="btn-admin">Akses Administrator</button>
+    <a href="daftar.html" class="btn-daftar">Daftar Anggota Baru</a>
 </div>
 
 <script>
-    // Fungsi Buka Tutup Modal
-    function bukaModalAdmin() { 
-        document.getElementById('modalAdmin').style.display = 'flex'; 
-        document.getElementById('pinAdmin').focus();
-    }
-    function tutupModalAdmin() { 
-        document.getElementById('modalAdmin').style.display = 'none'; 
-        document.getElementById('pinAdmin').value = '';
+    const firebaseConfig = {
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+        authDomain: "boby-apps-project.firebaseapp.com",
+        projectId: "boby-apps-project",
+        storageBucket: "boby-apps-project.firebasestorage.app",
+        messagingSenderId: "125984859692",
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Fungsi Intip Password
+    function intip(lihat) {
+        const pInput = document.getElementById('login_password');
+        pInput.type = lihat ? 'text' : 'password';
     }
 
-    // Cek PIN
-    function cekPin() {
-        const pin = document.getElementById('pinAdmin').value;
-        if (pin === "admin2026") {
-            window.location.href = 'admin_portal.html';
-        } else {
-            alert("PIN Salah!");
-            document.getElementById('pinAdmin').value = '';
+    // Fungsi Login yang Diperbaiki
+    async function prosesLogin() {
+        const email = document.getElementById('login_email').value.trim();
+        const pass = document.getElementById('login_password').value.trim();
+
+        if(!email || !pass) return alert("Harap isi semua kolom!");
+
+        try {
+            // Kita coba cari data yang email dan passwordnya cocok
+            const userRef = db.collection("users");
+            const q = await userRef.where("email", "==", email).where("password", "==", pass).get();
+
+            if(!q.empty) {
+                alert("Login Berhasil!");
+                window.location.href = "admin_portal.html"; 
+            } else {
+                // Jika tidak ketemu, kita kasih pesan peringatan
+                alert("Email atau Password salah. Pastikan penulisan huruf besar/kecil benar.");
+            }
+        } catch(e) { 
+            alert("Terjadi masalah sistem: " + e.message); 
         }
     }
-
-    // Login User Standar
-    function loginUser() {
-        alert("Silakan daftar jika belum memiliki akun.");
-    }
 </script>
+
 </body>
 </html>
