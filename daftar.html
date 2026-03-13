@@ -6,6 +6,7 @@
     <title>Pendaftaran Anggota</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
@@ -14,6 +15,20 @@
         .field { margin-bottom: 15px; }
         .field label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        
+        /* Style Tambahan untuk Password Wrapper */
+        .password-container { position: relative; display: flex; align-items: center; }
+        .password-container input { padding-right: 40px; }
+        .toggle-password { 
+            position: absolute; 
+            right: 10px; 
+            cursor: pointer; 
+            color: #888; 
+            padding: 5px;
+            user-select: none; /* Mencegah teks ter-highlight saat ditekan lama */
+        }
+        .toggle-password:hover { color: #333; }
+
         .btn-submit { width: 100%; padding: 12px; background: #2ed573; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn-back { display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none; font-size: 14px; }
     </style>
@@ -45,7 +60,17 @@
 
     <div class="field">
         <label>Buat Password</label>
-        <input type="password" id="buat_password">
+        <div class="password-container">
+            <input type="password" id="buat_password" placeholder="Masukkan password">
+            <span class="toggle-password" 
+                  onmousedown="intipPassword(true)" 
+                  onmouseup="intipPassword(false)" 
+                  onmouseleave="intipPassword(false)"
+                  ontouchstart="intipPassword(true)" 
+                  ontouchend="intipPassword(false)">
+                <i class="fas fa-eye" id="eyeIcon"></i>
+            </span>
+        </div>
     </div>
 
     <div class="field">
@@ -60,11 +85,7 @@
     <div class="field">
         <label>Lokasi JC</label>
         <select id="pilih_lokasi_jc">
-            <option value="JC 1">JC 1</option>
-            <option value="JC 2">JC 2</option>
-            <option value="JC 3">JC 3</option>
-            <option value="JC 4">JC 4</option>
-            <option value="JC 5">JC 5</option>
+            <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option><option value="JC 4">JC 4</option><option value="JC 5">JC 5</option>
         </select>
     </div>
 
@@ -91,6 +112,7 @@
 </div>
 
 <script>
+    // Konfigurasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -103,13 +125,29 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // FUNGSI INTIP PASSWORD (HOLD TO REVEAL)
+    function intipPassword(tampilkan) {
+        const inputPass = document.getElementById('buat_password');
+        const icon = document.getElementById('eyeIcon');
+        
+        if (tampilkan) {
+            inputPass.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            inputPass.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // FUNGSI DAFTAR (TIDAK BERUBAH)
     async function prosesDaftar() {
-        // Ambil Data dari Input
         const data = {
             nama: document.getElementById('nama_lengkap').value,
             email: document.getElementById('email_anggota').value,
             no_hp: document.getElementById('nomor_hp').value,
-            alamat: document.getElementById('alamat_tinggal').value, // Data Alamat Baru
+            alamat: document.getElementById('alamat_tinggal').value,
             password: document.getElementById('buat_password').value,
             jabatan: document.getElementById('pilih_jabatan').value,
             komsel: document.getElementById('pilih_lokasi_jc').value,
@@ -125,7 +163,7 @@
 
         try {
             await db.collection("users").add(data);
-            alert("Pendaftaran Berhasil! Data sudah sinkron ke Admin.");
+            alert("Pendaftaran Berhasil!");
             window.location.href = "index.html";
         } catch (error) {
             alert("Gagal: " + error.message);
