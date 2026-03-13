@@ -105,9 +105,13 @@
         firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
-
-    // 4. Ambil data dari Firestore secara otomatis
-    window.onload = function() {
+// Ganti baris 108 - 110 menjadi ini:
+} else {
+    console.log("Data tidak ditemukan!");
+    // Kita arahkan ke profile.html (pakai E) agar tidak 404
+    alert("Data profil belum diisi, silakan lengkapi.");
+    window.location.href = "profile.html"; 
+}
         // Mengambil data dari koleksi 'users' dengan ID dokumen 'user_test'
         db.collection("users").doc("user_test").get().then((doc) => {
             if (doc.exists) {
