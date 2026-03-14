@@ -13,7 +13,19 @@
         .subtitle { color: #666; margin-bottom: 25px; font-size: 13px; font-weight: bold; text-transform: uppercase; }
         .input-group { position: relative; margin-bottom: 15px; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-        .toggle-password { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #999; }
+        
+        /* Gaya Simbol Mata */
+        .toggle-password { 
+            position: absolute; 
+            right: 12px; 
+            top: 12px; 
+            cursor: pointer; 
+            color: #999; 
+            padding: 5px;
+            user-select: none; 
+            -webkit-user-select: none;
+        }
+
         .role-selection { margin: 15px 0; display: flex; justify-content: space-around; font-size: 14px; }
         button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         button:hover { background-color: #0056b3; }
@@ -34,7 +46,14 @@
 
     <div class="input-group">
         <input type="password" id="password" placeholder="Password">
-        <i class="fa-solid fa-eye toggle-password" id="eyeIcon" onclick="togglePass()"></i>
+        <span class="toggle-password" 
+              onmousedown="intip(true)" 
+              onmouseup="intip(false)" 
+              onmouseleave="intip(false)"
+              ontouchstart="intip(true)" 
+              ontouchend="intip(false)">
+            <i class="fa-solid fa-eye" id="eyeIcon"></i>
+        </span>
     </div>
 
     <div class="role-selection">
@@ -50,10 +69,11 @@
 </div>
 
 <script>
-    function togglePass() {
+    // Fungsi Intip Password (Tekan untuk melihat)
+    function intip(tampilkan) {
         const passInput = document.getElementById("password");
         const eyeIcon = document.getElementById("eyeIcon");
-        if (passInput.type === "password") {
+        if (tampilkan) {
             passInput.type = "text";
             eyeIcon.classList.replace("fa-eye", "fa-eye-slash");
         } else {
