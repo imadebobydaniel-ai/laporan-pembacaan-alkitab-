@@ -10,10 +10,14 @@
             font-family: 'Segoe UI', sans-serif; 
             background-color: #f0f2f5; 
             margin: 0; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             overflow-x: hidden;
-            overscroll-behavior-y: contain; /* Membantu kontrol refresh pada browser mobile */
+            overscroll-behavior-y: contain;
         }
         
+        /* Top Padding (Navbar) */
         .navbar { 
             background: #007bff; 
             color: white; 
@@ -24,6 +28,14 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             height: 50px;
             gap: 10px;
+        }
+
+        /* Bottom Padding (Footer) - Warna sama dengan Top */
+        .footer-padding {
+            background: #007bff;
+            height: 50px; /* Tinggi disamakan dengan navbar agar simetris */
+            width: 100%;
+            margin-top: auto; /* Memastikan padding selalu di paling bawah */
         }
 
         .btn-setting {
@@ -50,9 +62,10 @@
         .container { 
             padding: 15px; 
             max-width: 100%; 
-            margin: auto; 
+            margin: 0 auto; 
             text-align: center; 
             box-sizing: border-box;
+            flex: 1; /* Mengisi ruang sisa agar footer tetap di bawah */
         }
 
         .main-title {
@@ -77,6 +90,7 @@
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
             gap: 10px; 
+            margin-bottom: 20px;
         }
 
         .menu-item { 
@@ -141,10 +155,10 @@
     </div>
 </div>
 
+<div class="footer-padding"></div>
+
 <script>
-    // Fitur Swipe to Refresh yang diperbaiki
     let startY = 0;
-    
     window.addEventListener('touchstart', (e) => {
         startY = e.touches[0].pageY;
     }, {passive: true});
@@ -152,8 +166,6 @@
     window.addEventListener('touchmove', (e) => {
         const currentY = e.touches[0].pageY;
         const diff = currentY - startY;
-
-        // Jika swipe ke bawah lebih dari 100px dan user berada di top halaman
         if (diff > 100 && window.scrollY === 0) {
             location.reload();
         }
