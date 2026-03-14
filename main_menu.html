@@ -6,13 +6,12 @@
     <title>Menu Utama - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Fit & Friendly Mobile View */
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: #f0f2f5; 
             margin: 0; 
             overflow-x: hidden;
-            touch-action: pan-y; /* Memastikan gerakan swipe vertikal lancar */
+            overscroll-behavior-y: contain; /* Membantu kontrol refresh pada browser mobile */
         }
         
         .navbar { 
@@ -24,6 +23,17 @@
             align-items: center; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             height: 50px;
+            gap: 10px;
+        }
+
+        .btn-setting {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
         }
         
         .btn-logout { 
@@ -49,7 +59,7 @@
             font-weight: bold; 
             font-size: 20px;
             color: #333;
-            margin: 15px 0 10px 0;
+            margin: 10px 0;
         }
 
         .welcome-card { 
@@ -60,19 +70,18 @@
             margin-bottom: 20px; 
         }
 
-        .welcome-card h2 { font-size: 18px; margin: 0 0 5px 0; }
-        .welcome-card p { font-size: 13px; margin: 0; color: #666; }
+        .welcome-card h2 { font-size: 16px; margin: 0; }
+        .welcome-card p { font-size: 12px; margin: 5px 0 0 0; color: #666; }
         
-        /* Grid Responsive Mobile */
         .menu-grid { 
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); /* 2 Kolom di HP agar fit */
-            gap: 12px; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
         }
 
         .menu-item { 
             background: white; 
-            padding: 20px 10px; 
+            padding: 15px 5px; 
             border-radius: 12px; 
             text-align: center; 
             text-decoration: none; 
@@ -81,13 +90,14 @@
             border: 1px solid #eee;
         }
         
-        .menu-item i { font-size: 30px; margin-bottom: 10px; color: #007bff; }
-        .menu-item h3 { margin: 0; font-size: 14px; }
+        .menu-item i { font-size: 24px; margin-bottom: 8px; color: #007bff; }
+        .menu-item h3 { margin: 0; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="navbar">
+    <button class="btn-setting" onclick="location.href='setting.html'"><i class="fa-solid fa-gear"></i></button>
     <button class="btn-logout" onclick="location.href='index.html'">Keluar</button>
 </div>
 
@@ -95,7 +105,7 @@
     <div class="main-title">Pondok Pemulihan Papua</div>
 
     <div class="welcome-card">
-        <h2 id="userGreeting">Memuat data...</h2>
+        <h2 id="userGreeting">Selamat Datang Imade Boby Komsel JC 5</h2>
         <p>Sistem Informasi Komsel JC</p>
     </div>
 
@@ -112,33 +122,42 @@
             <i class="fa-solid fa-book-bible"></i>
             <h3>Baca Alkitab</h3>
         </a>
+        <a href="statistik.html" class="menu-item">
+            <i class="fa-solid fa-chart-line"></i>
+            <h3>Statistik Komsel</h3>
+        </a>
+        <a href="kegiatan.html" class="menu-item">
+            <i class="fa-solid fa-calendar-days"></i>
+            <h3>Kegiatan Tahunan</h3>
+        </a>
+        <a href="laporan.html" class="menu-item">
+            <i class="fa-solid fa-file-invoice"></i>
+            <h3>Laporan Bulanan</h3>
+        </a>
+        <a href="lacak.html" class="menu-item">
+            <i class="fa-solid fa-location-dot"></i>
+            <h3>Lacak Domba</h3>
+        </a>
     </div>
 </div>
 
 <script>
-    // 1. Fungsi Load Data Nama & JC
-    function loadUserData() {
-        // Mengambil data dari localStorage (asumsi disimpan saat login)
-        const namaUser = localStorage.getItem('nama_user') || "Imade Boby"; 
-        const nomorJC = localStorage.getItem('nomor_jc') || "5"; 
-        document.getElementById('userGreeting').innerText = "Selamat Datang " + namaUser + " Komsel JC " + nomorJC;
-    }
-
-    // 2. Fitur Swipe to Refresh
-    let touchStartPoint = 0;
+    // Fitur Swipe to Refresh yang diperbaiki
+    let startY = 0;
+    
     window.addEventListener('touchstart', (e) => {
-        touchStartPoint = e.touches[0].pageY;
+        startY = e.touches[0].pageY;
     }, {passive: true});
 
     window.addEventListener('touchmove', (e) => {
-        const touchEndPoint = e.touches[0].pageY;
-        // Jika tarik kebawah lebih dari 150px dan posisi scroll di paling atas
-        if (touchEndPoint - touchStartPoint > 150 && window.scrollY === 0) {
+        const currentY = e.touches[0].pageY;
+        const diff = currentY - startY;
+
+        // Jika swipe ke bawah lebih dari 100px dan user berada di top halaman
+        if (diff > 100 && window.scrollY === 0) {
             location.reload();
         }
     }, {passive: true});
-
-    window.onload = loadUserData;
 </script>
 
 </body>
