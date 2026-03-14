@@ -82,8 +82,8 @@
     }
 
     function prosesLogin() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
         const role = document.querySelector('input[name="role"]:checked').value;
 
         if(email === "" || password === "") {
@@ -91,31 +91,22 @@
             return;
         }
 
-      function loginAplikasi() {
-    // Ambil nilai dari input form
-    const emailInput = document.getElementById('email').value.trim(); // .trim() untuk buang spasi liar
-    const passwordInput = document.getElementById('password').value.trim();
+        // LOGIKA KHUSUS ADMINISTRATOR
+        if (role === "admin") {
+            const adminEmail = "admin@pondok.com";
+            const adminPass = "papua123";
 
-    // DATA ADMINISTRATOR (Sesuai Perintah Abang)
-    const adminEmail = "admin@pondok.com";
-    const adminPass = "papua123";
-
-    // Validasi Login
-    if (emailInput === adminEmail && passwordInput === adminPass) {
-        alert("Login Administrator Berhasil!");
-        window.location.href = "admin_portal.html"; 
-    } else {
-        // Jika gagal, tampilkan pesan error yang jelas
-        alert("Email atau Password Administrator Salah!");
-        console.log("Input Email: " + emailInput);
-        console.log("Input Pass: " + passwordInput);
-    }
-}
-        } else {
-            // SET DATA OTOMATIS UNTUK ANGGOTA
+            if (email === adminEmail && password === adminPass) {
+                alert("Login Administrator Berhasil!");
+                window.location.href = "admin_portal.html";
+            } else {
+                alert("Email atau Password Administrator Salah!");
+            }
+        } 
+        // LOGIKA KHUSUS ANGGOTA
+        else {
             localStorage.setItem('nama_login', 'Imade Boby');
             localStorage.setItem('jc_login', '5');
-
             alert("Mencoba masuk sebagai Anggota...");
             window.location.href = "main_menu.html";
         }
