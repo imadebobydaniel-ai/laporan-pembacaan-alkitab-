@@ -1,175 +1,30 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Anggota</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        .field { margin-bottom: 15px; }
-        .field label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        
-        /* Style Tambahan untuk Password Wrapper */
-        .password-container { position: relative; display: flex; align-items: center; }
-        .password-container input { padding-right: 40px; }
-        .toggle-password { 
-            position: absolute; 
-            right: 10px; 
-            cursor: pointer; 
-            color: #888; 
-            padding: 5px;
-            user-select: none; /* Mencegah teks ter-highlight saat ditekan lama */
-        }
-        .toggle-password:hover { color: #333; }
+<div style="margin-bottom: 15px;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #333;">Nomor Komsel (Otomatis)</label>
+    <input type="text" id="nomorOtomatis" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9; font-weight: bold; color: #555;" readonly>
+</div>
 
-        .btn-submit { width: 100%; padding: 12px; background: #2ed573; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .btn-back { display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none; font-size: 14px; }
-    </style>
-</head>
-<body>
-
-<div class="box">
-    <h2>Daftar Anggota Baru</h2>
-    
-    <div class="field">
-        <label>Nama Lengkap</label>
-        <input type="text" id="nama_lengkap">
-    </div>
-    
-    <div class="field">
-        <label>Email</label>
-        <input type="email" id="email_anggota">
-    </div>
-
-    <div class="field">
-        <label>Nomor HP</label>
-        <input type="text" id="nomor_hp">
-    </div>
-    
-    <div class="field">
-        <label>Alamat Tempat Tinggal</label>
-        <input type="text" id="alamat_tinggal">
-    </div>
-
-    <div class="field">
-        <label>Buat Password</label>
-        <div class="password-container">
-            <input type="password" id="buat_password" placeholder="Masukkan password">
-            <span class="toggle-password" 
-                  onmousedown="intipPassword(true)" 
-                  onmouseup="intipPassword(false)" 
-                  onmouseleave="intipPassword(false)"
-                  ontouchstart="intipPassword(true)" 
-                  ontouchend="intipPassword(false)">
-                <i class="fas fa-eye" id="eyeIcon"></i>
-            </span>
-        </div>
-    </div>
-
-    <div class="field">
-        <label>Jabatan Komsel</label>
-        <select id="pilih_jabatan">
-            <option value="Anggota Komsel">Anggota Komsel</option>
-            <option value="Ketua Komsel">Ketua Komsel</option>
-            <option value="Wakil Ketua Komsel">Wakil Ketua Komsel</option>
-        </select>
-    </div>
-
-    <div class="field">
-        <label>Lokasi JC</label>
-        <select id="pilih_lokasi_jc">
-            <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option><option value="JC 4">JC 4</option><option value="JC 5">JC 5</option>
-        </select>
-    </div>
-
-    <div class="field">
-        <label>Golongan Darah</label>
-        <select id="pilih_golongan_darah">
-            <option value="O">O</option><option value="A">A</option><option value="B">B</option><option value="AB">AB</option>
-        </select>
-    </div>
-
-    <div class="field">
-        <label>Status Pernikahan</label>
-        <select id="pilih_status_pernikahan">
-            <option value="Single">Single</option>
-            <option value="Relationship">Relationship</option>
-            <option value="Menikah">Menikah</option>
-            <option value="Cerai Hidup">Cerai Hidup</option>
-            <option value="Cerai Mati">Cerai Mati</option>
-        </select>
-    </div>
-
-    <button class="btn-submit" onclick="prosesDaftar()">Daftar Sekarang</button>
-    <a href="index.html" class="btn-back">Kembali ke Login</a>
+<div style="margin-bottom: 15px;">
+    <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #333;">Nama Lengkap</label>
+    <input type="text" placeholder="Masukkan nama lengkap" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;">
 </div>
 
 <script>
-    // Konfigurasi Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
-        authDomain: "boby-apps-project.firebaseapp.com",
-        projectId: "boby-apps-project",
-        storageBucket: "boby-apps-project.firebasestorage.app",
-        messagingSenderId: "125984859692",
-        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // FUNGSI INTIP PASSWORD (HOLD TO REVEAL)
-    function intipPassword(tampilkan) {
-        const inputPass = document.getElementById('buat_password');
-        const icon = document.getElementById('eyeIcon');
+    // Fungsi untuk menghasilkan nomor otomatis berdasarkan input JC
+    function generateNomorKomsel() {
+        const jcSelect = document.querySelector('select[name="lokasi_jc"]') || { value: "1" }; // Default JC 1 jika belum pilih
+        const jcValue = jcSelect.value.replace("JC ", ""); // Mengambil angka saja
         
-        if (tampilkan) {
-            inputPass.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            inputPass.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
+        // Simulasi nomor urut (dalam sistem nyata ini diambil dari database)
+        const nomorUrut = "001"; 
+        const tahun = "2026";
+        
+        const formatNomor = `NK-PPP-${nomorUrut}-${jcValue}-${tahun}`;
+        document.getElementById('nomorOtomatis').value = formatNomor;
     }
 
-    // FUNGSI DAFTAR (TIDAK BERUBAH)
-    async function prosesDaftar() {
-        const data = {
-            nama: document.getElementById('nama_lengkap').value,
-            email: document.getElementById('email_anggota').value,
-            no_hp: document.getElementById('nomor_hp').value,
-            alamat: document.getElementById('alamat_tinggal').value,
-            password: document.getElementById('buat_password').value,
-            jabatan: document.getElementById('pilih_jabatan').value,
-            komsel: document.getElementById('pilih_lokasi_jc').value,
-            gol_darah: document.getElementById('pilih_golongan_darah').value,
-            status_nikah: document.getElementById('pilih_status_pernikahan').value,
-            status: "Aktif"
-        };
+    // Jalankan fungsi saat halaman dimuat
+    window.onload = generateNomorKomsel;
 
-        if(!data.nama || !data.email || !data.password) {
-            alert("Nama, Email, dan Password wajib diisi!");
-            return;
-        }
-
-        try {
-            await db.collection("users").add(data);
-            alert("Pendaftaran Berhasil!");
-            window.location.href = "index.html";
-        } catch (error) {
-            alert("Gagal: " + error.message);
-        }
-    }
+    // Jika dropdown JC berubah, nomor otomatis ikut berubah
+    document.querySelector('select[name="lokasi_jc"]').addEventListener('change', generateNomorKomsel);
 </script>
-
-</body>
-</html>
