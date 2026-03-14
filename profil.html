@@ -8,14 +8,13 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* PERINTAH: Mematikan navigasi di navbar */
+        /* Navigasi di navbar dimatikan sesuai perintah sebelumnya */
         .navbar { background: #007bff; color: white; padding: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .navbar a.back-nav { display: none; } /* Tombol back di navbar disembunyikan */
         
         .container { padding: 20px; flex: 1; text-align: center; }
         .profile-header { margin-bottom: 25px; }
         
-        /* Container untuk foto dan tombol pensil */
+        /* Container untuk foto */
         .profile-pic-container {
             position: relative;
             width: 100px;
@@ -26,23 +25,8 @@
         .profile-pic { width: 100%; height: 100%; background: #ddd; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; }
         .profile-pic i { font-size: 50px; color: #666; }
         
-        /* PERINTAH: Menambahkan simbol pensil */
-        .edit-pic-icon {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: #007bff;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 14px;
-            border: 2px solid white;
-            cursor: pointer;
-        }
+        /* PERINTAH: Menghilangkan simbol pensil edit foto */
+        .edit-pic-icon { display: none; }
 
         .info-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; }
         .info-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
@@ -50,17 +34,18 @@
         .info-label { font-size: 12px; color: #888; font-weight: bold; text-transform: uppercase; }
         .info-value { font-size: 14px; color: #333; font-weight: bold; }
         
-        .btn-edit { display: block; width: 100%; background: #007bff; color: white; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; font-size: 14px; }
+        /* PERINTAH: Menghilangkan tombol "Edit Profil / Pengaturan" di bawah info-card */
+        .btn-edit { display: none; }
+        
         .footer-padding { background: #007bff; height: 50px; width: 100%; margin-top: auto; }
         
-        /* Elemen input file tersembunyi */
+        /* Input file dan fungsionalitas upload dimatikan */
         #fileInput { display: none; }
     </style>
 </head>
 <body>
 
 <div class="navbar">
-    <a href="javascript:void(0);" class="back-nav"><i class="fa-solid fa-arrow-left"></i></a>
     <div style="font-weight: bold;">Profil Saya</div>
 </div>
 
@@ -71,11 +56,7 @@
                 <i class="fa-solid fa-user" id="defaultIcon"></i>
                 <img id="imagePreview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
             </div>
-            <label for="fileInput" class="edit-pic-icon">
-                <i class="fa-solid fa-pencil"></i>
-            </label>
-            <input type="file" id="fileInput" accept="image/*">
-        </div>
+            </div>
         <h2 id="dispName" style="margin: 5px 0; font-size: 18px;">Memuat...</h2>
         <p id="dispRole" style="margin: 0; color: #666; font-size: 13px;">Anggota Komsel</p>
     </div>
@@ -99,12 +80,11 @@
         </div>
     </div>
 
-    <a href="setting.html" class="btn-edit"><i class="fa-solid fa-user-pen"></i> Edit Profil / Pengaturan</a>
-</div>
+    </div>
 
 <a href="main_menu.html" style="display: block; text-align: center; margin: 15px auto; text-decoration: none; color: #007bff; font-weight: bold; font-size: 14px;">
     <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu
-    </a>
+</a>
 
 <div class="footer-padding"></div>
 
@@ -121,26 +101,7 @@
         document.getElementById('dispLoc').innerText = lokasi;
     }
 
-    // Logika simulasi upload foto
-    const fileInput = document.getElementById('fileInput');
-    const defaultIcon = document.getElementById('defaultIcon');
-    const imagePreview = document.getElementById('imagePreview');
-
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                // Tampilkan preview foto
-                defaultIcon.style.display = 'none';
-                imagePreview.src = event.target.result;
-                imagePreview.style.display = 'block';
-                // Di sistem nyata, data image ini akan dikirim ke server di sini
-                alert("Foto profil telah dipilih. (Sistem simulasi upload aktif)");
-            }
-            reader.readAsDataURL(file);
-        }
-    });
+    // Logika upload foto dimatikan
 
     window.onload = loadProfileData;
 </script>
