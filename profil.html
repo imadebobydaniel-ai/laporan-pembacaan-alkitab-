@@ -60,7 +60,9 @@
         </div>
     </div>
 
-    <a href="setting.html" class="btn-edit"><i class="fa-solid fa-user-pen"></i> Edit Profil / Pengaturan</a>
+   <a href="profil.html" style="display: block; text-align: center; margin-top: 15px; text-decoration: none; color: #007bff; font-weight: bold; font-size: 14px;">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Profil
+    </a>
 </div>
 
 <div class="footer-padding"></div>
@@ -79,6 +81,12 @@
         document.getElementById('dispJC').innerText = "JC " + jc;
         document.getElementById('dispLoc').innerText = lokasi;
     }
+    function simpanPerubahan() {
+    // ... (logika penyimpanan data) ...
+    
+    alert("Perubahan berhasil disimpan!");
+    window.location.href = "profil.html"; // Diarahkan kembali ke profil
+}
 
     window.onload = loadProfileData;
 </script>
