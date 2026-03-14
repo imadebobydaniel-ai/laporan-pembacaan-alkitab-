@@ -2,17 +2,29 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Daftar Anggota Baru</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .reg-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        .reg-container h2 { text-align: center; color: #333; margin-bottom: 25px; font-size: 24px; }
+        .reg-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; box-sizing: border-box; }
+        .reg-container h2 { text-align: center; color: #333; margin-bottom: 25px; font-size: 22px; }
+        
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #444; }
         .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        .form-group input[readonly] { background-color: #f9f9f9; color: #555; font-weight: bold; }
-        .btn-submit { width: 100%; padding: 14px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
+        .form-group input[readonly] { background-color: #f9f9f9; color: #555; font-weight: bold; border: 1px solid #ddd; }
+
+        /* Container Tombol */
+        .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        
+        .btn { width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        
+        .btn-daftar { background: #007bff; color: white; }
+        .btn-batal { background: #ffc107; color: #333; }
+        .btn-kembali { background: white; color: #666; border: 1px solid #ccc; }
+
+        .btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -80,23 +92,35 @@
             </select>
         </div>
 
-        <button type="submit" class="btn-submit">Daftar Sekarang</button>
+        <div class="button-group">
+            <button type="submit" class="btn btn-daftar">
+                <i class="fa-solid fa-user-plus"></i> Daftar Sekarang
+            </button>
+            <button type="reset" class="btn btn-batal">
+                <i class="fa-solid fa-eraser"></i> Batal / Reset
+            </button>
+            <a href="index.html" class="btn btn-kembali" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Login
+            </a>
+        </div>
     </form>
 </div>
 
 <script>
     function generateNomorKomsel() {
         const jcValue = document.getElementById('jcSelect').value;
-        const nomorUrut = "001"; // Simulasi nomor urut
+        const nomorUrut = "001"; 
         const tahun = "2026";
-        
-        // Format: NK-PPP-(Nomor Urut)-(JC)-2026
         const formatNomor = `NK-PPP-${nomorUrut}-${jcValue}-${tahun}`;
         document.getElementById('nomorOtomatis').value = formatNomor;
     }
 
-    // Load nomor otomatis saat pertama kali buka
     window.onload = generateNomorKomsel;
+
+    document.getElementById('regForm').onsubmit = function(e) {
+        e.preventDefault();
+        alert("Pendaftaran Berhasil! Nomor Komsel Anda: " + document.getElementById('nomorOtomatis').value);
+    };
 </script>
 
 </body>
