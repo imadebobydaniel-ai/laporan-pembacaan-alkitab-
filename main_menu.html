@@ -3,27 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Pondok Pemulihan Papua</title>
+    <title>Menu Utama - Pondok Pemulihan Papua</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0px 4px 15px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        h2 { margin-bottom: 30px; font-weight: bold; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; }
+        .navbar { background: #007bff; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .container { padding: 20px; max-width: 1000px; margin: auto; }
+        .welcome-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .menu-item { background: white; padding: 30px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-decoration: none; color: #333; }
+        .menu-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); color: #007bff; }
+        .menu-item i { font-size: 40px; margin-bottom: 15px; color: #007bff; }
+        .btn-logout { background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Login Anggota</h2>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="prosesLogin()">Masuk Sekarang</button>
+
+<div class="navbar">
+    <div style="font-weight: bold; font-size: 18px;">Pondok Pemulihan Papua</div>
+    <button class="btn-logout" onclick="location.href='index.html'">Keluar</button>
+</div>
+
+<div class="container">
+    <div class="welcome-card">
+        <h2>Selamat Datang, Anggota!</h2>
+        <p>Sistem Informasi Komsel JC - Silakan pilih menu di bawah untuk melanjutkan.</p>
     </div>
-    <script>
-        function prosesLogin() {
-            // Logika login Abang di sini
-            alert("Mencoba masuk...");
-        }
-    </script>
+
+    <div class="menu-grid">
+        <a href="profil.html" class="menu-item">
+            <i class="fa-solid fa-user-gear"></i>
+            <h3>Profil Saya</h3>
+        </a>
+        <a href="kehadiran.html" class="menu-item">
+            <i class="fa-solid fa-calendar-check"></i>
+            <h3>Laporan Kehadiran</h3>
+        </a>
+        <a href="alkitab.html" class="menu-item">
+            <i class="fa-solid fa-book-bible"></i>
+            <h3>Baca Alkitab</h3>
+        </a>
+    </div>
+</div>
+
 </body>
 </html>
