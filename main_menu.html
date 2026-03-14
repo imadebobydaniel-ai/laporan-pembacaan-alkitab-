@@ -7,20 +7,48 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; }
-        .navbar { background: #007bff; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        /* Navbar dengan tulisan di tengah */
+        .navbar { 
+            background: #007bff; 
+            color: white; 
+            padding: 15px 20px; 
+            display: flex; 
+            justify-content: center; /* Memindahkan konten ke tengah */
+            align-items: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            position: relative;
+        }
+        
+        .navbar-title { 
+            font-weight: bold; 
+            font-size: 18px; 
+        }
+
+        .btn-logout { 
+            background: #ff4757; 
+            color: white; 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            position: absolute; /* Tetap di posisi kanan */
+            right: 20px;
+        }
+
         .container { padding: 20px; max-width: 1000px; margin: auto; }
-        .welcome-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .welcome-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; }
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
         .menu-item { background: white; padding: 30px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-decoration: none; color: #333; }
         .menu-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); color: #007bff; }
         .menu-item i { font-size: 40px; margin-bottom: 15px; color: #007bff; }
-        .btn-logout { background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="navbar">
-    <div style="font-weight: bold; font-size: 18px;">Pondok Pemulihan Papua</div>
+    <div class="navbar-title">Pondok Pemulihan Papua</div>
     <button class="btn-logout" onclick="location.href='index.html'">Keluar</button>
 </div>
 
