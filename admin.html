@@ -9,7 +9,6 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
         .admin-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 95%; margin: auto; }
         
-        /* TOMBOL KEMBALI KE LOGIN */
         .navigation-top { margin-bottom: 20px; }
         .btn-back { 
             background: #222 !important; color: #fff !important; border: 2px solid #007bff; 
@@ -21,25 +20,21 @@
 
         .header-section { display: flex; align-items: center; gap: 10px; border-bottom: 3px solid #ff0000; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px; font-weight: bold; }
         
-        /* TOOLBAR */
         .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
         .btn-tool { border: none; padding: 10px 18px; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         #btnRefresh { background: #00e676; }
         #btnEdit { background: #ffa000; }
         #btnHapus { background: #37474f; }
 
-        /* SEARCH AREA */
         .search-group { display: flex; gap: 5px; flex-grow: 1; max-width: 500px; position: relative; }
         .search-input { padding: 10px 15px; width: 100%; border: 1px solid #ccc; border-radius: 6px; }
         .btn-cari-red { background: #ff0000; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-        /* TABLE */
         .table-container { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1200px; }
         thead { background: #ff0000; color: white; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
         
-        /* WARNA SAAT EDIT */
         .sedang-diedit { background-color: #fffde7 !important; border: 2px solid orange !important; outline: none; color: black !important; }
     </style>
 </head>
@@ -83,52 +78,29 @@
                 </tr>
             </thead>
             <tbody id="badanTabel">
-    <tr>
-        <td><input type="checkbox" class="cek-baris"></td>
-        <td class="bisa-edit">Boby Daniel</td>
-        <td class="bisa-edit">boby.daniel4@gmail.com</td>
-        <td class="bisa-edit" style="color:red; font-weight:bold;">Bukadong821</td>
-        <td class="bisa-edit">081283393576</td>
-        <td class="bisa-edit">Jl. tanah Hitam Abe pantai</td>
-        <td class="bisa-edit">Ketua Komsel</td>
-        <td class="bisa-edit">JC 5</td>
-        <td class="bisa-edit">AB</td>
-    </tr>
-</tbody>
+                <tr>
+                    <td><input type="checkbox" class="cek-baris"></td>
+                    <td class="bisa-edit">Boby Daniel</td>
+                    <td class="bisa-edit">boby.daniel4@gmail.com</td>
+                    <td class="bisa-edit" style="color:red; font-weight:bold;">Bukadong821</td>
+                    <td class="bisa-edit">081283393576</td>
+                    <td class="bisa-edit">Jl. tanah Hitam Abe pantai</td>
+                    <td class="bisa-edit">Ketua Komsel</td>
+                    <td class="bisa-edit">JC 5</td>
+                    <td class="bisa-edit">AB</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <script>
-    // FUNGSI EDIT DATA
-    document.getElementById('btnEdit').onclick = function() {
-        // 1. Cari baris yang dicentang
-        let terpilih = document.querySelectorAll('.cek-baris:checked');
-        
-        // 2. Cek apakah ada yang dicentang
-        if (terpilih.length === 0) {
-            alert("Centang dulu kotak di sebelah kiri nama, Bang!");
-            return;
-        }
-
-        // 3. Proses aktifkan edit
-        terpilih.forEach(checkbox => {
-            let baris = checkbox.closest('tr');
-            let selData = baris.querySelectorAll('.bisa-edit');
-            
-            selData.forEach(td => {
-                td.contentEditable = "true"; // Ini yang bikin bisa diketik
-                td.style.backgroundColor = "#fffde7"; // Kasih warna kuning biar tahu lagi diedit
-                td.style.border = "2px solid orange";
-            });
-        });
-
-        alert("Mode Edit Aktif! Klik pada teks di tabel untuk merubah isi.");
-    };
-</script>
     // 1. FUNGSI EDIT DATA
     document.getElementById('btnEdit').onclick = function() {
         let terpilih = document.querySelectorAll('.cek-baris:checked');
         
         if (terpilih.length === 0) {
-            alert("Centang dulu kotak di sebelah kiri data, Pace!");
+            alert("Centang dulu kotak di sebelah kiri data, Bang!");
             return;
         }
 
@@ -137,8 +109,8 @@
             let selData = baris.querySelectorAll('.bisa-edit');
             
             selData.forEach(td => {
-                td.contentEditable = "true"; // Mengaktifkan mode ketik
-                td.classList.add('sedang-diedit'); // Memberi warna kuning
+                td.contentEditable = "true"; 
+                td.classList.add('sedang-diedit');
             });
         });
 
