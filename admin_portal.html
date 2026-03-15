@@ -64,14 +64,14 @@
             <tbody id="dataTable">
                 <tr>
                     <td><input type="checkbox" class="user-checkbox"></td>
-                    <td contenteditable="false">Boby Daniel</td>
-                    <td contenteditable="false">boby.daniel4@gmail.com</td>
-                    <td class="password-cell" contenteditable="false">Bukadong821</td>
-                    <td contenteditable="false">081283393576</td>
-                    <td contenteditable="false">Jl. tanah Hitam Abe pantai</td>
-                    <td contenteditable="false">Ketua Komsel</td>
-                    <td contenteditable="false">JC 5</td>
-                    <td contenteditable="false">AB</td>
+                    <td class="edit-cell">Boby Daniel</td>
+                    <td class="edit-cell">boby.daniel4@gmail.com</td>
+                    <td class="password-cell edit-cell">Bukadong821</td>
+                    <td class="edit-cell">081283393576</td>
+                    <td class="edit-cell">Jl. tanah Hitam Abe pantai</td>
+                    <td class="edit-cell">Ketua Komsel</td>
+                    <td class="edit-cell">JC 5</td>
+                    <td class="edit-cell">AB</td>
                 </tr>
             </tbody>
         </table>
@@ -79,35 +79,32 @@
 </div>
 
 <script>
-    // DATA LOGIN ADMIN: admin@pondok.com | papua123
-
-    // 1. FUNGSI EDIT DATA (DIPERBAIKI)
-    document.getElementById('btnEdit').onclick = function() {
-        const selected = document.querySelectorAll('.user-checkbox:checked');
-        if (selected.length === 0) {
-            alert("Pilih data yang ingin diedit terlebih dahulu dengan mencentang checkbox!");
-            return;
-        }
-        
-        alert("Mode Edit Aktif. Silakan langsung ubah data pada baris yang dicentang.");
-        selected.forEach(cb => {
-            const row = cb.closest('tr');
-            const cells = row.querySelectorAll('td');
-            // Aktifkan mode edit pada kolom (indeks 1 sampai 8)
-            for (let i = 1; i <= 8; i++) {
-                cells[i].contentEditable = "true";
-                cells[i].style.backgroundColor = "#fffde7"; // Tandai area yang bisa diedit
-                cells[i].style.border = "1px dashed orange";
-            }
-        });
-    };
-
-    // 2. FUNGSI REFRESH
+    // 1. FUNGSI REFRESH (AKTIF)
     document.getElementById('btnRefresh').onclick = function() {
         location.reload();
     };
 
-    // 3. FUNGSI HAPUS
+    // 2. FUNGSI EDIT DATA (AKTIF)
+    document.getElementById('btnEdit').onclick = function() {
+        const selected = document.querySelectorAll('.user-checkbox:checked');
+        if (selected.length === 0) {
+            alert("Pilih data yang ingin diedit terlebih dahulu!");
+            return;
+        }
+        
+        alert("Mode Edit Aktif. Klik langsung pada teks untuk mengubah.");
+        selected.forEach(cb => {
+            const row = cb.closest('tr');
+            const editables = row.querySelectorAll('.edit-cell');
+            editables.forEach(cell => {
+                cell.contentEditable = "true";
+                cell.style.backgroundColor = "#fffde7";
+                cell.style.border = "1px dashed #ffa000";
+            });
+        });
+    };
+
+    // 3. FUNGSI HAPUS (AKTIF)
     document.getElementById('btnHapus').onclick = function() {
         const selected = document.querySelectorAll('.user-checkbox:checked');
         if (selected.length > 0) {
@@ -119,13 +116,7 @@
         }
     };
 
-    // 4. FUNGSI CHECKALL
-    document.getElementById('checkAll').onclick = function() {
-        const checkboxes = document.querySelectorAll('.user-checkbox');
-        checkboxes.forEach(cb => cb.checked = this.checked);
-    };
-
-    // 5. FUNGSI SEARCH
+    // 4. FUNGSI SEARCH (AKTIF)
     document.getElementById('searchInput').onkeyup = function() {
         const filter = this.value.toLowerCase();
         const rows = document.querySelectorAll('#dataTable tr');
@@ -136,10 +127,17 @@
         });
     };
 
-    // 6. FUNGSI KELUAR
+    // 5. FUNGSI CHECKBOX SELECT ALL (AKTIF)
+    document.getElementById('checkAll').onclick = function() {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    };
+
+    // 6. FUNGSI KELUAR (AKTIF)
     document.getElementById('btnKeluar').onclick = function() {
         window.location.href = 'index.html';
     };
 </script>
+
 </body>
 </html>
