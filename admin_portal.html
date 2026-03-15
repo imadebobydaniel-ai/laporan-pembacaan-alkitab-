@@ -25,7 +25,7 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 13px; }
         tr:hover { background-color: #f9f9f9; }
         .password-cell { color: red; font-weight: bold; }
-        .edit-aktif { background-color: #fffde7 !important; border: 2px solid orange !important; outline: none; }
+        .editing-mode { background-color: #fffde7 !important; border: 2px solid orange !important; outline: none; }
     </style>
 </head>
 <body>
@@ -33,17 +33,17 @@
 <div class="admin-container">
     <div class="header-section">
         <div class="header-title"><i class="fa-solid fa-database"></i> Database Administrator</div>
-        <button class="btn-keluar" id="btnKeluar"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+        <button class="btn-keluar" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
     </div>
 
     <div class="toolbar">
-        <button id="btnRefresh" class="btn-tool"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        <button id="btnRefresh" class="btn-tool" onclick="window.location.reload()"><i class="fa-solid fa-rotate"></i> Refresh</button>
         <button id="btnEdit" class="btn-tool"><i class="fa-solid fa-pen-to-square"></i> Edit Data</button>
         <button id="btnHapus" class="btn-tool"><i class="fa-solid fa-trash"></i> Hapus</button>
         
         <div class="search-wrapper">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="Cari Nama atau No HP...">
+            <input type="text" id="pencarian" class="search-input" placeholder="Cari Nama atau No HP...">
         </div>
     </div>
 
@@ -51,7 +51,7 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 30px;"><input type="checkbox" id="checkAll"></th>
+                    <th style="width: 30px;"><input type="checkbox" id="pilihSemua"></th>
                     <th>Nama Lengkap</th>
                     <th>Email</th>
                     <th>Password</th>
@@ -62,17 +62,17 @@
                     <th>Gol. Darah</th>
                 </tr>
             </thead>
-            <tbody id="dataTable">
+            <tbody id="badanTabel">
                 <tr>
-                    <td><input type="checkbox" class="user-checkbox"></td>
-                    <td class="cell-data">Boby Daniel</td>
-                    <td class="cell-data">boby.daniel4@gmail.com</td>
-                    <td class="cell-data password-cell">Bukadong821</td>
-                    <td class="cell-data">081283393576</td>
-                    <td class="cell-data">Jl. tanah Hitam Abe pantai</td>
-                    <td class="cell-data">Ketua Komsel</td>
-                    <td class="cell-data">JC 5</td>
-                    <td class="cell-data">AB</td>
+                    <td><input type="checkbox" class="cek-baris"></td>
+                    <td class="data-kolom">Boby Daniel</td>
+                    <td class="data-kolom">boby.daniel4@gmail.com</td>
+                    <td class="data-kolom password-cell">Bukadong821</td>
+                    <td class="data-kolom">081283393576</td>
+                    <td class="data-kolom">Jl. tanah Hitam Abe pantai</td>
+                    <td class="data-kolom">Ketua Komsel</td>
+                    <td class="data-kolom">JC 5</td>
+                    <td class="data-kolom">AB</td>
                 </tr>
             </tbody>
         </table>
@@ -80,58 +80,56 @@
 </div>
 
 <script>
-    // --- 1. FUNGSI LOGOUT (KELUAR) ---
-    // Dipastikan pindah ke halaman login utama
-    document.getElementById('btnKeluar').onclick = function() {
-        if(confirm("Apakah Anda yakin ingin keluar?")) {
-            window.location.replace('index.html'); 
+    // 1. FUNGSI LOGOUT (PASTI JALAN)
+    document.getElementById('logoutBtn').onclick = function() {
+        if(confirm("Keluar dari Sistem Administrator?")) {
+            window.location.href = 'index.html';
         }
     };
 
-    // --- 2. FUNGSI EDIT DATA ---
-    // Begitu diklik, semua baris data bisa langsung diketik ulang
+    // 2. FUNGSI EDIT (PASTI AKTIF)
     document.getElementById('btnEdit').onclick = function() {
-        const cells = document.querySelectorAll('.cell-data');
-        cells.forEach(cell => {
-            cell.contentEditable = "true";
-            cell.classList.add('edit-aktif');
+        const dipilih = document.querySelectorAll('.cek-baris:checked');
+        if (dipilih.length === 0) {
+            alert("Centang dulu data yang mau di-edit!");
+            return;
+        }
+        dipilih.forEach(cb => {
+            const baris = cb.closest('tr');
+            const kolom = baris.querySelectorAll('.data-kolom');
+            kolom.forEach(cell => {
+                cell.contentEditable = "true";
+                cell.classList.add('editing-mode');
+            });
         });
-        alert("MODE EDIT AKTIF: Silakan langsung ubah teks di tabel.");
+        alert("Mode Edit Aktif pada baris terpilih.");
     };
 
-    // --- 3. FUNGSI SEARCH ---
-    // Filter Nama atau No HP secara real-time
-    document.getElementById('searchInput').onkeyup = function() {
-        let filter = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#dataTable tr');
-        
-        rows.forEach(row => {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.includes(filter) ? "" : "none";
-        });
-    };
-
-    // --- 4. FUNGSI HAPUS ---
-    // Menghapus baris yang dicentang
+    // 3. FUNGSI HAPUS (PASTI BERHASIL)
     document.getElementById('btnHapus').onclick = function() {
-        const selected = document.querySelectorAll('.user-checkbox:checked');
-        if (selected.length === 0) {
+        const dipilih = document.querySelectorAll('.cek-baris:checked');
+        if (dipilih.length === 0) {
             alert("Centang data yang ingin dihapus!");
             return;
         }
-        if (confirm("Hapus " + selected.length + " data?")) {
-            selected.forEach(cb => cb.closest('tr').remove());
+        if (confirm("Hapus " + dipilih.length + " data?")) {
+            dipilih.forEach(cb => cb.closest('tr').remove());
         }
     };
 
-    // --- 5. FUNGSI REFRESH ---
-    document.getElementById('btnRefresh').onclick = function() {
-        location.reload();
+    // 4. FUNGSI SEARCH (PASTI FILTER)
+    document.getElementById('pencarian').onkeyup = function() {
+        const kataKunci = this.value.toLowerCase();
+        const semuaBaris = document.querySelectorAll('#badanTabel tr');
+        semuaBaris.forEach(baris => {
+            const isiBaris = baris.innerText.toLowerCase();
+            baris.style.display = isiBaris.includes(kataKunci) ? "" : "none";
+        });
     };
 
-    // --- 6. FUNGSI CHECK ALL ---
-    document.getElementById('checkAll').onclick = function() {
-        const checkboxes = document.querySelectorAll('.user-checkbox');
+    // 5. FUNGSI CHECKBOX SELECT ALL
+    document.getElementById('pilihSemua').onclick = function() {
+        const checkboxes = document.querySelectorAll('.cek-baris');
         checkboxes.forEach(cb => cb.checked = this.checked);
     };
 </script>
