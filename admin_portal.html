@@ -25,6 +25,8 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 13px; }
         tr:hover { background-color: #f9f9f9; }
         .password-cell { color: red; font-weight: bold; }
+        /* Style tambahan saat mode edit aktif */
+        .editing { background-color: #fffde7 !important; border: 1px dashed orange !important; outline: none; }
     </style>
 </head>
 <body>
@@ -64,14 +66,14 @@
             <tbody id="dataTable">
                 <tr>
                     <td><input type="checkbox" class="user-checkbox"></td>
-                    <td class="edit-cell">Boby Daniel</td>
-                    <td class="edit-cell">boby.daniel4@gmail.com</td>
-                    <td class="password-cell edit-cell">Bukadong821</td>
-                    <td class="edit-cell">081283393576</td>
-                    <td class="edit-cell">Jl. tanah Hitam Abe pantai</td>
-                    <td class="edit-cell">Ketua Komsel</td>
-                    <td class="edit-cell">JC 5</td>
-                    <td class="edit-cell">AB</td>
+                    <td class="data-field">Boby Daniel</td>
+                    <td class="data-field">boby.daniel4@gmail.com</td>
+                    <td class="data-field password-cell">Bukadong821</td>
+                    <td class="data-field">081283393576</td>
+                    <td class="data-field">Jl. tanah Hitam Abe pantai</td>
+                    <td class="data-field">Ketua Komsel</td>
+                    <td class="data-field">JC 5</td>
+                    <td class="data-field">AB</td>
                 </tr>
             </tbody>
         </table>
@@ -79,32 +81,40 @@
 </div>
 
 <script>
-    // 1. FUNGSI REFRESH (AKTIF)
+    // 1. FUNGSI EDIT DATA (DIPERBAIKI SECARA TOTAL)
+    document.getElementById('btnEdit').addEventListener('click', function() {
+        const selected = document.querySelectorAll('.user-checkbox:checked');
+        
+        if (selected.length === 0) {
+            alert("Pilih data (centang checkbox) yang ingin diedit!");
+            return;
+        }
+
+        selected.forEach(cb => {
+            const row = cb.closest('tr');
+            const cells = row.querySelectorAll('.data-field');
+            
+            cells.forEach(cell => {
+                const isEditable = cell.contentEditable === "true";
+                if (!isEditable) {
+                    cell.contentEditable = "true";
+                    cell.classList.add('editing');
+                } else {
+                    cell.contentEditable = "false";
+                    cell.classList.remove('editing');
+                }
+            });
+        });
+        
+        alert("Mode Edit beralih. Silakan ubah data pada sel yang berwarna kuning.");
+    });
+
+    // 2. FUNGSI REFRESH
     document.getElementById('btnRefresh').onclick = function() {
         location.reload();
     };
 
-    // 2. FUNGSI EDIT DATA (AKTIF)
-    document.getElementById('btnEdit').onclick = function() {
-        const selected = document.querySelectorAll('.user-checkbox:checked');
-        if (selected.length === 0) {
-            alert("Pilih data yang ingin diedit terlebih dahulu!");
-            return;
-        }
-        
-        alert("Mode Edit Aktif. Klik langsung pada teks untuk mengubah.");
-        selected.forEach(cb => {
-            const row = cb.closest('tr');
-            const editables = row.querySelectorAll('.edit-cell');
-            editables.forEach(cell => {
-                cell.contentEditable = "true";
-                cell.style.backgroundColor = "#fffde7";
-                cell.style.border = "1px dashed #ffa000";
-            });
-        });
-    };
-
-    // 3. FUNGSI HAPUS (AKTIF)
+    // 3. FUNGSI HAPUS
     document.getElementById('btnHapus').onclick = function() {
         const selected = document.querySelectorAll('.user-checkbox:checked');
         if (selected.length > 0) {
@@ -116,7 +126,7 @@
         }
     };
 
-    // 4. FUNGSI SEARCH (AKTIF)
+    // 4. FUNGSI SEARCH
     document.getElementById('searchInput').onkeyup = function() {
         const filter = this.value.toLowerCase();
         const rows = document.querySelectorAll('#dataTable tr');
@@ -127,13 +137,13 @@
         });
     };
 
-    // 5. FUNGSI CHECKBOX SELECT ALL (AKTIF)
+    // 5. FUNGSI CHECKALL
     document.getElementById('checkAll').onclick = function() {
         const checkboxes = document.querySelectorAll('.user-checkbox');
         checkboxes.forEach(cb => cb.checked = this.checked);
     };
 
-    // 6. FUNGSI KELUAR (AKTIF)
+    // 6. FUNGSI KELUAR
     document.getElementById('btnKeluar').onclick = function() {
         window.location.href = 'index.html';
     };
