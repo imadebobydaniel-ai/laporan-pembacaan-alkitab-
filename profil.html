@@ -11,7 +11,7 @@
         .header-blue { background: #007bff; color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2em; }
         
         .photo-section { text-align: center; padding: 30px 20px; position: relative; background: #fff; }
-        .profile-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 5px solid #f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .profile-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 5px solid #f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; }
         .btn-upload { position: absolute; bottom: 95px; right: 36%; background: #007bff; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; transition: 0.3s; }
         
         .info-container { padding: 0 25px 30px; }
@@ -29,8 +29,9 @@
     <div class="header-blue">Profil Saya</div>
     
     <div class="photo-section">
-        <img src="https://via.placeholder.com/120" id="displayPhoto" class="profile-img">
+        <img src="https://via.placeholder.com/120" id="displayPhoto" class="profile-img" onclick="document.getElementById('fileInput').click();">
         <label for="fileInput" class="btn-upload"><i class="fa-solid fa-pencil"></i></label>
+        
         <input type="file" id="fileInput" accept="image/*" style="display: none;">
         
         <h3 id="p_nama" style="margin: 15px 0 5px; color: #2c3e50;">Memuat Nama...</h3>
@@ -52,7 +53,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // Konfigurasi Firebase Abang
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -64,16 +64,13 @@
         databaseURL: "https://boby-apps-project-default-rtdb.firebaseio.com"
     };
     
-    // Inisialisasi Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
     function muatDataProfil() {
-        // Ambil email user yang login (Default ke Boby jika belum login)
         let userEmail = localStorage.getItem('loggedUserEmail') || "boby.daniel4@gmail.com"; 
         const userKey = userEmail.replace(/\./g, ',');
 
-        // Tarik data dari Firebase di node 'users'
         database.ref('users/' + userKey).once('value').then((snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -89,7 +86,6 @@
                 }
             } else {
                 document.getElementById('p_nama').innerText = "Data Tidak Ditemukan";
-                console.log("Cek Firebase Abang, pastikan ada folder 'users' lalu di dalamnya ada email '" + userKey + "'");
             }
         }).catch((err) => {
             console.error(err);
@@ -97,24 +93,34 @@
         });
     }
 
-    // Fungsi Upload Foto Khusus HP
+    // Fungsi Upload Foto dengan Kompresi (Penting untuk HP)
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                const base64Image = event.target.result;
-                document.getElementById('displayPhoto').src = base64Image;
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    // Kompres ke ukuran kecil (300px) agar lancar di Firebase
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = 300;
+                    canvas.height = 300;
+                    ctx.drawImage(img, 0, 0, 300, 300);
+                    
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    document.getElementById('displayPhoto').src = compressedBase64;
 
-                let userEmail = localStorage.getItem('loggedUserEmail') || "boby.daniel4@gmail.com";
-                const userKey = userEmail.replace(/\./g, ',');
-                
-                // Simpan foto permanen ke Firebase
-                database.ref('users/' + userKey).update({
-                    fotoProfil: base64Image
-                }).then(() => {
-                    alert("Foto Berhasil Disimpan!");
-                });
+                    let userEmail = localStorage.getItem('loggedUserEmail') || "boby.daniel4@gmail.com";
+                    const userKey = userEmail.replace(/\./g, ',');
+                    
+                    database.ref('users/' + userKey).update({
+                        fotoProfil: compressedBase64
+                    }).then(() => {
+                        alert("Foto Berhasil Diperbarui!");
+                    });
+                };
             };
             reader.readAsDataURL(file);
         }
