@@ -30,12 +30,13 @@
         .search-input { padding: 10px 15px; width: 100%; border: 1px solid #ccc; border-radius: 6px; }
         .btn-cari-red { background: #ff0000; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-        .table-container { overflow-x: auto; }
+        .table-container { overflow-x: auto; background: white; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; min-width: 1200px; }
-        thead { background: #ff0000; color: white; }
+        thead { background: #ff0000; color: white; position: sticky; top: 0; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
         
         .sedang-diedit { background-color: #fffde7 !important; border: 2px solid orange !important; outline: none; color: black !important; }
+        .loading-text { text-align: center; padding: 20px; font-weight: bold; color: #666; }
     </style>
 </head>
 <body>
@@ -52,13 +53,13 @@
     </div>
 
     <div class="toolbar">
-        <button id="btnRefresh" class="btn-tool" onclick="location.reload()"><i class="fa-solid fa-rotate"></i> Refresh</button>
-        <button id="btnEdit" class="btn-tool"><i class="fa-solid fa-pen-to-square"></i> Edit Data</button>
-        <button id="btnHapus" class="btn-tool"><i class="fa-solid fa-trash"></i> Hapus</button>
+        <button id="btnRefresh" class="btn-tool" onclick="muatDataUser()"><i class="fa-solid fa-rotate"></i> Refresh Data</button>
+        <button id="btnEdit" class="btn-tool"><i class="fa-solid fa-pen-to-square"></i> Mode Edit</button>
+        <button id="btnHapus" class="btn-tool"><i class="fa-solid fa-trash"></i> Hapus Terpilih</button>
         
         <div class="search-group">
-            <input type="text" id="kotakCari" class="search-input" placeholder="Cari Nama atau No HP...">
-            <button class="btn-cari-red" onclick="jalankanCari()"><i class="fa-solid fa-magnifying-glass"></i> Cari</button>
+            <input type="text" id="kotakCari" class="search-input" placeholder="Cari Nama atau No HP..." onkeyup="jalankanCari()">
+            <button class="btn-cari-red"><i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
     </div>
 
@@ -78,31 +79,60 @@
                 </tr>
             </thead>
             <tbody id="badanTabel">
-                <tr>
-                    <td><input type="checkbox" class="cek-baris"></td>
-                    <td class="bisa-edit">Boby Daniel</td>
-                    <td class="bisa-edit">boby.daniel4@gmail.com</td>
-                    <td class="bisa-edit" style="color:red; font-weight:bold;">Bukadong821</td>
-                    <td class="bisa-edit">081283393576</td>
-                    <td class="bisa-edit">Jl. tanah Hitam Abe pantai</td>
-                    <td class="bisa-edit">Ketua Komsel</td>
-                    <td class="bisa-edit">JC 5</td>
-                    <td class="bisa-edit">AB</td>
-                </tr>
+                <tr><td colspan="9" class="loading-text">Sedang mengambil data dari server...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 <script>
-    // 1. FUNGSI EDIT DATA
+    // Konfigurasi Firebase Abang
+    const firebaseConfig = {
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+        authDomain: "boby-apps-project.firebaseapp.com",
+        projectId: "boby-apps-project",
+        storageBucket: "boby-apps-project.firebasestorage.app",
+        messagingSenderId: "125984859692",
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389",
+        databaseURL: "https://boby-apps-project-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // 1. FUNGSI AMBIL DATA DARI FIREBASE
+    function muatDataUser() {
+        const badanTabel = document.getElementById('badanTabel');
+        database.ref('users').on('value', (snapshot) => {
+            badanTabel.innerHTML = "";
+            const data = snapshot.val();
+            
+            for (let id in data) {
+                let user = data[id];
+                let baris = `
+                    <tr data-id="${id}">
+                        <td><input type="checkbox" class="cek-baris"></td>
+                        <td class="bisa-edit" data-field="nama">${user.nama || '-'}</td>
+                        <td>${user.email || '-'}</td>
+                        <td class="bisa-edit" data-field="password" style="color:red; font-weight:bold;">${user.password || '***'}</td>
+                        <td class="bisa-edit" data-field="nomorHp">${user.nomorHp || '-'}</td>
+                        <td class="bisa-edit" data-field="alamat">${user.alamat || '-'}</td>
+                        <td class="bisa-edit" data-field="jabatan">${user.jabatan || '-'}</td>
+                        <td class="bisa-edit" data-field="lokasiJc">${user.lokasiJc || '-'}</td>
+                        <td class="bisa-edit" data-field="golDarah">${user.golDarah || '-'}</td>
+                    </tr>
+                `;
+                badanTabel.innerHTML += baris;
+            }
+        });
+    }
+
+    // 2. FUNGSI EDIT DATA
     document.getElementById('btnEdit').onclick = function() {
         let terpilih = document.querySelectorAll('.cek-baris:checked');
-        
-        if (terpilih.length === 0) {
-            alert("Centang dulu kotak di sebelah kiri data, Bang!");
-            return;
-        }
+        if (terpilih.length === 0) return alert("Pilih data dulu, Bang!");
 
         terpilih.forEach(checkbox => {
             let baris = checkbox.closest('tr');
@@ -111,44 +141,49 @@
             selData.forEach(td => {
                 td.contentEditable = "true"; 
                 td.classList.add('sedang-diedit');
+                
+                // Simpan otomatis saat selesai edit (blur)
+                td.onblur = function() {
+                    const idUser = baris.getAttribute('data-id');
+                    const field = td.getAttribute('data-field');
+                    const valueBaru = td.innerText;
+                    
+                    database.ref('users/' + idUser).update({ [field]: valueBaru });
+                };
             });
         });
-
-        alert("Mode Edit Aktif! Silakan klik pada teks di tabel untuk merubahnya.");
+        alert("Mode Edit Aktif! Klik pada kotak kuning untuk merubah.");
     };
 
-    // 2. FUNGSI CARI (Berdasarkan Nama atau HP)
+    // 3. FUNGSI CARI
     function jalankanCari() {
         let input = document.getElementById('kotakCari').value.toLowerCase();
         let barisTabel = document.querySelectorAll('#badanTabel tr');
-
         barisTabel.forEach(tr => {
-            let nama = tr.cells[1].innerText.toLowerCase();
-            let hp = tr.cells[4].innerText.toLowerCase();
-
-            if (nama.includes(input) || hp.includes(input)) {
-                tr.style.display = "";
-            } else {
-                tr.style.display = "none";
-            }
+            let teks = tr.innerText.toLowerCase();
+            tr.style.display = teks.includes(input) ? "" : "none";
         });
     }
 
-    // 3. FUNGSI HAPUS
+    // 4. FUNGSI HAPUS
     document.getElementById('btnHapus').onclick = function() {
         let terpilih = document.querySelectorAll('.cek-baris:checked');
         if (terpilih.length === 0) return alert("Pilih data yang mau dihapus!");
         
-        if (confirm("Hapus data terpilih?")) {
-            terpilih.forEach(cb => cb.closest('tr').remove());
+        if (confirm("Hapus data dari server?")) {
+            terpilih.forEach(cb => {
+                const idUser = cb.closest('tr').getAttribute('data-id');
+                database.ref('users/' + idUser).remove();
+            });
         }
     };
 
-    // 4. SELECT ALL
+    // 5. SELECT ALL
     document.getElementById('pilihSemua').onclick = function() {
         document.querySelectorAll('.cek-baris').forEach(cb => cb.checked = this.checked);
     }
-</script>
 
+    window.onload = muatDataUser;
+</script>
 </body>
 </html>
