@@ -9,36 +9,38 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .login-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 320px; text-align: center; }
         .logo-container { margin-bottom: 15px; }
-        .logo-container img { width: 80px; height: auto; }
-        h2 { margin-bottom: 20px; color: #333; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .logo-container img { width: 100px; height: auto; }
+        h2 { margin-bottom: 20px; color: #333; font-size: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         .pass-wrapper { position: relative; }
-        .pass-wrapper i { position: absolute; right: 10px; top: 22px; cursor: pointer; color: #888; }
-        .btn-red { background: #ff0000; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
-        .footer-links { text-align: left; margin-top: 15px; }
-        .footer-links a { color: blue; text-decoration: none; font-weight: bold; font-size: 14px; }
+        .pass-wrapper i { position: absolute; right: 12px; top: 22px; cursor: pointer; color: #888; }
+        .btn-red { background: #ff0000; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; transition: 0.3s; }
+        .btn-red:hover { background: #cc0000; }
+        .footer-links { text-align: left; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
+        .footer-links a { color: #007bff; text-decoration: none; font-weight: bold; font-size: 14px; }
+        .footer-links a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="login-box">
     <div class="logo-container">
-        <img src="logo_pondok.png" alt="Logo">
+        <img src="logo_pondok.png" alt="Logo Pondok">
     </div>
     
-    <h2>Masuk</h2>
+    <h2>MASUK APLIKASI</h2>
     
-    <input type="email" id="email" placeholder="Masukkan email">
+    <input type="email" id="email" placeholder="Email">
     
     <div class="pass-wrapper">
-        <input type="password" id="pass" placeholder="Masukkan password">
-        <i class="fa-solid fa-eye" onclick="togglePass()"></i>
+        <input type="password" id="pass" placeholder="Password">
+        <i class="fa-solid fa-eye" id="toggleIcon" onclick="togglePass()"></i>
     </div>
     
-    <button class="btn-red" onclick="loginUser()">Masuk Sekarang</button>
+    <button class="btn-red" onclick="loginUser()">MASUK</button>
     
     <div class="footer-links">
-        <a href="registrasi.html">Daftar Baru</a>
+        <a href="registrasi.html"><i class="fa-solid fa-user-plus"></i> DAFTAR BARU</a>
     </div>
 </div>
 
@@ -61,14 +63,24 @@
 
     function togglePass() {
         const p = document.getElementById('pass');
-        p.type = p.type === "password" ? "text" : "password";
+        const icon = document.getElementById('toggleIcon');
+        if (p.type === "password") {
+            p.type = "text";
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            p.type = "password";
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
     }
 
     function loginUser() {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('pass').value;
 
-        if(!email || !pass) return alert("Isi email dan password!");
+        if(!email || !pass) {
+            alert("Email dan Password harus diisi!");
+            return;
+        }
 
         const userKey = email.replace(/\./g, ',');
         
@@ -76,16 +88,17 @@
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 if (userData.password === pass) {
-                    // Simpan email ke localStorage untuk halaman profil/setting
                     localStorage.setItem('userEmail', email);
-                    alert("Berhasil Masuk!");
+                    alert("Selamat Datang, " + userData.nama);
                     window.location.href = "main_menu.html";
                 } else {
-                    alert("Password salah!");
+                    alert("Password Salah!");
                 }
             } else {
-                alert("Email tidak terdaftar!");
+                alert("Akun tidak ditemukan. Silakan Daftar Baru.");
             }
+        }).catch((err) => {
+            alert("Error: " + err.message);
         });
     }
 </script>
