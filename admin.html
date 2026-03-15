@@ -9,31 +9,31 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
         .admin-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 95%; margin: auto; }
         
-        /* TOMBOL KEMBALI KE LOGIN */
+        /* TOMBOL KEMBALI */
         .navigation-top { margin-bottom: 20px; }
         .btn-back { 
-            background: #222 !important; 
-            color: #fff !important; 
-            border: 2px solid #007bff; 
-            padding: 12px 25px; 
-            border-radius: 50px; 
-            cursor: pointer; 
-            text-decoration: none; 
-            font-size: 16px; 
-            font-weight: bold; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 10px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: 0.3s;
+            background: #222 !important; color: #fff !important; border: 2px solid #007bff; 
+            padding: 10px 20px; border-radius: 50px; cursor: pointer; text-decoration: none; 
+            font-size: 14px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.3s;
         }
         .btn-back:hover { background: #007bff !important; transform: translateX(-5px); }
 
+        /* HEADER & TOOLBAR */
         .header-section { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #ff0000; padding-bottom: 15px; margin-bottom: 25px; }
+        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn-tool { border: none; padding: 10px 18px; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        #btnRefresh { background: #00e676; }
+        #btnEdit { background: #ffa000; }
+        #btnHapus { background: #37474f; }
+        .search-input { padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 6px; flex-grow: 1; }
+
+        /* TABEL DESIGN */
         .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
         thead { background: #ff0000; color: white; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
+        .sedang-diedit { background-color: #fffde7 !important; border: 2px solid orange !important; outline: none; color: black !important; }
     </style>
 </head>
 <body>
@@ -49,27 +49,82 @@
         <div style="font-size: 24px; font-weight: bold;"><i class="fa-solid fa-database"></i> Database Administrator</div>
     </div>
 
+    <div class="toolbar">
+        <button id="btnRefresh" class="btn-tool" onclick="location.reload()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        <button id="btnEdit" class="btn-tool"><i class="fa-solid fa-pen-to-square"></i> Edit Data</button>
+        <button id="btnHapus" class="btn-tool"><i class="fa-solid fa-trash"></i> Hapus</button>
+        <input type="text" id="kotakCari" class="search-input" placeholder="Cari Nama atau Data...">
+    </div>
+
     <div class="table-container">
         <table>
             <thead>
                 <tr>
+                    <th style="width: 20px;"><input type="checkbox" id="pilihSemuaData"></th>
                     <th>Nama Lengkap</th>
                     <th>Email</th>
+                    <th>Password</th>
+                    <th>Nomor HP</th>
+                    <th>Alamat</th>
                     <th>Jabatan</th>
                     <th>Lokasi JC</th>
+                    <th>Gol. Darah</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="badanTabel">
                 <tr>
-                    <td>Boby Daniel</td>
-                    <td>boby.daniel4@gmail.com</td>
-                    <td>Ketua Komsel</td>
-                    <td>JC 5</td>
+                    <td><input type="checkbox" class="cek-baris"></td>
+                    <td class="edit-teks">Boby Daniel</td>
+                    <td class="edit-teks">boby.daniel4@gmail.com</td>
+                    <td class="edit-teks" style="color:red; font-weight:bold;">Bukadong821</td>
+                    <td class="edit-teks">081283393576</td>
+                    <td class="edit-teks">Jl. tanah Hitam Abe pantai</td>
+                    <td class="edit-teks">Ketua Komsel</td>
+                    <td class="edit-teks">JC 5</td>
+                    <td class="edit-teks">AB</td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    // FUNGSI CARI
+    document.getElementById('kotakCari').onkeyup = function() {
+        let filter = this.value.toLowerCase();
+        document.querySelectorAll('#badanTabel tr').forEach(tr => {
+            tr.style.display = tr.innerText.toLowerCase().includes(filter) ? "" : "none";
+        });
+    };
+
+    // FUNGSI EDIT
+    document.getElementById('btnEdit').onclick = function() {
+        let terpilih = document.querySelectorAll('.cek-baris:checked');
+        if (terpilih.length === 0) return alert("Pilih data yang mau diedit dulu, Bang!");
+        terpilih.forEach(cb => {
+            let row = cb.closest('tr');
+            row.querySelectorAll('.edit-teks').forEach(td => {
+                td.contentEditable = "true";
+                td.classList.add('sedang-diedit');
+            });
+        });
+        alert("Mode Edit Aktif! Silakan ubah langsung di tabel.");
+    };
+
+    // FUNGSI HAPUS
+    document.getElementById('btnHapus').onclick = function() {
+        let terpilih = document.querySelectorAll('.cek-baris:checked');
+        if (terpilih.length === 0) return alert("Pilih data yang mau dihapus!");
+        if (confirm("Yakin mau hapus data ini?")) {
+            terpilih.forEach(cb => cb.closest('tr').remove());
+        }
+    };
+
+    // SELECT ALL
+    document.getElementById('pilihSemuaData').onclick = function() {
+        document.querySelectorAll('.cek-baris').forEach(cb => cb.checked = this.checked);
+    };
+</script>
 
 </body>
 </html>
