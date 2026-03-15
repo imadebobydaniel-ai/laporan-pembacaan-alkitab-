@@ -9,25 +9,29 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
         .admin-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 95%; margin: auto; }
         
-        /* DESAIN TOMBOL BACK KE LOGIN */
+        /* TOMBOL KEMBALI KE LOGIN */
         .navigation-top { margin-bottom: 20px; }
         .btn-back { 
-            background: #333; 
-            color: white; 
+            background: #222 !important; 
+            color: #fff !important; 
+            border: 2px solid #007bff; 
+            padding: 12px 25px; 
+            border-radius: 50px; 
+            cursor: pointer; 
             text-decoration: none; 
-            padding: 10px 20px; 
-            border-radius: 8px; 
+            font-size: 16px; 
             font-weight: bold; 
             display: inline-flex; 
             align-items: center; 
-            gap: 10px;
+            gap: 10px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: 0.3s;
         }
-        .btn-back:hover { background: #007bff; }
+        .btn-back:hover { background: #007bff !important; transform: translateX(-5px); }
 
-        /* Style Tabel dan Header */
         .header-section { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #ff0000; padding-bottom: 15px; margin-bottom: 25px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
         thead { background: #ff0000; color: white; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; }
     </style>
@@ -37,32 +41,34 @@
 <div class="admin-container">
     <div class="navigation-top">
         <a href="index.html" class="btn-back">
-            <i class="fa-solid fa-arrow-left"></i> KEMBALI KE HALAMAN LOGIN
+            <i class="fa-solid fa-circle-arrow-left"></i> KEMBALI KE LOGIN
         </a>
     </div>
 
     <div class="header-section">
-        <h2><i class="fa-solid fa-database"></i> Database Administrator</h2>
+        <div style="font-size: 24px; font-weight: bold;"><i class="fa-solid fa-database"></i> Database Administrator</div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nama Lengkap</th>
-                <th>Email</th>
-                <th>Jabatan</th>
-                <th>Lokasi JC</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Boby Daniel</td>
-                <td>boby.daniel4@gmail.com</td>
-                <td>Ketua Komsel</td>
-                <td>JC 5</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama Lengkap</th>
+                    <th>Email</th>
+                    <th>Jabatan</th>
+                    <th>Lokasi JC</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Boby Daniel</td>
+                    <td>boby.daniel4@gmail.com</td>
+                    <td>Ketua Komsel</td>
+                    <td>JC 5</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 </body>
