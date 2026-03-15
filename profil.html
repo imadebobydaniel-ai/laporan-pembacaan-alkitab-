@@ -1,176 +1,81 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Profil Saya - Pondok Pemulihan Papua</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+<div class="profile-card">
+    <div class="header-blue">Profil Saya</div>
+    
+    <div class="photo-section">
+        <img src="https://via.placeholder.com/100" id="displayPhoto" class="profile-img" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #eee;">
         
-        .navbar { background: #007bff; color: white; padding: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        <label for="fileInput" class="btn-upload" style="position: absolute; bottom: 25px; right: 38%; background: #007bff; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid white;">
+            <i class="fa-solid fa-pencil"></i>
+        </label>
         
-        .container { padding: 20px; flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .profile-header { margin-bottom: 25px; width: 100%; }
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
         
-        /* Container Foto & Pensil */
-        .profile-pic-container {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 10px;
-        }
+        <h3 id="p_nama" style="margin: 10px 0 5px;">Memuat Nama...</h3>
+        <p id="p_jabatan" style="color: #666; font-size: 13px; margin: 0;">Memuat Jabatan...</p>
+    </div>
 
-        .profile-pic { 
-            width: 100%; 
-            height: 100%; 
-            background: #ddd; 
-            border-radius: 50%; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            border: 4px solid white; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            overflow: hidden; 
-        }
-
-        #imagePreview { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            display: none; 
-        }
-
-        .profile-pic i.fa-user { font-size: 50px; color: #666; }
-        
-        /* Simbol Pensil Edit */
-        .edit-pic-icon {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: #007bff;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 14px;
-            border: 2px solid white;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        .info-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: left; width: 100%; max-width: 400px; box-sizing: border-box; }
-        .info-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
-        .info-item:last-child { border-bottom: none; }
-        .info-label { font-size: 11px; color: #888; font-weight: bold; text-transform: uppercase; }
-        .info-value { font-size: 14px; color: #333; font-weight: bold; }
-        
-        /* Tombol Kembali Presisi */
-        .btn-back-container { width: 100%; max-width: 400px; margin-top: 25px; }
-        .btn-back-profil {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 12px;
-            background-color: white;
-            color: #007bff;
-            border: 2px solid #007bff;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        
-        .footer-padding { background: #007bff; height: 50px; width: 100%; margin-top: auto; }
-        #fileInput { display: none; }
-    </style>
-</head>
-<body>
-
-<div class="navbar">
-    <div style="font-weight: bold;">Profil Saya</div>
-</div>
-
-<div class="container">
-    <div class="profile-header">
-        <div class="profile-pic-container">
-            <div class="profile-pic" id="picBox">
-                <i class="fa-solid fa-user" id="defaultIcon"></i>
-                <img id="imagePreview">
-            </div>
-            <label for="fileInput" class="edit-pic-icon">
-                <i class="fa-solid fa-pencil"></i>
-            </label>
-            <input type="file" id="fileInput" accept="image/*">
+    <div class="info-container" style="padding: 0 20px 20px;">
+        <div class="info-item" style="border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between;">
+            <span class="label" style="color: #888; font-size: 12px; text-transform: uppercase;">Email</span>
+            <span class="value" id="p_email" style="font-weight: 600; font-size: 14px;">-</span>
         </div>
-        <h2 id="dispName" style="margin: 5px 0; font-size: 18px;">Memuat...</h2>
-        <p id="dispRole" style="margin: 0; color: #666; font-size: 13px;">Anggota Komsel</p>
+        <div class="info-item" style="border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between;">
+            <span class="label" style="color: #888; font-size: 12px; text-transform: uppercase;">Nomor HP</span>
+            <span class="value" id="p_hp" style="font-weight: 600; font-size: 14px;">-</span>
+        </div>
+        <div class="info-item" style="border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between;">
+            <span class="label" style="color: #888; font-size: 12px; text-transform: uppercase;">Lokasi JC</span>
+            <span class="value" id="p_jc" style="font-weight: 600; font-size: 14px;">-</span>
+        </div>
+        <div class="info-item" style="border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between;">
+            <span class="label" style="color: #888; font-size: 12px; text-transform: uppercase;">Gol. Darah</span>
+            <span class="value" id="p_goldar" style="font-weight: 600; font-size: 14px;">-</span>
+        </div>
+        <div class="info-item" style="border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between;">
+            <span class="label" style="color: #888; font-size: 12px; text-transform: uppercase;">Status</span>
+            <span class="value" style="color: #28a745; font-weight: bold; font-size: 14px;">Aktif</span>
+        </div>
     </div>
 
-    <div class="info-card">
-        <div class="info-item"><span class="info-label">Email</span><span class="info-value" id="dispEmail">-</span></div>
-        <div class="info-item"><span class="info-label">Nomor Komsel</span><span class="info-value" id="dispJC">-</span></div>
-        <div class="info-item"><span class="info-label">Lokasi Ibadah</span><span class="info-value" id="dispLoc">-</span></div>
-        <div class="info-item"><span class="info-label">Status</span><span class="info-value" style="color: #28a745;">Aktif</span></div>
-    </div>
-
-    <div class="btn-back-container">
-        <a href="main_menu.html" class="btn-back-profil">
-            <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu
-        </a>
-    </div>
+    <a href="main_menu.html" style="display: block; width: 90%; margin: 10px auto 20px; padding: 12px; text-align: center; border: 2px solid #007bff; color: #007bff; text-decoration: none; border-radius: 8px; font-weight: bold;">← Kembali ke Menu</a>
 </div>
-
-<div class="footer-padding"></div>
 
 <script>
-    // Fungsi memuat data dan foto yang tersimpan
-    function loadProfile() {
-        document.getElementById('dispName').innerText = localStorage.getItem('nama_login') || "Pengguna";
-        document.getElementById('dispEmail').innerText = localStorage.getItem('email_login') || "anggota@pondok.com";
-        document.getElementById('dispJC').innerText = "JC " + (localStorage.getItem('jc_login') || "-");
-        document.getElementById('dispLoc').innerText = localStorage.getItem('lokasi_ibadah') || "Belum diatur";
+    // FUNGSI 1: AMBIL DATA DARI DATABASE LOKAL (BIODATA LENGKAP)
+    function muatDataProfil() {
+        // Ambil data user yang sedang login
+        const dataUser = JSON.parse(localStorage.getItem('userSession')); 
+        
+        if (dataUser) {
+            document.getElementById('p_nama').innerText = dataUser.nama || "User";
+            document.getElementById('p_email').innerText = dataUser.email || "-";
+            document.getElementById('p_jabatan').innerText = dataUser.jabatan || "Anggota";
+            document.getElementById('p_hp').innerText = dataUser.hp || "-";
+            document.getElementById('p_jc').innerText = dataUser.jc || "-";
+            document.getElementById('p_goldar').innerText = dataUser.goldar || "-";
+        }
 
-        // Cek jika ada foto yang tersimpan di memori
-        const savedPhoto = localStorage.getItem('user_photo');
-        if (savedPhoto) {
-            document.getElementById('defaultIcon').style.display = 'none';
-            const img = document.getElementById('imagePreview');
-            img.src = savedPhoto;
-            img.style.display = 'block';
+        // Ambil Foto Profil
+        const fotoTersimpan = localStorage.getItem('userPhoto');
+        if (fotoTersimpan) {
+            document.getElementById('displayPhoto').src = fotoTersimpan;
         }
     }
 
-    // Fungsi Upload dan Simpan Foto
+    // FUNGSI 2: UPLOAD FOTO PROFIL (BIAR BISA DI HP)
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                const base64Image = event.target.result;
-                
-                // Tampilkan langsung
-                document.getElementById('defaultIcon').style.display = 'none';
-                const img = document.getElementById('imagePreview');
-                img.src = base64Image;
-                img.style.display = 'block';
-
-                // Simpan ke localStorage agar permanen di HP user
-                localStorage.setItem('user_photo', base64Image);
-                alert("Foto profil berhasil diperbarui!");
+                const fotoBase64 = event.target.result;
+                document.getElementById('displayPhoto').src = fotoBase64;
+                localStorage.setItem('userPhoto', fotoBase64); // Simpan permanen di HP
             };
             reader.readAsDataURL(file);
         }
     });
 
-    window.onload = loadProfile;
+    // Jalankan saat halaman dibuka
+    window.onload = muatDataProfil;
 </script>
-
-</body>
-</html>
