@@ -104,7 +104,7 @@
 
 <div id="editModal" class="modal-overlay">
     <div class="modal-content">
-        <div class="modal-header">EDIT DATA ANGGOTA</div>
+        <div class="modal-header">EDIT DATA ANGGOTA (ADMIN FULL CONTROL)</div>
         <div class="modal-body">
             <input type="hidden" id="edit_id">
             <div class="form-group">
@@ -120,8 +120,8 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Email (Tidak bisa diubah)</label>
-                <input type="email" id="edit_email" readonly style="background:#f9f9f9;">
+                <label>Email</label>
+                <input type="email" id="edit_email">
             </div>
             <div class="form-group">
                 <label>Password</label>
@@ -226,6 +226,7 @@
         const dataBaru = {
             nama: document.getElementById('edit_nama').value,
             jabatan: document.getElementById('edit_jabatan').value,
+            email: document.getElementById('edit_email').value, // FULL CONTROL: Email ikut disimpan
             password: document.getElementById('edit_pass').value,
             nomor_hp: document.getElementById('edit_hp').value,
             komsel: document.getElementById('edit_jc').value,
