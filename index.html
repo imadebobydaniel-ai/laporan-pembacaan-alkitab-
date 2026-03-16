@@ -99,8 +99,15 @@
                 const userData = doc.data();
                 if (userData.password === passwordInput) {
                     loginBerhasil = true;
+
+                    // SIMPAN DATA AGAR MUNCUL DI MAIN MENU
+                    localStorage.setItem('nama_login', userData.nama);
+                    localStorage.setItem('jc_login', userData.komsel || "-");
+
                     alert("Login Berhasil! Selamat Datang " + userData.nama);
-                    window.location.href = "dashboard.html"; 
+                    
+                    // PERBAIKAN: Tujuannya sekarang ke main_menu.html
+                    window.location.href = "main_menu.html"; 
                 }
             });
 
