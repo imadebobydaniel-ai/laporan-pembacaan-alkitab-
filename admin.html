@@ -89,6 +89,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+    // Konfigurasi Firebase tetap sama
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -100,16 +101,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 1. FUNGSI AMBIL DATA (Diubah ke .get() agar tidak refresh otomatis saat sedang diedit)
+    // 1. AMBIL DATA (Sekali ambil, tidak auto-refresh agar tidak bentrok saat edit)
     function muatDataUser() {
         const badanTabel = document.getElementById('badanTabel');
-        
         db.collection("users").get().then((querySnapshot) => {
             badanTabel.innerHTML = "";
-            if (querySnapshot.empty) {
-                badanTabel.innerHTML = "<tr><td colspan='9' class='loading-text'>Tidak ada data ditemukan.</td></tr>";
-                return;
-            }
             querySnapshot.forEach((doc) => {
                 let user = doc.data();
                 let id = doc.id;
@@ -124,17 +120,13 @@
                         <td class="bisa-edit" data-field="jabatan">${user.jabatan || '-'}</td>
                         <td class="bisa-edit" data-field="komsel">${user.komsel || '-'}</td>
                         <td class="bisa-edit" data-field="gol_darah">${user.gol_darah || '-'}</td>
-                    </tr>
-                `;
+                    </tr>`;
                 badanTabel.innerHTML += baris;
             });
-        }).catch((error) => {
-            console.error("Error: ", error);
-            badanTabel.innerHTML = "<tr><td colspan='9' class='loading-text'>Gagal mengambil data.</td></tr>";
         });
     }
 
-    // 2. FUNGSI EDIT DATA (Kunci ID User dan Kirim ke Firestore)
+    // 2. MODE EDIT & SIMPAN OTOMATIS
     document.getElementById('btnEdit').onclick = function() {
         let terpilih = document.querySelectorAll('.cek-baris:checked');
         if (terpilih.length === 0) return alert("Pilih data dulu, Bang!");
@@ -148,52 +140,41 @@
                 td.contentEditable = "true"; 
                 td.classList.add('sedang-diedit');
                 
+                // Simpan saat klik di luar kotak (blur)
                 td.onblur = function() {
                     const field = td.getAttribute('data-field');
                     const valueBaru = td.innerText.trim();
                     
                     db.collection("users").doc(idUser).update({
                         [field]: valueBaru
-                    })
-                    .then(() => {
-                        console.log("Berhasil simpan: " + field);
-                        td.style.backgroundColor = "#e8f5e9"; // Hijau muda menandakan tersimpan
-                    })
-                    .catch(err => {
-                        alert("Gagal Simpan ke Firebase: " + err.message);
+                    }).then(() => {
+                        td.style.backgroundColor = "#d4edda"; // Warna hijau tanda sukses
                     });
                 };
             });
         });
-        alert("Mode Edit Aktif! Silakan ubah data di kotak kuning, lalu klik di luar kotak untuk menyimpan.");
+        alert("Mode Edit Aktif! Klik kotak kuning, ubah, lalu klik di luar kotak untuk simpan.");
     };
 
-    // 3. FUNGSI CARI
+    // 3. CARI DATA
     function jalankanCari() {
         let input = document.getElementById('kotakCari').value.toLowerCase();
-        let barisTabel = document.querySelectorAll('#badanTabel tr');
-        barisTabel.forEach(tr => {
-            let teks = tr.innerText.toLowerCase();
-            tr.style.display = teks.includes(input) ? "" : "none";
+        document.querySelectorAll('#badanTabel tr').forEach(tr => {
+            tr.style.display = tr.innerText.toLowerCase().includes(input) ? "" : "none";
         });
     }
 
-    // 4. FUNGSI HAPUS
+    // 4. HAPUS DATA
     document.getElementById('btnHapus').onclick = function() {
         let terpilih = document.querySelectorAll('.cek-baris:checked');
-        if (terpilih.length === 0) return alert("Pilih data yang mau dihapus!");
-        
-        if (confirm("Hapus data dari server?")) {
-            terpilih.forEach(cb => {
-                const idUser = cb.closest('tr').getAttribute('data-id');
-                db.collection("users").doc(idUser).delete().then(() => {
-                    cb.closest('tr').remove();
-                });
-            });
-        }
+        if (terpilih.length === 0 || !confirm("Hapus data terpilih?")) return;
+        terpilih.forEach(cb => {
+            const id = cb.closest('tr').getAttribute('data-id');
+            db.collection("users").doc(id).delete().then(() => cb.closest('tr').remove());
+        });
     };
 
-    // 5. SELECT ALL
+    // 5. PILIH SEMUA
     document.getElementById('pilihSemua').onclick = function() {
         document.querySelectorAll('.cek-baris').forEach(cb => cb.checked = this.checked);
     }
