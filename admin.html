@@ -134,27 +134,37 @@
         });
     }
 
-    // 2. FUNGSI EDIT DATA
+ // 2. FUNGSI EDIT DATA
     document.getElementById('btnEdit').onclick = function() {
         let terpilih = document.querySelectorAll('.cek-baris:checked');
         if (terpilih.length === 0) return alert("Pilih data dulu, Bang!");
 
         terpilih.forEach(checkbox => {
             let baris = checkbox.closest('tr');
+            let idUser = baris.getAttribute('data-id'); // Ambil ID di sini agar tidak hilang
             let selData = baris.querySelectorAll('.bisa-edit');
             
             selData.forEach(td => {
                 td.contentEditable = "true"; 
                 td.classList.add('sedang-diedit');
                 
+                // Menghapus event lama agar tidak tumpang tindih
+                td.onblur = null; 
+                
                 td.onblur = function() {
-                    const idUser = baris.getAttribute('data-id');
                     const field = td.getAttribute('data-field');
-                    const valueBaru = td.innerText;
+                    const valueBaru = td.innerText.trim();
                     
-                    db.collection("users").doc(idUser).update({ [field]: valueBaru })
-                    .then(() => console.log("Berhasil Update"))
-                    .catch(err => alert("Gagal Simpan: " + err));
+                    // Eksekusi langsung ke dokumen Firestore yang spesifik
+                    db.collection("users").doc(idUser).update({
+                        [field]: valueBaru
+                    })
+                    .then(() => {
+                        console.log("Field " + field + " berhasil diupdate.");
+                    })
+                    .catch(err => {
+                        alert("Gagal Simpan: " + err.message);
+                    });
                 };
             });
         });
