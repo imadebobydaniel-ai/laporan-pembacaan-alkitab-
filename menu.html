@@ -23,7 +23,12 @@
     </style>
 </head>
 <body>
-    <div class="top-bar"><div id="digital-clock">00:00:00</div><div class="system-title">SISTEM INFORMASI KOMSEL</div></div>
+
+    <div class="top-bar">
+        <div id="digital-clock">00:00:00</div>
+        <div class="system-title">SISTEM INFORMASI KOMSEL</div>
+    </div>
+
     <div class="container">
         <h3 class="org-title">PONDOK PEMULIHAN PAPUA</h3>
         <div class="profile-section">
@@ -31,6 +36,7 @@
             <h2 id="disp_nama">Memuat...</h2>
             <p id="disp_komsel">Memuat Data Komsel...</p>
         </div>
+
         <div class="menu-grid">
             <a href="#" class="menu-box"><i class="fa-solid fa-user-gear"></i>Profil Saya</a>
             <a href="#" class="menu-box"><i class="fa-solid fa-calendar-check"></i>Kehadiran</a>
@@ -41,47 +47,29 @@
             <a href="#" class="menu-box"><i class="fa-solid fa-location-dot"></i>Lacak Domba</a>
             <a href="javascript:location.reload()" class="menu-box" style="color: #28a745;"><i class="fa-solid fa-rotate"></i>Refresh</a>
         </div>
-        <a href="index.html" class="btn-back-login"><i class="fa-solid fa-circle-arrow-left"></i> KEMBALI KE LOGIN</a>
+
+        <a href="index.html" class="btn-back-login" onclick="localStorage.clear()"><i class="fa-solid fa-circle-arrow-left"></i> KEMBALI KE LOGIN</a>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
-            authDomain: "boby-apps-project.firebaseapp.com",
-            projectId: "boby-apps-project",
-            storageBucket: "boby-apps-project.firebasestorage.app",
-            messagingSenderId: "125984859692",
-            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Jam Aktif
-        setInterval(() => {
+        // JAM AKTIF
+        function updateTime() {
             const now = new Date();
             document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID') + " WIT";
-        }, 1000);
-
-        // Ambil data Email yang tadi disimpan saat Daftar/Login
-        const loginEmail = localStorage.getItem("userEmail");
-
-        async function fetchProfile() {
-            if (!loginEmail) { 
-                window.location.href = "index.html"; 
-                return; 
-            }
-            try {
-                const query = await db.collection("users").where("email", "==", loginEmail).get();
-                if (!query.empty) {
-                    const user = query.docs[0].data();
-                    document.getElementById('disp_nama').innerText = user.nama;
-                    document.getElementById('disp_komsel').innerText = "KOMSEL " + user.komsel;
-                }
-            } catch (err) { console.log(err); }
         }
-        fetchProfile();
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // TAMPILKAN DATA
+        const nama = localStorage.getItem("userName");
+        const komsel = localStorage.getItem("userKomsel");
+
+        if (nama) {
+            document.getElementById('disp_nama').innerText = nama;
+            document.getElementById('disp_komsel').innerText = "KOMSEL " + komsel;
+        } else {
+            window.location.href = "index.html";
+        }
     </script>
 </body>
 </html>
