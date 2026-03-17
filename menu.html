@@ -109,17 +109,24 @@
 
     <script>
         // Fungsi Tanggal Otomatis (Hari, Tanggal Bulan Tahun)
-        function updateTanggal() {
-            const now = new Date();
-            const opsi = { 
-                weekday: 'long', 
-                day: '2-digit', 
-                month: 'long', 
-                year: 'numeric' 
-            };
-            const tanggalLengkap = now.toLocaleDateString('id-ID', opsi);
-            document.getElementById('display-tanggal').innerText = tanggalLengkap;
-        }
+       function updateWaktu() {
+        const now = new Date();
+        
+        // 1. Update Tanggal (Kiri)
+        const opsiTanggal = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
+        document.getElementById('display-tanggal').innerText = now.toLocaleDateString('id-ID', opsiTanggal);
+
+        // 2. Update Jam Digital (Kanan - Samping Setting)
+        const jam = String(now.getHours()).padStart(2, '0');
+        const menit = String(now.getMinutes()).padStart(2, '0');
+        const detik = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('digital-clock').innerText = `${jam}:${menit}:${detik} WIT`;
+    }
+
+    // Jalankan setiap 1 detik agar jam berdetak
+    setInterval(updateWaktu, 1000);
+    updateWaktu(); // Jalankan langsung saat halaman dimuat
+</script>
 
         // Ambil data User dari LocalStorage
         function loadUserData() {
