@@ -81,7 +81,12 @@
         updateClock();
         setInterval(updateClock, 1000);
         loadUserData();
-        if (window.location.href.includes('menu.html')) { window.history.replaceState(null, null,'menu.html'); }
+        
+        // Perbaikan: Hanya jalankan replaceState jika URL mengandung '.html' 
+        // agar history browser lebih bersih
+        if (window.location.pathname.includes('main_menu.html')) { 
+            window.history.replaceState(null, null, 'menu.html'); 
+        }
     };
 </script>
 </body>
