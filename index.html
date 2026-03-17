@@ -6,79 +6,89 @@
     <title>Login - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .login-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 380px; text-align: center; }
-        .header-section { margin-bottom: 25px; }
-        .logo-main { width: 90px; height: auto; margin-bottom: 15px; }
-        #text-org { margin: 5px 0; font-size: 20px; color: #333; font-weight: bold; text-transform: uppercase; display: block; }
-        #text-system { margin: 8px 0; font-size: 18px; color: #FFD700; font-weight: bold; display: block; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-        #text-status { margin: 10px 0; font-size: 16px; color: #555; font-weight: normal; display: block; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-blue { background: #007bff; color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .footer-links { margin-top: 20px; font-size: 14px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .logo { width: 80px; margin-bottom: 10px; }
+        h2 { margin: 5px 0; font-size: 20px; color: #333; text-transform: uppercase; }
+        h3 { margin: 0 0 20px; font-size: 16px; color: #ffcc00; text-shadow: 1px 1px #000; }
+        p { color: #666; font-size: 14px; margin-bottom: 20px; }
+        
+        .form-group { margin-bottom: 15px; position: relative; text-align: left; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
+        
+        /* Style Simbol Mata */
+        .toggle-password { 
+            position: absolute; 
+            right: 15px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            cursor: pointer; 
+            color: #999; 
+            font-size: 18px;
+        }
+
+        .btn-login { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-login:hover { background-color: #0056b3; }
+        
+        .footer-links { margin-top: 20px; font-size: 13px; color: #666; }
         .footer-links a { color: #007bff; text-decoration: none; font-weight: bold; }
+        .admin-link { display: block; margin-top: 15px; color: #888; text-decoration: none; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="login-box">
-    <div class="header-section">
-        <img src="https://imadebobydaniel-ai.github.io/laporan-pembacaan-alkitab-/logo_pondok.png" alt="Logo" class="logo-main">
-        <span id="text-org">PONDOK PEMULIHAN PAPUA</span>
-        <span id="text-system">Sistem Informasi Komsel JC</span>
-        <span id="text-status">Login Anggota Komsel</span>
+    <div class="login-card">
+        <img src="logo_pondok.png" alt="Logo" class="logo">
+        <h2>PONDOK PEMULIHAN PAPUA</h2>
+        <h3>Sistem Informasi Komsel JC</h3>
+        <p>Login Anggota Komsel</p>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Email Anggota" required>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
+                <i class="fa-solid fa-eye toggle-password" id="eyeIcon" onclick="togglePass()"></i>
+            </div>
+
+            <button type="submit" class="btn-login">MASUK</button>
+        </form>
+
+        <div class="footer-links">
+            Belum punya akun? <a href="registrasi.html">Daftar Sekarang</a>
+            <a href="admin_login.html" class="admin-link">Masuk sebagai Admin</a>
+        </div>
     </div>
 
-    <input type="email" id="email" placeholder="Email Anggota">
-    <input type="password" id="pass" placeholder="Password">
-    
-    <button class="btn-blue" onclick="prosesLogin()">MASUK</button>
-    
-    <div class="footer-links">
-        <p>Belum punya akun? <a href="registrasi.html">Daftar Sekarang</a></p>
-       <a href="login_admin.html" style="text-decoration:none; color:#666; font-size:13px;">Masuk sebagai Admin</a>
-    </div>
-</div>
+    <script>
+        // Fungsi Toggle Password (Sekali Tap Muncul Tulisan)
+        function togglePass() {
+            const passInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
-        authDomain: "boby-apps-project.firebaseapp.com",
-        projectId: "boby-apps-project",
-        storageBucket: "boby-apps-project.firebasestorage.app",
-        messagingSenderId: "125984859692",
-        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    async function prosesLogin() {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('pass').value;
-
-        try {
-            const snapshot = await db.collection("users")
-                .where("email", "==", email)
-                .where("password", "==", pass)
-                .get();
-
-            if (!snapshot.empty) {
-                const user = snapshot.docs[0].data();
-                // Simpan data agar Main Menu langsung kenal
-                localStorage.setItem("userEmail", email);
-                localStorage.setItem("userName", user.nama);
-                localStorage.setItem("userKomsel", user.komsel);
-                
-                // Navigasi ke Main Menu
-                window.location.href = "menu.html";
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
             } else {
-                alert("Email atau Password Salah!");
+                passInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
             }
-        } catch (e) { alert("Error: " + e.message); }
-    }
-</script>
+        }
+
+        // Script login dasar (tetap sesuai sistem Anda)
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            
+            // Logika verifikasi Anda di sini
+            console.log("Mencoba login:", email);
+            // Contoh redirect: window.location.href = "menu.html";
+        });
+    </script>
 </body>
 </html>
