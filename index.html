@@ -14,6 +14,7 @@
         .btn-login { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .btn-login:hover { background: #0056b3; }
         .admin-link { margin-top: 15px; display: block; font-size: 12px; color: #666; text-decoration: none; }
+        .reg-link { margin-top: 10px; display: block; font-size: 13px; color: #007bff; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -26,28 +27,59 @@
     <input type="email" id="userEmail" placeholder="Email Anggota">
     <input type="password" id="userPass" placeholder="Password">
     <button class="btn-login" onclick="loginUser()">MASUK</button>
-    <a href="login.html" class="admin-link">Masuk sebagai Admin</a>
+    
+    <a href="registrasi.html" class="reg-link">Belum punya akun? Daftar Sekarang</a>
+    
+    <a href="login_admin.html" class="admin-link">Masuk sebagai Admin</a>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 <script>
+    // Konfigurasi Firebase Abang
+    const firebaseConfig = {
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+        authDomain: "boby-apps-project.firebaseapp.com",
+        projectId: "boby-apps-project",
+        storageBucket: "boby-apps-project.firebasestorage.app",
+        messagingSenderId: "125984859692",
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     function loginUser() {
         const email = document.getElementById('userEmail').value;
         const pass = document.getElementById('userPass').value;
 
-        // Validasi login (Silakan sesuaikan jika ada pass khusus)
-        if (email !== "" && pass !== "") {
-            localStorage.setItem('email_login', email);
-            localStorage.setItem('nama_login', "Anggota Komsel"); 
-            localStorage.setItem('jc_login', "1");
-
-            alert("Login Berhasil!");
-
-            // FIX UTAMA: Di daftar file Abang namanya 'menu.html'
-            // Jadi harus panggil 'menu.html', bukan 'main_menu.html'
-            window.location.href = "menu.html"; 
-        } else {
-            alert("Email dan Password harus diisi!");
+        if (email === "" || pass === "") {
+            return alert("Email dan Password harus diisi!");
         }
+
+        // Cek data di koleksi 'users'
+        db.collection("users").where("email", "==", email).where("password", "==", pass).get()
+        .then((querySnapshot) => {
+            if (!querySnapshot.empty) {
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    // Simpan data ke session sementara
+                    localStorage.setItem('email_login', user.email);
+                    localStorage.setItem('nama_login', user.nama);
+                    localStorage.setItem('jc_login', user.komsel);
+
+                    alert("Selamat Datang, " + user.nama);
+                    
+                    // SINKRONISASI: Mengarah ke menu.html sesuai daftar file
+                    window.location.href = "menu.html"; 
+                });
+            } else {
+                alert("Email atau Password salah!");
+            }
+        })
+        .catch((error) => {
+            console.error("Error login: ", error);
+        });
     }
 </script>
 
