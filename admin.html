@@ -21,13 +21,11 @@
         .search-input { padding: 10px 15px; width: 100%; border: 1px solid #ccc; border-radius: 6px; }
         .btn-cari-red { background: #ff0000; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         
-        /* PERBAIKAN TABEL: Checkbox ikut bergeser, tidak freeze berantakan */
         .table-container { overflow-x: auto; background: white; border-radius: 8px; width: 100%; border: 1px solid #ddd; }
         table { width: 100%; border-collapse: collapse; min-width: 1400px; table-layout: auto; }
         thead { background: #ff0000; color: white; position: sticky; top: 0; z-index: 10; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; font-size: 13px; white-space: nowrap; }
         
-        /* Checkbox Tetap di tempat (Sticky) tapi Rapih */
         th:first-child, td:first-child { 
             position: sticky; 
             left: 0; 
@@ -54,6 +52,13 @@
 <body>
 
 <div class="admin-container">
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
+        <img src="logo_ppp.png" alt="Logo" style="width: 100px; margin-bottom: 10px;">
+        <h2 style="margin: 5px 0; font-size: 20px; color: #333; text-transform: uppercase;">PONDOK PEMULIHAN PAPUA</h2>
+        <h3 style="margin: 5px 0; font-size: 18px; color: #FFD700; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; font-weight: bold;">Sistem Informasi Komsel JC</h3>
+        <h2 style="margin-top: 20px; font-size: 18px; color: #333; font-weight: bold;">MASUK ADMINISTRATOR</h2>
+    </div>
+
     <div class="navigation-top">
         <a href="index.html" class="btn-back"><i class="fa-solid fa-circle-arrow-left"></i> KEMBALI KE LOGIN</a>
     </div>
@@ -135,7 +140,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-    // 1. Inisialisasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -147,7 +151,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. Muat Data
     function muatDataUser() {
         const badanTabel = document.getElementById('badanTabel');
         db.collection("users").get().then((querySnapshot) => {
@@ -178,7 +181,6 @@
         });
     }
 
-    // 3. Edit Data
     function bukaModeEdit() {
         const terpilih = document.querySelectorAll('.cek-baris:checked');
         if (terpilih.length !== 1) return alert("Pilih satu data melalui checkbox untuk diedit!");
@@ -221,7 +223,6 @@
         }).catch(err => alert("❌ GAGAL UPDATE: " + err));
     }
 
-    // 4. Hapus Data
     function hapusTerpilih() {
         const terpilih = document.querySelectorAll('.cek-baris:checked');
         if (terpilih.length === 0) return alert("Pilih minimal satu data untuk dihapus!");
