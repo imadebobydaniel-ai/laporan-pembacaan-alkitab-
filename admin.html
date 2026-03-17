@@ -61,6 +61,7 @@
                 <th>Jabatan</th>
                 <th>Gol. Darah</th>
                 <th>WhatsApp</th>
+                <th>Alamat</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -170,6 +171,29 @@
         base64Image = data.fotoUrl || ""; // Reset dengan foto lama
         document.getElementById('editModal').style.display = "block";
     }
+    async function loadData() {
+    const list = document.getElementById('user-list');
+    list.innerHTML = '<tr><td colspan="9" style="text-align:center;">Memuat data...</td></tr>';
+    const snapshot = await db.collection("users").orderBy("tanggal_daftar", "desc").get();
+    list.innerHTML = '';
+    snapshot.forEach(doc => {
+        const d = doc.data();
+        list.innerHTML += `
+            <tr>
+                <td><input type="checkbox" class="check-item" value="${doc.id}"></td>
+                <td><img src="${d.fotoUrl || 'https://via.placeholder.com/50'}" class="user-img"></td>
+                <td><span class="nk-badge">${d.nomor_komsel || '-'}</span></td>
+                <td><strong>${d.nama}</strong><br><small>${d.email}</small></td>
+                <td>${d.jabatan || '-'}</td>
+                <td style="color:red; font-weight:bold;">${d.gol_darah || '-'}</td>
+                <td>${d.no_hp}</td>
+                <td>${d.alamat || '-'}</td> <td class="action-btns">
+                    <button class="edit-btn" onclick="openEditModal('${doc.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="delete-btn" onclick="hapusSatu('${doc.id}')"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>`;
+    });
+}
 
     function closeEditModal() { document.getElementById('editModal').style.display = "none"; }
 
