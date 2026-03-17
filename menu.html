@@ -58,13 +58,25 @@
     </div>
 
     <script>
+        
         // Jam Digital Aktif
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID') + " WIT";
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
+       <script>
+    function updateTanggal() {
+        const now = new Date();
+        const opsi = { 
+            weekday: 'long', 
+            day: '2-digit', 
+            month: 'long', 
+            year: 'numeric' 
+        };
+        // Menghasilkan format: Selasa, 17 Maret 2026
+        const tanggalLengkap = now.toLocaleDateString('id-ID', opsi);
+        document.getElementById('display-tanggal').innerText = tanggalLengkap;
+    }
+
+    // Jalankan fungsi saat halaman dimuat
+    updateTanggal();
+</script>
 
         // Ambil data User
         const nama = localStorage.getItem("userName");
