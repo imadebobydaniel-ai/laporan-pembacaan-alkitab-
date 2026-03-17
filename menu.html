@@ -128,22 +128,7 @@
     updateWaktu(); // Jalankan langsung saat halaman dimuat
 </script>
 
-        // Ambil data User dari LocalStorage
-        function loadUserData() {
-            const nama = localStorage.getItem("userName");
-            const komsel = localStorage.getItem("userKomsel");
-
-            if (nama) {
-                document.getElementById('disp_nama').innerText = nama;
-                document.getElementById('disp_komsel').innerText = "KOMSEL " + (komsel || "");
-            } else {
-                window.location.href = "index.html";
-            }
-        }
-
-        // Jalankan saat halaman siap
-        updateTanggal();
-        loadUserData();
+      
     </script>
 </body>
 </html>
