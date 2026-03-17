@@ -6,141 +6,24 @@
     <title>Menu Utama - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: #f0f2f5; 
-            margin: 0; 
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        .navbar { 
-            background: #007bff; 
-            color: white; 
-            padding: 10px 15px; 
-            display: flex; 
-            justify-content: flex-end; 
-            align-items: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            height: 50px;
-            gap: 10px;
-            position: relative;
-        }
-
-        .datetime-container {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: bold;
-            text-align: left;
-            line-height: 1.2;
-            position: absolute;
-            left: 10px;
-        }
-
-        .btn-setting {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        
-        .btn-logout { 
-            background: #ff4757; 
-            color: white; 
-            border: none; 
-            padding: 6px 12px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .container { 
-            padding: 15px; 
-            max-width: 100%; 
-            margin: 0 auto; 
-            text-align: center; 
-            box-sizing: border-box;
-            flex: 1;
-        }
-
-        .main-title {
-            font-weight: bold; 
-            font-size: 20px;
-            color: #333;
-            margin: 10px 0;
-        }
-
-        .welcome-card { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-            margin-bottom: 20px; 
-        }
-
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        .navbar { background: #007bff; color: white; padding: 10px 15px; display: flex; justify-content: flex-end; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: 50px; gap: 10px; position: relative; }
+        .datetime-container { background: rgba(255, 255, 255, 0.2); color: white; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-align: left; line-height: 1.2; position: absolute; left: 10px; }
+        .btn-setting { background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 18px; }
+        .btn-logout { background: #ff4757; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .container { padding: 15px; max-width: 100%; margin: 0 auto; text-align: center; box-sizing: border-box; flex: 1; }
+        .main-title { font-weight: bold; font-size: 20px; color: #333; margin: 10px 0; }
+        .welcome-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .welcome-card h2 { font-size: 16px; margin: 0; }
         .welcome-card p { font-size: 12px; margin: 5px 0 0 0; color: #666; }
-        
-        .menu-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 10px; 
-            margin-bottom: 20px;
-        }
-
-        .menu-item { 
-            background: white; 
-            padding: 15px 5px; 
-            border-radius: 12px; 
-            text-align: center; 
-            text-decoration: none; 
-            color: #333; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-        }
-        
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        .menu-item { background: white; padding: 15px 5px; border-radius: 12px; text-align: center; text-decoration: none; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
         .menu-item i { font-size: 24px; margin-bottom: 8px; color: #007bff; }
         .menu-item h3 { margin: 0; font-size: 12px; font-weight: bold; }
-
-        .footer-marquee {
-            background: #ffffff;
-            color: #333;
-            padding: 10px 0;
-            border-top: 1px solid #ddd;
-            font-size: 13px;
-            font-weight: bold;
-            width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            box-sizing: border-box;
-            margin-top: 20px;
-        }
-
-        .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 15s linear infinite;
-        }
-
-        @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
-
-        .footer-padding {
-            background: #007bff;
-            height: 50px;
-            width: 100%;
-        }
+        .footer-marquee { background: #ffffff; color: #333; padding: 10px 0; border-top: 1px solid #ddd; font-size: 13px; font-weight: bold; width: 100%; overflow: hidden; white-space: nowrap; box-sizing: border-box; margin-top: 20px; }
+        .marquee-content { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; }
+        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        .footer-padding { background: #007bff; height: 50px; width: 100%; }
     </style>
 </head>
 <body>
@@ -156,104 +39,50 @@
 
 <div class="container">
     <div class="main-title">PONDOK PEMULIHAN PAPUA</div>
-
     <div class="welcome-card">
         <h2 id="userGreeting">Memuat data...</h2>
         <p>Sistem Informasi Komsel JC</p>
     </div>
-
     <div class="menu-grid">
-        <a href="profil.html" class="menu-item">
-            <i class="fa-solid fa-user-gear"></i>
-            <h3>Profil Saya</h3>
-        </a>
-        <a href="kehadiran.html" class="menu-item">
-            <i class="fa-solid fa-calendar-check"></i>
-            <h3>Kehadiran</h3>
-        </a>
-        <a href="alkitab.html" class="menu-item">
-            <i class="fa-solid fa-book-bible"></i>
-            <h3>Baca Alkitab</h3>
-        </a>
-        <a href="statistik.html" class="menu-item">
-            <i class="fa-solid fa-chart-line"></i>
-            <h3>Statistik Komsel</h3>
-        </a>
-        <a href="kegiatan.html" class="menu-item">
-            <i class="fa-solid fa-calendar-days"></i>
-            <h3>Kegiatan Tahunan</h3>
-        </a>
-        <a href="laporan.html" class="menu-item">
-            <i class="fa-solid fa-file-invoice"></i>
-            <h3>Laporan Bulanan</h3>
-        </a>
-        <a href="lacak.html" class="menu-item">
-            <i class="fa-solid fa-location-dot"></i>
-            <h3>Lacak Domba</h3>
-        </a>
-        <a href="javascript:void(0);" class="menu-item" onclick="location.reload();" style="border: 1px solid #007bff;">
-            <i class="fa-solid fa-rotate" style="color: #28a745;"></i>
-            <h3>Refresh Sistem</h3>
-        </a>
+        <a href="profil.html" class="menu-item"><i class="fa-solid fa-user-gear"></i><h3>Profil Saya</h3></a>
+        <a href="kehadiran.html" class="menu-item"><i class="fa-solid fa-calendar-check"></i><h3>Kehadiran</h3></a>
+        <a href="alkitab.html" class="menu-item"><i class="fa-solid fa-book-bible"></i><h3>Baca Alkitab</h3></a>
+        <a href="statistik.html" class="menu-item"><i class="fa-solid fa-chart-line"></i><h3>Statistik</h3></a>
+        <a href="kegiatan.html" class="menu-item"><i class="fa-solid fa-calendar-days"></i><h3>Kegiatan</h3></a>
+        <a href="laporan.html" class="menu-item"><i class="fa-solid fa-file-invoice"></i><h3>Laporan</h3></a>
+        <a href="lacak.html" class="menu-item"><i class="fa-solid fa-location-dot"></i><h3>Lacak Domba</h3></a>
+        <a href="javascript:void(0);" class="menu-item" onclick="location.reload();" style="border: 1px solid #007bff;"><i class="fa-solid fa-rotate" style="color: #28a745;"></i><h3>Refresh</h3></a>
     </div>
 </div>
 
-<div class="footer-marquee">
-    <div class="marquee-content">
-        Aplikasi ini adalah sistem informasi untuk Komsel dan juga sistem laporan berbasis digital. copyright 2026 by. imade boby.
-    </div>
-</div>
+<div class="footer-marquee"><div class="marquee-content">Aplikasi Sistem Informasi Komsel & Laporan Digital. Copyright 2026 by imade boby.</div></div>
 <div class="footer-padding"></div>
 
 <script>
-    // 1. Fungsi Jam & Tanggal
     function updateClock() {
         const now = new Date();
         const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
         const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        
-        const datePart = document.getElementById('datePart');
-        const timePart = document.getElementById('timePart');
-        
-        if(datePart) datePart.innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-        if(timePart) timePart.innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        document.getElementById('datePart').innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        document.getElementById('timePart').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     }
 
-    // 2. Fungsi Ambil Data Login (Agar nama user langsung muncul)
     function loadUserData() {
-        const namaUser = localStorage.getItem('nama_login') || localStorage.getItem('userNama') || "Pengguna"; 
-        const nomorJC = localStorage.getItem('jc_login') || localStorage.getItem('userJC') || "-"; 
-        const greetingElement = document.getElementById('userGreeting');
-        
-        if(greetingElement) {
-            if(nomorJC !== "-") {
-                greetingElement.innerText = "Selamat Datang " + namaUser + " Komsel JC " + nomorJC;
-            } else {
-                greetingElement.innerText = "Selamat Datang " + namaUser;
-            }
-        }
+        const nama = localStorage.getItem('nama_login') || "Pengguna";
+        const jc = localStorage.getItem('jc_login') || "-";
+        document.getElementById('userGreeting').innerText = jc !== "-" ? `Selamat Datang ${nama} (JC ${jc})` : `Selamat Datang ${nama}`;
     }
 
-    // 3. Fungsi Logout
     function prosesLogout() {
-        if(confirm("Apakah Anda yakin ingin keluar?")) {
-            localStorage.clear(); 
-            window.location.href = "index.html"; 
-        }
+        if(confirm("Keluar dari aplikasi?")) { localStorage.clear(); window.location.href = "index.html"; }
     }
 
-    // Eksekusi saat halaman dibuka
     window.onload = function() {
         updateClock();
         setInterval(updateClock, 1000);
         loadUserData();
-        
-        // Mencegah error URL main_menu.html
-        if (window.location.href.includes('main_menu.html')) {
-            window.history.replaceState(null, null, 'menu.html');
-        }
+        if (window.location.href.includes('main_menu.html')) { window.history.replaceState(null, null, 'menu.html'); }
     };
 </script>
-
 </body>
 </html>
