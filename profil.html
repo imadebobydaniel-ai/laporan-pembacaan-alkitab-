@@ -95,62 +95,63 @@
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
-        authDomain: "boby-apps-project.firebaseapp.com",
-        projectId: "boby-apps-project",
-        storageBucket: "boby-apps-project.firebasestorage.app",
-        messagingSenderId: "125984859692",
-        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-    };
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+  // 1. Konfigurasi Firebase Abang (Sesuaikan dengan milik Abang)
+  const firebaseConfig = {
+    apiKey: "AIzaSy...",
+    authDomain: "laporan-pembacaan-alkitab.firebaseapp.com",
+    databaseURL: "https://laporan-pembacaan-alkitab-default-rtdb.firebaseio.com",
+    projectId: "laporan-pembacaan-alkitab",
+    storageBucket: "laporan-pembacaan-alkitab.appspot.com",
+    messagingSenderId: "...",
+    appId: "..."
+  };
 
-    // FUNGSI MUAT DATA DARI FIREBASE
-    function muatProfilDariDatabase() {
-        const userEmail = localStorage.getItem('userEmail');
-        
-        if (!userEmail) {
-            console.log("Email tidak ditemukan di sesi browser.");
-            return;
-        }
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-        db.collection("users").where("email", "==", userEmail).get().then((querySnapshot) => {
-            if (!querySnapshot.empty) {
-                const doc = querySnapshot.docs[0];
-                const data = doc.data();
-                
-                // Isi otomatis kolom biodata (Sesuaikan ID-nya)
-                if(document.getElementById('p_nama')) document.getElementById('p_nama').value = data.nama || "";
-                if(document.getElementById('p_jabatan')) document.getElementById('p_jabatan').value = data.jabatan || "";
-                if(document.getElementById('p_email')) document.getElementById('p_email').value = data.email || "";
-                if(document.getElementById('p_hp')) document.getElementById('p_hp').value = data.nomor_hp || "";
-                if(document.getElementById('p_jc')) document.getElementById('p_jc').value = data.komsel || "";
-                if(document.getElementById('p_goldar')) document.getElementById('p_goldar').value = data.gol_darah || "";
-                
-                // Muat Foto Profil
-                if (data.fotoUrl && document.getElementById('display_foto')) {
-                    document.getElementById('display_foto').src = data.fotoUrl;
-                }
-                
-                // Simpan ID dokumen untuk update nanti
-                localStorage.setItem('userDocId', doc.id);
-            }
-        }).catch((error) => {
-            console.error("Gagal menarik data:", error);
-        });
-    }
+  // 2. Fungsi Ambil Data Otomatis
+  function loadUserProfile() {
+      // Ambil email dari localStorage yang kita set saat login tadi
+      const userEmail = localStorage.getItem('email_login');
+      
+      if (!userEmail) {
+          alert("Sesi berakhir, silakan login kembali.");
+          window.location.href = "index.html";
+          return;
+      }
 
-    // JALANKAN SAAT HALAMAN DIBUKA
-    window.onload = muatProfilDariDatabase;
+      // Format email agar bisa jadi ID (hapus titik karena Firebase dilarang pakai titik di Key)
+      const userKey = userEmail.replace(/\./g, ',');
+
+      // Ambil data dari tabel 'users'
+      db.ref('users/' + userKey).once('value').then((snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+              // Isi ke form secara otomatis
+              document.getElementById('namaLengkap').value = data.nama || "";
+              document.getElementById('jabatan').value = data.jabatan || "Anggota Komsel";
+              document.getElementById('emailAktif').value = data.email || userEmail;
+              document.getElementById('nomorWa').value = data.whatsapp || "";
+              document.getElementById('lokasiJc').value = data.jc || "JC 1";
+              document.getElementById('golDarah').value = data.golonganDarah || "A";
+              
+              // Jika ada foto, tampilkan
+              if (data.fotoUrl) {
+                  document.getElementById('fotoProfil').src = data.fotoUrl;
+              }
+          }
+      }).catch((error) => {
+          console.error("Gagal ambil data:", error);
+      });
+  }
+
+  // Jalankan fungsi saat halaman dibuka
+  window.onload = loadUserProfile;
 </script>
 </body>
 </html>
