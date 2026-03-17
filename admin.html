@@ -16,18 +16,24 @@
         table th { background-color: #f8f9fa; color: #495057; }
         .user-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
         
-        .action-btns button { border: none; background: none; cursor: pointer; font-size: 18px; margin-right: 8px; transition: 0.2s; }
+        .action-btns button { border: none; background: none; cursor: pointer; font-size: 18px; margin-right: 8px; }
         .edit-btn { color: #007bff; }
         .delete-btn { color: #dc3545; }
         .nk-badge { background: #e7f3ff; color: #007bff; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
 
-        /* MODAL POPUP STYLE */
+        /* MODAL POPUP */
         .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
-        .modal-content { background: white; margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; position: relative; }
-        .modal-header { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        .modal-content { background: white; margin: 2% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; position: relative; }
         .form-edit-group { margin-bottom: 15px; }
         .form-edit-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
         .form-edit-group input, .form-edit-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        
+        /* FOTO PROFILE STYLING */
+        .profile-upload-area { text-align: center; margin-bottom: 20px; position: relative; }
+        #preview-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #27ae60; margin-bottom: 10px; }
+        .upload-label { background: #f8f9fa; border: 1px dashed #ccc; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; display: inline-block; }
+        .upload-label:hover { background: #e9ecef; }
+
         .btn-save { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .close-modal { position: absolute; right: 20px; top: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
     </style>
@@ -36,20 +42,16 @@
 
 <div class="admin-box">
     <div class="header-panel">
-        <h2 style="margin:0;"><i class="fa-solid fa-users-viewfinder"></i> Database Anggota Komsel JC</h2>
+        <h2 style="margin:0;"><i class="fa-solid fa-users-viewfinder"></i> Database Anggota PPP</h2>
         <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> KEMBALI KE LOGIN</a>
     </div>
 
     <div style="margin-bottom: 15px; display: flex; gap: 10px;">
-        <button onclick="hapusTerpilih()" style="background:#dc3545; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
-            <i class="fa-solid fa-trash-can"></i> Hapus Terpilih
-        </button>
-        <button onclick="loadData()" style="background:#007bff; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
-            <i class="fa-solid fa-rotate"></i> Refresh Data
-        </button>
+        <button onclick="hapusTerpilih()" style="background:#dc3545; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; font-weight:bold;"><i class="fa-solid fa-trash-can"></i> Hapus Terpilih</button>
+        <button onclick="loadData()" style="background:#007bff; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; font-weight:bold;"><i class="fa-solid fa-rotate"></i> Refresh Data</button>
     </div>
 
-    <table id="dataTable">
+    <table>
         <thead>
             <tr>
                 <th style="width: 30px;"><input type="checkbox" id="selectAll" onclick="toggleAll()"></th>
@@ -69,18 +71,20 @@
 <div id="editModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeEditModal()">&times;</span>
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-user-pen"></i> Edit Data Anggota</h3>
+        <h3 style="margin-top:0;"><i class="fa-solid fa-user-pen"></i> Edit Data Anggota</h3>
+        
+        <div class="profile-upload-area">
+            <img id="preview-img" src="https://via.placeholder.com/100" alt="Profile">
+            <br>
+            <label class="upload-label" for="file-input">
+                <i class="fa-solid fa-camera"></i> Ganti Foto Profil
+            </label>
+            <input type="file" id="file-input" style="display:none;" accept="image/*" onchange="previewFile()">
         </div>
+
         <input type="hidden" id="edit-id">
-        <div class="form-edit-group">
-            <label>Nama Lengkap</label>
-            <input type="text" id="edit-nama">
-        </div>
-        <div class="form-edit-group">
-            <label>Nomor Komsel (NK)</label>
-            <input type="text" id="edit-nk">
-        </div>
+        <div class="form-edit-group"><label>Nama Lengkap</label><input type="text" id="edit-nama"></div>
+        <div class="form-edit-group"><label>Nomor Komsel (NK)</label><input type="text" id="edit-nk"></div>
         <div class="form-edit-group">
             <label>Jabatan</label>
             <select id="edit-jabatan">
@@ -92,21 +96,12 @@
         <div class="form-edit-group">
             <label>Golongan Darah</label>
             <select id="edit-goldar">
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="AB">AB</option>
-                <option value="O">O</option>
+                <option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option>
             </select>
         </div>
-        <div class="form-edit-group">
-            <label>Nomor WhatsApp</label>
-            <input type="text" id="edit-wa">
-        </div>
-        <div class="form-edit-group">
-            <label>Alamat Lengkap</label>
-            <input type="text" id="edit-alamat">
-        </div>
-        <button class="btn-save" onclick="updateData()">SIMPAN PERUBAHAN</button>
+        <div class="form-edit-group"><label>Nomor WhatsApp</label><input type="text" id="edit-wa"></div>
+        <div class="form-edit-group"><label>Alamat Lengkap</label><input type="text" id="edit-alamat"></div>
+        <button class="btn-save" id="btnUpdate" onclick="updateData()">SIMPAN PERUBAHAN</button>
     </div>
 </div>
 
@@ -124,6 +119,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    let base64Image = ""; // Variabel untuk menyimpan data foto
 
     async function loadData() {
         const list = document.getElementById('user-list');
@@ -139,7 +135,7 @@
                     <td><span class="nk-badge">${d.nomor_komsel || '-'}</span></td>
                     <td><strong>${d.nama}</strong><br><small>${d.email}</small></td>
                     <td>${d.jabatan || '-'}</td>
-                    <td style="color:red; font-weight:bold;">${d.gol_darah || d.gol_darah || d.gol_darah || '-'}</td>
+                    <td style="color:red; font-weight:bold;">${d.gol_darah || '-'}</td>
                     <td>${d.no_hp}</td>
                     <td class="action-btns">
                         <button class="edit-btn" onclick="openEditModal('${doc.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -149,17 +145,29 @@
         });
     }
 
-    // FUNGSI POPUP EDIT
+    // FUNGSI PREVIEW & KONVERSI FOTO
+    function previewFile() {
+        const file = document.getElementById('file-input').files[0];
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            document.getElementById('preview-img').src = reader.result;
+            base64Image = reader.result; // Simpan string base64
+        }
+        if (file) { reader.readAsDataURL(file); }
+    }
+
     async function openEditModal(id) {
         const doc = await db.collection("users").doc(id).get();
         const data = doc.data();
         document.getElementById('edit-id').value = id;
-        document.getElementById('edit-nama').value = data.nama;
-        document.getElementById('edit-nk').value = data.nomor_komsel;
-        document.getElementById('edit-jabatan').value = data.jabatan;
-        document.getElementById('edit-goldar').value = data.gol_darah;
-        document.getElementById('edit-wa').value = data.no_hp;
-        document.getElementById('edit-alamat').value = data.alamat;
+        document.getElementById('edit-nama').value = data.nama || "";
+        document.getElementById('edit-nk').value = data.nomor_komsel || "";
+        document.getElementById('edit-jabatan').value = data.jabatan || "Anggota Komsel";
+        document.getElementById('edit-goldar').value = data.gol_darah || "AB";
+        document.getElementById('edit-wa').value = data.no_hp || "";
+        document.getElementById('edit-alamat').value = data.alamat || "";
+        document.getElementById('preview-img').src = data.fotoUrl || 'https://via.placeholder.com/100';
+        base64Image = data.fotoUrl || ""; // Reset dengan foto lama
         document.getElementById('editModal').style.display = "block";
     }
 
@@ -167,24 +175,30 @@
 
     async function updateData() {
         const id = document.getElementById('edit-id').value;
-        await db.collection("users").doc(id).update({
-            nama: document.getElementById('edit-nama').value,
-            nomor_komsel: document.getElementById('edit-nk').value,
-            jabatan: document.getElementById('edit-jabatan').value,
-            gol_darah: document.getElementById('edit-goldar').value,
-            no_hp: document.getElementById('edit-wa').value,
-            alamat: document.getElementById('edit-alamat').value
-        });
-        alert("Data Berhasil Diperbarui!");
-        closeEditModal();
-        loadData();
+        const btn = document.getElementById('btnUpdate');
+        btn.innerText = "Menyimpan...";
+        btn.disabled = true;
+
+        try {
+            await db.collection("users").doc(id).update({
+                nama: document.getElementById('edit-nama').value,
+                nomor_komsel: document.getElementById('edit-nk').value,
+                jabatan: document.getElementById('edit-jabatan').value,
+                gol_darah: document.getElementById('edit-goldar').value,
+                no_hp: document.getElementById('edit-wa').value,
+                alamat: document.getElementById('edit-alamat').value,
+                fotoUrl: base64Image // Simpan foto baru/lama
+            });
+            alert("Data & Foto Berhasil Diperbarui!");
+            closeEditModal();
+            loadData();
+        } catch (e) { alert("Error: " + e.message); }
+        btn.innerText = "SIMPAN PERUBAHAN";
+        btn.disabled = false;
     }
 
     async function hapusSatu(id) {
-        if(confirm("Hapus data ini?")) {
-            await db.collection("users").doc(id).delete();
-            loadData();
-        }
+        if(confirm("Hapus data ini?")) { await db.collection("users").doc(id).delete(); loadData(); }
     }
 
     function toggleAll() {
