@@ -87,6 +87,14 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script>
+    db.collection("users").where("email", "==", userEmail).get().then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        // Langsung pasang ke foto profil di menu utama
+        document.getElementById('main-profile-img').src = data.fotoUrl;
+        document.getElementById('user-name').innerText = data.nama;
+    });
+});
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
