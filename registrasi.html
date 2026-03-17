@@ -16,11 +16,14 @@
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: #555; }
         input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
         
+        .nk-display { background-color: #eefbff; border: 1.5px solid #007bff !important; color: #007bff; font-weight: bold; text-align: center; }
+        .info-otomatis { font-size: 11px; color: #27ae60; font-style: italic; display: block; margin-bottom: 10px; }
+
         /* Style Simbol Mata */
         .toggle-password { 
             position: absolute; 
             right: 12px; 
-            top: 35px; /* Menyesuaikan posisi di bawah label */
+            top: 35px; 
             cursor: pointer; 
             color: #999; 
             font-size: 16px;
@@ -39,6 +42,13 @@
         <p style="font-size: 14px; color: #666;">Formulir Pendaftaran Anggota</p>
 
         <form id="regForm">
+            <div class="form-group">
+                <label>Nomor Komsel (NK) - Otomatis</label>
+                <input type="text" id="reg_nk" class="nk-display" placeholder="Otomatis..." readonly>
+            </div>
+
+            <span class="info-otomatis"><i class="fa-solid fa-clock"></i> Tanggal daftar tercatat otomatis oleh sistem</span>
+
             <div class="form-group">
                 <label>Nama Lengkap</label>
                 <input type="text" id="reg_nama" required>
@@ -78,41 +88,85 @@
 
             <div class="form-group">
                 <label>Komsel JC</label>
-                <select id="reg_komsel">
+                <select id="reg_komsel" onchange="generateNK()">
                     <option value="">-- Pilih Lokasi JC --</option>
                     <option value="JC1">JC 1</option>
                     <option value="JC2">JC 2</option>
+                    <option value="JC3">JC 3</option>
+                    <option value="JC4">JC 4</option>
                     <option value="JC5">JC 5</option>
                 </select>
             </div>
 
-            <button type="submit" class="btn-reg">DAFTAR SEKARANG</button>
+            <button type="submit" id="btnSubmit" class="btn-reg">DAFTAR SEKARANG</button>
         </form>
 
         <a href="index.html" class="footer-link">Sudah punya akun? <b>Login Disini</b></a>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <script>
-        // Fungsi Toggle Password Registrasi
+        const firebaseConfig = {
+            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+            authDomain: "boby-apps-project.firebaseapp.com",
+            projectId: "boby-apps-project",
+            storageBucket: "boby-apps-project.appspot.com",
+            messagingSenderId: "125984859692",
+            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Fungsi Toggle Password
         function togglePassReg() {
             const passInput = document.getElementById('reg_password');
             const eyeIcon = document.getElementById('eyeIconReg');
-
             if (passInput.type === 'password') {
                 passInput.type = 'text';
-                eyeIcon.classList.remove('fa-eye');
-                eyeIcon.classList.add('fa-eye-slash');
+                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 passInput.type = 'password';
-                eyeIcon.classList.remove('fa-eye-slash');
-                eyeIcon.classList.add('fa-eye');
+                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
 
-        // Script registrasi tetap sesuai sistem Anda
-        document.getElementById('regForm').addEventListener('submit', function(e) {
+        // Generate NK Otomatis
+        async function generateNK() {
+            const jc = document.getElementById('reg_komsel').value;
+            if (!jc) return;
+            const snap = await db.collection("users").get();
+            const urutan = String(snap.size + 1).padStart(3, '0');
+            document.getElementById('reg_nk').value = `NK-PPP-${urutan}-${jc}-2026`;
+        }
+
+        // Proses Simpan ke Firebase
+        document.getElementById('regForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            console.log("Proses registrasi...");
+            const btn = document.getElementById('btnSubmit');
+            btn.innerText = "Mendaftarkan...";
+            btn.disabled = true;
+
+            try {
+                await db.collection("users").add({
+                    nama: document.getElementById('reg_nama').value,
+                    email: document.getElementById('reg_email').value,
+                    no_hp: document.getElementById('reg_wa').value,
+                    password: document.getElementById('reg_password').value,
+                    alamat: document.getElementById('reg_alamat').value,
+                    gol_darah: document.getElementById('reg_gol_darah').value,
+                    komsel: document.getElementById('reg_komsel').value,
+                    nomor_komsel: document.getElementById('reg_nk').value,
+                    tanggal_daftar: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Pendaftaran Berhasil!");
+                window.location.href = "index.html";
+            } catch (err) {
+                alert("Gagal: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "DAFTAR SEKARANG";
+            }
         });
     </script>
 </body>
