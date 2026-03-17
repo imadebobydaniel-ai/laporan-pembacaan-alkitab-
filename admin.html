@@ -3,44 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrator - PPP</title>
+    <title>Administrator - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .admin-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 1200px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
-        .btn-logout { background: #222; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 13px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .admin-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 1200px; margin: auto; }
+        .header-panel { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .btn-back { background: #333; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: bold; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        table th, table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        table th { background-color: #f8f9fa; color: #333; }
-        .img-table { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        table th, table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        table th { background-color: #f8f9fa; font-weight: bold; color: #495057; }
+        .user-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
         
-        .btn-edit { color: #007bff; cursor: pointer; margin-right: 10px; border: none; background: none; }
-        .btn-delete { color: #dc3545; cursor: pointer; border: none; background: none; }
-        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; background: #e1f5fe; color: #01579b; }
+        .action-btns button { border: none; background: none; cursor: pointer; font-size: 16px; margin-right: 8px; }
+        .edit-btn { color: #007bff; }
+        .delete-btn { color: #dc3545; }
+        .nk-badge { background: #e7f3ff; color: #007bff; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
     </style>
 </head>
 <body>
 
-<div class="admin-container">
-    <div class="header">
-        <h2><i class="fa-solid fa-users-gear"></i> Data Anggota Pondok</h2>
-        <a href="index.html" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> KEMBALI KE LOGIN</a>
+<div class="admin-box">
+    <div class="header-panel">
+        <h2 style="margin:0;"><i class="fa-solid fa-users-viewfinder"></i> Database Anggota PPP</h2>
+        <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> KEMBALI KE LOGIN</a>
     </div>
 
-    <div style="margin-bottom: 15px;">
-        <button onclick="deleteSelected()" style="background:#dc3545; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">
-            <i class="fa-solid fa-trash"></i> Hapus Terpilih
+    <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+        <button onclick="hapusTerpilih()" style="background:#dc3545; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+            <i class="fa-solid fa-trash-can"></i> Hapus Terpilih
+        </button>
+        <button onclick="loadData()" style="background:#007bff; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">
+            <i class="fa-solid fa-rotate"></i> Refresh Data
         </button>
     </div>
 
-    <table id="userTable">
+    <table id="dataTable">
         <thead>
             <tr>
-                <th><input type="checkbox" id="checkAll" onclick="toggleSelectAll()"></th>
+                <th style="width: 30px;"><input type="checkbox" id="selectAll" onclick="toggleAll()"></th>
                 <th>Foto</th>
-                <th>NK (Nomor Komsel)</th>
+                <th>NK (Otomatis)</th>
                 <th>Nama Lengkap</th>
                 <th>Jabatan</th>
                 <th>Gol. Darah</th>
@@ -48,7 +52,7 @@
                 <th>Aksi</th>
             </tr>
         </thead>
-        <tbody id="tbody-users">
+        <tbody id="user-list">
             </tbody>
     </table>
 </div>
@@ -68,77 +72,78 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 1. AMBIL DATA DARI FIREBASE
-    async function loadUsers() {
-        const tbody = document.getElementById('tbody-users');
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Memuat data...</td></tr>';
+    // 1. FUNGSI LOAD DATA ANGGOTA
+    async function loadData() {
+        const list = document.getElementById('user-list');
+        list.innerHTML = '<tr><td colspan="8" style="text-align:center;">Sedang mengambil data anggota...</td></tr>';
         
         try {
-            const snap = await db.collection("users").orderBy("tanggal_daftar", "desc").get();
-            tbody.innerHTML = '';
+            const snapshot = await db.collection("users").orderBy("tanggal_daftar", "desc").get();
+            list.innerHTML = '';
             
-            snap.forEach(doc => {
-                const u = doc.data();
-                const id = doc.id;
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const docId = doc.id;
                 
-                tbody.innerHTML += `
+                list.innerHTML += `
                     <tr>
-                        <td><input type="checkbox" class="user-check" value="${id}"></td>
-                        <td><img src="${u.fotoUrl || 'default-user.png'}" class="img-table"></td>
-                        <td><span class="status-badge">${u.nomor_komsel}</span></td>
-                        <td><b>${u.nama}</b><br><small>${u.email}</small></td>
-                        <td>${u.jabatan || '-'}</td>
-                        <td>${u.goldar || '-'}</td>
-                        <td>${u.no_hp}</td>
-                        <td>
-                            <button class="btn-edit" onclick="editUser('${id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button class="btn-delete" onclick="hapusUser('${id}')"><i class="fa-solid fa-trash"></i></button>
+                        <td><input type="checkbox" class="check-item" value="${docId}"></td>
+                        <td><img src="${data.fotoUrl || 'https://via.placeholder.com/50'}" class="user-img"></td>
+                        <td><span class="nk-badge">${data.nomor_komsel || '-'}</span></td>
+                        <td><strong>${data.nama}</strong><br><span style="font-size:11px; color:#666;">${data.email}</span></td>
+                        <td>${data.jabatan || 'Anggota'}</td>
+                        <td><span style="font-weight:bold; color:#d63031;">${data.gol_darah || '-'}</span></td>
+                        <td><a href="https://wa.me/${data.no_hp}" target="_blank" style="text-decoration:none; color:#27ae60; font-weight:bold;">${data.no_hp}</a></td>
+                        <td class="action-btns">
+                            <button class="edit-btn" onclick="editData('${docId}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="delete-btn" onclick="hapusSatu('${docId}')"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             });
-        } catch (err) {
-            tbody.innerHTML = '<tr><td colspan="8">Gagal memuat data: ' + err.message + '</td></tr>';
+        } catch (error) {
+            list.innerHTML = `<tr><td colspan="8" style="color:red;">Gagal: ${error.message}</td></tr>`;
         }
     }
 
     // 2. FUNGSI HAPUS SATUAN
-    async function hapusUser(id) {
-        if(confirm("Apakah Anda yakin ingin menghapus anggota ini?")) {
+    async function hapusSatu(id) {
+        if(confirm("Hapus data anggota ini secara permanen?")) {
             await db.collection("users").doc(id).delete();
-            alert("Data berhasil dihapus");
-            loadUsers();
+            alert("Data berhasil dihapus!");
+            loadData();
         }
     }
 
-    // 3. SELEKSI SEMUA CHECKBOX
-    function toggleSelectAll() {
-        const isChecked = document.getElementById('checkAll').checked;
-        const checks = document.querySelectorAll('.user-check');
-        checks.forEach(c => c.checked = isChecked);
+    // 3. FUNGSI CHECKBOX SEMUA
+    function toggleAll() {
+        const master = document.getElementById('selectAll').checked;
+        const items = document.querySelectorAll('.check-item');
+        items.forEach(i => i.checked = master);
     }
 
-    // 4. HAPUS YANG TERPILIH (MASSAL)
-    async function deleteSelected() {
-        const selected = document.querySelectorAll('.user-check:checked');
-        if(selected.length === 0) return alert("Pilih data yang ingin dihapus!");
+    // 4. FUNGSI HAPUS TERPILIH (MASSAL)
+    async function hapusTerpilih() {
+        const checked = document.querySelectorAll('.check-item:checked');
+        if(checked.length === 0) return alert("Pilih minimal satu data!");
         
-        if(confirm(`Hapus ${selected.length} anggota terpilih?`)) {
-            for(let s of selected) {
-                await db.collection("users").doc(s.value).delete();
+        if(confirm(`Yakin ingin menghapus ${checked.length} data terpilih?`)) {
+            for(let item of checked) {
+                await db.collection("users").doc(item.value).delete();
             }
-            alert("Data terpilih berhasil dihapus");
-            loadUsers();
+            alert("Semua data terpilih telah dihapus.");
+            loadData();
         }
     }
 
-    // 5. FUNGSI EDIT (SIMULASI)
-    function editUser(id) {
-        alert("Fitur edit untuk ID: " + id + " sedang dikembangkan.");
+    // 5. FUNGSI EDIT
+    function editData(id) {
+        // Logika edit bisa diarahkan ke file profil.html atau modal box
+        alert("Fitur Edit untuk ID " + id + " sedang disiapkan.");
     }
 
-    // JALANKAN SAAT HALAMAN DIBUKA
-    loadUsers();
+    // Jalankan saat pertama kali buka
+    loadData();
 </script>
 
 </body>
