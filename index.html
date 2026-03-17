@@ -26,7 +26,7 @@
     <input type="email" id="userEmail" placeholder="Email Anggota">
     <input type="password" id="userPass" placeholder="Password">
     <button class="btn-login" onclick="loginUser()">MASUK</button>
-    <a href="login_admin.html" class="admin-link">Masuk sebagai Admin</a>
+    <a href="login.html" class="admin-link">Masuk sebagai Admin</a>
 </div>
 
 <script>
@@ -34,27 +34,19 @@
         const email = document.getElementById('userEmail').value;
         const pass = document.getElementById('userPass').value;
 
-        // Validasi sederhana (Sesuaikan dengan data Abang)
+        // Validasi login (Silakan sesuaikan jika ada pass khusus)
         if (email !== "" && pass !== "") {
-            // SIMPAN DATA KE STORAGE
             localStorage.setItem('email_login', email);
-            localStorage.setItem('nama_login', "Anggota Komsel"); // Nama sementara
-            localStorage.setItem('jc_login', "1"); // JC sementara
+            localStorage.setItem('nama_login', "Anggota Komsel"); 
+            localStorage.setItem('jc_login', "1");
 
             alert("Login Berhasil!");
 
-            // --- BAGIAN KRUSIAL (Penyebab Error 404) ---
-            // Pastikan mengarah ke 'menu.html', BUKAN 'main_menu.html'
+            // FIX UTAMA: Di daftar file Abang namanya 'menu.html'
+            // Jadi harus panggil 'menu.html', bukan 'main_menu.html'
             window.location.href = "menu.html"; 
         } else {
             alert("Email dan Password harus diisi!");
-        }
-    }
-
-    // Cek jika sudah login, langsung lempar ke menu
-    window.onload = function() {
-        if (localStorage.getItem('email_login')) {
-            window.location.href = "menu.html";
         }
     }
 </script>
