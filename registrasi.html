@@ -17,6 +17,11 @@
         input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
         input:readonly { background-color: #e9ecef; cursor: not-allowed; }
         
+        /* Container untuk NK dan Tanggal */
+        .nk-container { display: flex; gap: 10px; align-items: flex-end; }
+        .nk-container .form-group { flex: 1; margin-bottom: 0; }
+        .date-display { font-size: 11px; color: #d9534f; font-weight: bold; margin-bottom: 5px; min-width: 150px; text-align: right; }
+
         .btn-back { position: absolute; top: 20px; left: 20px; text-decoration: none; color: #333; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
 
         .toggle-password { 
@@ -28,7 +33,7 @@
             font-size: 16px;
         }
 
-        .btn-reg { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-reg { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         .footer-link { margin-top: 20px; font-size: 13px; color: #666; display: block; text-decoration: none; }
         .footer-link b { color: #007bff; }
     </style>
@@ -43,12 +48,15 @@
         <p style="font-size: 14px; color: #666;">Formulir Pendaftaran Anggota</p>
 
         <form id="regForm">
-            <div class="form-group">
-                <label>Nomor Komsel (NK)</label>
-                <input type="text" id="reg_nk" placeholder="Pilih JC untuk generate NK..." readonly>
+            <div class="nk-container">
+                <div class="form-group">
+                    <label>Nomor Komsel (NK)</label>
+                    <input type="text" id="reg_nk" placeholder="Pilih JC..." readonly>
+                </div>
+                <div id="display_tanggal" class="date-display"></div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 15px;">
                 <label>Nama Lengkap</label>
                 <input type="text" id="reg_nama" required>
             </div>
@@ -114,14 +122,29 @@
     </div>
 
     <script>
-        // Fungsi generate NK otomatis berdasarkan pilihan JC
+        // Fungsi Update Tanggal Otomatis
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            const formattedDate = now.toLocaleDateString('id-ID', options) + " WIT";
+            document.getElementById('display_tanggal').innerText = formattedDate;
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
         function generateNK() {
             const jcLocation = document.getElementById('reg_komsel').value;
             const nkInput = document.getElementById('reg_nk');
-            
             if (jcLocation) {
-                // Simulasi nomor urut pendaftar (nomor urut ini nantinya disesuaikan dengan total data di DB)
-                const nomorUrut = "001"; 
+                const nomorUrut = "001"; // Simulasi nomor urut
                 nkInput.value = `NK-PPP-${nomorUrut}-${jcLocation}-2026`;
             } else {
                 nkInput.value = "";
@@ -139,11 +162,6 @@
                 eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
-
-        document.getElementById('regForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log("Proses registrasi dengan NK: " + document.getElementById('reg_nk').value);
-        });
     </script>
 </body>
 </html>
