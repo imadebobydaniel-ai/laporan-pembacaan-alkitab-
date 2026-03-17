@@ -3,120 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Administrator - Pondok Pemulihan Papua</title>
+    <title>Pendaftaran Anggota - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
-        .admin-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 95%; margin: auto; }
-        .navigation-top { margin-bottom: 20px; }
-        .btn-back { background: #222 !important; color: #fff !important; border: 2px solid #007bff; padding: 12px 25px; border-radius: 50px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s; }
-        .btn-back:hover { background: #007bff !important; transform: translateX(-5px); }
-        .header-section { display: flex; align-items: center; gap: 10px; border-bottom: 3px solid #ff0000; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px; font-weight: bold; }
-        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-        .btn-tool { border: none; padding: 10px 18px; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-        #btnRefresh { background: #00e676; }
-        #btnEdit { background: #ffa000; }
-        #btnHapus { background: #37474f; }
-        .search-group { display: flex; gap: 5px; flex-grow: 1; max-width: 500px; position: relative; }
-        .search-input { padding: 10px 15px; width: 100%; border: 1px solid #ccc; border-radius: 6px; }
-        .btn-cari-red { background: #ff0000; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        
-        .table-container { overflow-x: auto; background: white; border-radius: 8px; width: 100%; border: 1px solid #ddd; }
-        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
-        thead { background: #ff0000; color: white; position: sticky; top: 0; z-index: 10; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; font-size: 13px; white-space: nowrap; }
-        
-        /* Kolom Nomor Komsel diberi warna khusus agar menonjol */
-        .col-nk { font-weight: bold; color: #007bff; background-color: #f8fbff; }
-
-        /* Modal Settings */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 90%; max-width: 500px; border-radius: 15px; overflow: hidden; }
-        .modal-header { background: #007bff; color: white; padding: 15px; text-align: center; font-weight: bold; }
-        .modal-body { padding: 20px; max-height: 70vh; overflow-y: auto; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-        .form-group input[readonly] { background-color: #eee; cursor: not-allowed; }
-        .modal-footer { padding: 15px; display: flex; gap: 10px; border-top: 1px solid #eee; }
-        .btn-save { flex: 1; background: #28a745; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        /* MENGEMBALIKAN DESAIN ASLI SESUAI GAMBAR */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .reg-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header img { width: 80px; margin-bottom: 10px; }
+        .header h2 { margin: 0; color: #333; font-size: 22px; text-transform: uppercase; }
+        .header p { color: #666; font-size: 14px; margin-top: 5px; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #444; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .btn-reg { width: 100%; padding: 14px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; text-transform: uppercase; }
+        .btn-reg:hover { background-color: #0056b3; }
+        .btn-reg:disabled { background-color: #ccc; cursor: not-allowed; }
+        .footer-link { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
+        .footer-link a { color: #007bff; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="admin-container">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <img src="logo_pondok.png" alt="Logo" style="width: 80px;">
-        <h2 style="margin: 5px 0;">PONDOK PEMULIHAN PAPUA</h2>
-        <h4 style="margin: 0; color: #ffa000;">Database Anggota Komsel JC</h4>
+<div class="reg-container">
+    <div class="header">
+        <img src="logo_ppp.png" alt="Logo">
+        <h2>PONDOK PEMULIHAN PAPUA</h2>
+        <p>Pendaftaran Anggota Komsel JC</p>
     </div>
 
-    <div class="navigation-top">
-        <a href="index.html" class="btn-back"><i class="fa-solid fa-circle-arrow-left"></i> KEMBALI KE LOGIN</a>
-    </div>
-
-    <div class="header-section"><i class="fa-solid fa-database"></i> Database Anggota</div>
-
-    <div class="toolbar">
-        <button id="btnRefresh" class="btn-tool" onclick="muatDataUser()"><i class="fa-solid fa-rotate"></i> Refresh</button>
-        <button id="btnEdit" class="btn-tool" onclick="bukaModeEdit()"><i class="fa-solid fa-pen-to-square"></i> Edit Data</button>
-        <button id="btnHapus" class="btn-tool" onclick="hapusTerpilih()"><i class="fa-solid fa-trash"></i> Hapus</button>
-        <div class="search-group">
-            <input type="text" id="kotakCari" class="search-input" placeholder="Cari Nama, Email, atau NK..." onkeyup="jalankanCari()">
-            <button class="btn-cari-red"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <form id="formRegistrasi" onsubmit="prosesDaftar(event)">
+        <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" id="reg_nama" placeholder="Masukkan Nama Lengkap" required>
         </div>
-    </div>
-
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="pilihSemua"></th>
-                    <th style="background: #000;">Nomor Komsel (NK)</th> <th>Nama Lengkap</th>
-                    <th>Email</th>
-                    <th>Password</th>
-                    <th>No. HP</th>
-                    <th>Alamat</th>
-                    <th>Jabatan</th>
-                    <th>JC</th>
-                    <th>Gol. Darah</th>
-                </tr>
-            </thead>
-            <tbody id="badanTabel">
-                </tbody>
-        </table>
-    </div>
-</div>
-
-<div id="editModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">EDIT DATA ANGGOTA</div>
-        <div class="modal-body">
-            <input type="hidden" id="edit_id">
-            
-            <div class="form-group">
-                <label>Nomor Komsel (Terkunci)</label>
-                <input type="text" id="edit_nk" readonly> </div>
-
-            <div class="form-group"><label>Nama Lengkap</label><input type="text" id="edit_nama" required></div>
-            <div class="form-group"><label>Email</label><input type="email" id="edit_email" required></div>
-            <div class="form-group"><label>Password</label><input type="text" id="edit_pass" required></div>
-            <div class="form-group"><label>Nomor HP</label><input type="text" id="edit_hp" required></div>
-            <div class="form-group"><label>Alamat</label><input type="text" id="edit_alamat" required></div>
-            <div class="form-group">
-                <label>Jabatan</label>
-                <select id="edit_jabatan">
-                    <option value="Anggota Komsel">Anggota Komsel</option>
-                    <option value="Ketua Komsel">Ketua Komsel</option>
-                    <option value="Wakil Ketua Komsel">Wakil Ketua Komsel</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="reg_email" placeholder="contoh@mail.com" required>
         </div>
-        <div class="modal-footer">
-            <button class="btn-save" onclick="simpanDataUpdate()">SIMPAN PERUBAHAN</button>
-            <button class="btn-cancel" onclick="tutupModal()">BATAL</button>
+        <div class="form-group">
+            <label>Nomor HP / WhatsApp</label>
+            <input type="number" id="reg_hp" placeholder="Contoh: 08123456789" required>
         </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="reg_pass" placeholder="Buat Password" required>
+        </div>
+        <div class="form-group">
+            <label>Alamat</label>
+            <input type="text" id="reg_alamat" placeholder="Masukkan Alamat" required>
+        </div>
+        <div class="form-group">
+            <label>Jabatan</label>
+            <select id="reg_jabatan" required>
+                <option value="">-- Pilih Jabatan --</option>
+                <option value="Anggota Komsel">Anggota Komsel</option>
+                <option value="Ketua Komsel">Ketua Komsel</option>
+                <option value="Wakil Ketua Komsel">Wakil Ketua Komsel</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Komsel JC</label>
+            <select id="reg_jc" required>
+                <option value="">-- Pilih Lokasi JC --</option>
+                <option value="1">JC 1</option><option value="2">JC 2</option>
+                <option value="3">JC 3</option><option value="4">JC 4</option>
+                <option value="5">JC 5</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Golongan Darah</label>
+            <select id="reg_goldar" required>
+                <option value="">-- Pilih --</option>
+                <option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-reg" id="btnSubmit">DAFTAR SEKARANG</button>
+    </form>
+
+    <div class="footer-link">
+        Sudah punya akun? <a href="index.html">Masuk di sini</a>
     </div>
 </div>
 
@@ -136,76 +103,65 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    function muatDataUser() {
-        const badanTabel = document.getElementById('badanTabel');
-        badanTabel.innerHTML = "";
-        
-        db.collection("users").get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                let user = doc.data();
-                let baris = `
-                    <tr data-id="${doc.id}">
-                        <td><input type="checkbox" class="cek-baris"></td>
-                        <td class="col-nk">${user.nomor_komsel || '-'}</td>
-                        <td>${user.nama || '-'}</td>
-                        <td>${user.email || '-'}</td>
-                        <td style="color:red;">${user.password || '-'}</td>
-                        <td>${user.no_hp || '-'}</td>
-                        <td>${user.alamat || '-'}</td>
-                        <td>${user.jabatan || '-'}</td>
-                        <td>JC ${user.komsel || '-'}</td>
-                        <td>${user.gol_darah || '-'}</td>
-                    </tr>`;
-                badanTabel.innerHTML += baris;
+    async function prosesDaftar(event) {
+        event.preventDefault(); // Mencegah reload halaman
+        const btn = document.getElementById('btnSubmit');
+        btn.innerText = "Memproses...";
+        btn.disabled = true;
+
+        const email = document.getElementById('reg_email').value.trim();
+        const hp = document.getElementById('reg_hp').value.trim();
+
+        try {
+            // 1. DETEKSI EMAIL GANDA
+            const cekEmail = await db.collection("users").where("email", "==", email).get();
+            if (!cekEmail.empty) {
+                alert("❌ ERROR: Nomor anda sudah pernah didaftarkan pada sistem (Email Ganda)!");
+                btn.innerText = "DAFTAR SEKARANG";
+                btn.disabled = false;
+                return;
+            }
+
+            // 2. DETEKSI NOMOR HP GANDA
+            const cekHp = await db.collection("users").where("no_hp", "==", hp).get();
+            if (!cekHp.empty) {
+                alert("❌ ERROR: Nomor anda sudah pernah didaftarkan pada sistem (Nomor HP Ganda)!");
+                btn.innerText = "DAFTAR SEKARANG";
+                btn.disabled = false;
+                return;
+            }
+
+            // 3. GENERATE NOMOR KOMSEL (NK) OTOMATIS
+            const jc = document.getElementById('reg_jc').value;
+            const snapshot = await db.collection("users").get();
+            const count = snapshot.size + 1;
+            const padCount = String(count).padStart(3, '0');
+            const tahun = new Date().getFullYear();
+            const nk_baru = `NK-PPP-${padCount}-JC${jc}-${tahun}`;
+
+            // 4. SIMPAN DATA KE FIREBASE
+            await db.collection("users").add({
+                nama: document.getElementById('reg_nama').value,
+                email: email,
+                no_hp: hp,
+                password: document.getElementById('reg_pass').value,
+                alamat: document.getElementById('reg_alamat').value,
+                jabatan: document.getElementById('reg_jabatan').value,
+                komsel: jc,
+                gol_darah: document.getElementById('reg_goldar').value,
+                nomor_komsel: nk_baru,
+                tanggal_daftar: new Date().toISOString()
             });
-        });
+
+            alert("✅ PENDAFTARAN BERHASIL!\nNomor Komsel (NK) Anda: " + nk_baru);
+            window.location.href = "index.html";
+
+        } catch (error) {
+            alert("🚨 KENDALA SISTEM: " + error.message);
+            btn.innerText = "DAFTAR SEKARANG";
+            btn.disabled = false;
+        }
     }
-
-    function bukaModeEdit() {
-        const terpilih = document.querySelectorAll('.cek-baris:checked');
-        if (terpilih.length !== 1) return alert("Pilih satu data!");
-
-        const id = terpilih[0].closest('tr').getAttribute('data-id');
-        db.collection("users").doc(id).get().then((doc) => {
-            const data = doc.data();
-            document.getElementById('edit_id').value = id;
-            document.getElementById('edit_nk').value = data.nomor_komsel || ""; // NK ditampilkan
-            document.getElementById('edit_nama').value = data.nama || "";
-            document.getElementById('edit_email').value = data.email || "";
-            document.getElementById('edit_pass').value = data.password || "";
-            document.getElementById('edit_hp').value = data.no_hp || "";
-            document.getElementById('edit_alamat').value = data.alamat || "";
-            document.getElementById('edit_jabatan').value = data.jabatan || "Anggota Komsel";
-            document.getElementById('editModal').style.display = 'flex';
-        });
-    }
-
-    function simpanDataUpdate() {
-        const id = document.getElementById('edit_id').value;
-        const dataUpdate = {
-            nama: document.getElementById('edit_nama').value,
-            email: document.getElementById('edit_email').value,
-            password: document.getElementById('edit_pass').value,
-            no_hp: document.getElementById('edit_hp').value,
-            alamat: document.getElementById('edit_alamat').value,
-            jabatan: document.getElementById('edit_jabatan').value
-        };
-
-        db.collection("users").doc(id).update(dataUpdate).then(() => {
-            alert("Data Berhasil Diperbarui!");
-            tutupModal();
-            muatDataUser();
-        });
-    }
-
-    function tutupModal() { document.getElementById('editModal').style.display = 'none'; }
-    function jalankanCari() {
-        let input = document.getElementById('kotakCari').value.toLowerCase();
-        document.querySelectorAll('#badanTabel tr').forEach(tr => {
-            tr.style.display = tr.innerText.toLowerCase().includes(input) ? "" : "none";
-        });
-    }
-    window.onload = muatDataUser;
 </script>
 </body>
 </html>
