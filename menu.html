@@ -3,77 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Pondok Pemulihan Papua</title>
+    <title>Main Menu - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
         
-        /* HEADER ATAS DENGAN JAM AKTIF */
+        /* HEADER DENGAN JAM DIGITAL AKTIF */
         .top-bar { 
-            background: #fff; padding: 10px 20px; display: flex; 
+            background: #fff; padding: 12px 20px; display: flex; 
             justify-content: space-between; align-items: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
         }
-        #digital-clock { color: #007bff; font-size: 14px; }
+        #digital-clock { color: #007bff; font-weight: bold; font-size: 14px; }
+        .system-title { font-size: 12px; font-weight: bold; color: #555; }
 
-        .container { padding: 20px; max-width: 500px; margin: auto; text-align: center; }
+        .container { padding: 20px; max-width: 450px; margin: auto; text-align: center; }
+        .org-title { margin-bottom: 20px; font-weight: 800; letter-spacing: 1px; color: #222; }
         
-        /* KOTAK PROFIL (SINKRON DATA) */
-        .profile-card { 
-            background: white; padding: 20px; border-radius: 15px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px;
+        /* KOTAK PROFIL SINKRON DATA FIREBASE */
+        .profile-section { 
+            background: white; padding: 25px; border-radius: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 25px;
         }
-        .profile-card h2 { margin: 5px 0; color: #333; font-size: 22px; }
-        .profile-card p { margin: 0; color: #666; font-size: 14px; font-weight: 500; }
+        .profile-section i { font-size: 55px; color: #007bff; margin-bottom: 10px; }
+        .profile-section h2 { margin: 5px 0; font-size: 22px; color: #333; }
+        .profile-section p { margin: 0; color: #007bff; font-weight: bold; font-size: 14px; }
 
-        /* GRID MENU */
+        /* GRID MENU 8 TOMBOL */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .menu-item { 
-            background: white; padding: 20px; border-radius: 12px; 
+        .menu-box { 
+            background: white; padding: 20px; border-radius: 15px; 
             display: flex; flex-direction: column; align-items: center; 
-            text-decoration: none; color: #333; font-weight: bold; font-size: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.3s;
+            text-decoration: none; color: #333; font-weight: bold; font-size: 13px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: 0.2s;
         }
-        .menu-item i { font-size: 28px; margin-bottom: 10px; color: #007bff; }
-        .menu-item:active { transform: scale(0.95); background: #f0f7ff; }
+        .menu-box i { font-size: 26px; margin-bottom: 10px; color: #007bff; }
+        .menu-box:active { background: #eefbff; transform: scale(0.95); }
         
-        .btn-logout { 
-            margin-top: 25px; padding: 12px 30px; background: #222; 
-            color: white; border-radius: 50px; text-decoration: none; 
-            display: inline-flex; align-items: center; gap: 10px; font-weight: bold;
+        /* TOMBOL KEMBALI KE LOGIN DI BAWAH */
+        .footer-nav { margin-top: 30px; padding-bottom: 30px; }
+        .btn-back-login { 
+            background: #222; color: #fff; border: 2px solid #007bff; 
+            padding: 12px 30px; border-radius: 50px; cursor: pointer; 
+            text-decoration: none; font-size: 14px; font-weight: bold; 
+            display: inline-flex; align-items: center; gap: 10px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div id="digital-clock">Memuat Jam...</div>
-        <div style="color: #333; font-size: 12px;">Sistem Informasi Komsel</div>
+        <div id="digital-clock">00:00:00</div>
+        <div class="system-title">SISTEM INFORMASI KOMSEL</div>
     </div>
 
     <div class="container">
-        <h3 style="color: #222; letter-spacing: 1px;">PONDOK PEMULIHAN PAPUA</h3>
+        <h3 class="org-title">PONDOK PEMULIHAN PAPUA</h3>
         
-        <div class="profile-card">
-            <i class="fa-solid fa-circle-user" style="font-size: 50px; color: #ddd; margin-bottom: 10px;"></i>
-            <h2 id="user-nama">Memuat Nama...</h2>
-            <p id="user-komsel">Memuat Data Komsel...</p>
+        <div class="profile-section">
+            <i class="fa-solid fa-circle-user"></i>
+            <h2 id="disp_nama">Memuat...</h2>
+            <p id="disp_komsel">Memuat Data Komsel...</p>
         </div>
 
         <div class="menu-grid">
-            <a href="#" class="menu-item"><i class="fa-solid fa-user-gear"></i>Profil Saya</a>
-            <a href="#" class="menu-item"><i class="fa-solid fa-calendar-check"></i>Kehadiran</a>
-            <a href="#" class="menu-item"><i class="fa-solid fa-book-bible"></i>Baca Alkitab</a>
-            <a href="#" class="menu-item"><i class="fa-solid fa-chart-line"></i>Statistik</a>
-            <a href="#" class="menu-item"><i class="fa-solid fa-calendar-day"></i>Kegiatan</a>
-            <a href="#" class="menu-item"><i class="fa-solid fa-file-lines"></i>Laporan</a>
-            <a href="#" class="menu-item"><i class="fa-solid fa-location-dot"></i>Lacak Domba</a>
-            <a href="javascript:location.reload()" class="menu-item" style="color: #28a745;"><i class="fa-solid fa-rotate"></i>Refresh</a>
+            <a href="#" class="menu-box"><i class="fa-solid fa-user-gear"></i>Profil Saya</a>
+            <a href="#" class="menu-box"><i class="fa-solid fa-calendar-check"></i>Kehadiran</a>
+            <a href="#" class="menu-box"><i class="fa-solid fa-book-bible"></i>Baca Alkitab</a>
+            <a href="#" class="menu-box"><i class="fa-solid fa-chart-line"></i>Statistik</a>
+            <a href="#" class="menu-box"><i class="fa-solid fa-calendar-day"></i>Kegiatan</a>
+            <a href="#" class="menu-box"><i class="fa-solid fa-file-lines"></i>Laporan</a>
+            <a href="#" class="menu-box"><i class="fa-solid fa-location-dot"></i>Lacak Domba</a>
+            <a href="javascript:location.reload()" class="menu-box" style="color: #28a745;"><i class="fa-solid fa-rotate"></i>Refresh</a>
         </div>
 
-        <a href="index.html" class="btn-logout">
-            <i class="fa-solid fa-right-from-bracket"></i> KEMBALI KE LOGIN
-        </a>
+        <div class="footer-nav">
+            <a href="index.html" class="btn-back-login">
+                <i class="fa-solid fa-circle-arrow-left"></i> KEMBALI KE LOGIN
+            </a>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -91,41 +100,30 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. FUNGSI JAM DIGITAL AKTIF
-        function updateClock() {
+        // JAM DIGITAL AKTIF
+        function startClock() {
             const now = new Date();
-            const jam = String(now.getHours()).padStart(2, '0');
-            const min = String(now.getMinutes()).padStart(2, '0');
-            const det = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('digital-clock').innerText = `${jam}:${min}:${det} WIT`;
+            document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID') + " WIT";
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(startClock, 1000);
+        startClock();
 
-        // 2. AMBIL DATA DARI SESSION LOGIN
-        const userEmail = localStorage.getItem("userEmail"); // Pastikan saat login, email disimpan di localStorage
+        // AMBIL DATA DARI FIREBASE BERDASARKAN EMAIL LOGIN
+        const loginEmail = localStorage.getItem("userEmail");
 
-        async function loadUserData() {
-            if (!userEmail) {
-                window.location.href = "index.html"; // Jika tidak ada session, lempar ke login
-                return;
-            }
+        async function fetchProfile() {
+            if (!loginEmail) { window.location.href = "index.html"; return; }
 
             try {
-                const snapshot = await db.collection("users").where("email", "==", userEmail).get();
-                if (!snapshot.empty) {
-                    const data = snapshot.docs[0].data();
-                    document.getElementById('user-nama').innerText = data.nama;
-                    document.getElementById('user-komsel').innerText = "Sistem Informasi " + data.komsel;
-                } else {
-                    document.getElementById('user-nama').innerText = "Tamu";
-                    document.getElementById('user-komsel').innerText = "Data Tidak Ditemukan";
+                const query = await db.collection("users").where("email", "==", loginEmail).get();
+                if (!query.empty) {
+                    const user = query.docs[0].data();
+                    document.getElementById('disp_nama').innerText = user.nama;
+                    document.getElementById('disp_komsel').innerText = "KOMSEL " + user.komsel;
                 }
-            } catch (error) {
-                console.error("Error ambil data:", error);
-            }
+            } catch (err) { console.log("Gagal muat data:", err); }
         }
-        loadUserData();
+        fetchProfile();
     </script>
 </body>
 </html>
