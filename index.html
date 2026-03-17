@@ -52,7 +52,7 @@
         <a href="admin_login.html" class="admin-link">Masuk sebagai Admin</a>
     </div>
 
-   <script>
+  <script>
         // Fungsi Toggle Password Login
         function togglePassLogin() {
             const passInput = document.getElementById('login_password');
@@ -66,17 +66,18 @@
             }
         }
 
-        // Perbaikan navigasi ke Menu Utama
+        // Navigasi tombol MASUK ke file yang tepat
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = document.getElementById('login_email').value;
             const password = document.getElementById('login_password').value;
 
             if (email && password) {
-                // Menghilangkan alert dan langsung mengarahkan ke menu utama
+                // Mengarahkan ke file menu_utama.html sesuai struktur Anda
                 window.location.href = "menu.html"; 
             }
         });
+    </script>
     </script>
     </script>
 </body>
