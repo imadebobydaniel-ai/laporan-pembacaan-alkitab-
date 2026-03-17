@@ -8,7 +8,7 @@
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
-        /* POSISI TOMBOL KEMBALI KE LOGIN SESUAI CORETAN MERAH */
+        /* TOMBOL KEMBALI DI ATAS FORM SESUAI GAMBAR */
         .top-nav { margin-bottom: 10px; }
         .btn-kembali { 
             background: #222; color: #fff; border: 2px solid #007bff; 
@@ -19,7 +19,7 @@
         }
 
         .reg-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; box-sizing: border-box; }
-        .header { text-align: center; margin-bottom: 25px; }
+        .header { text-align: center; margin-bottom: 20px; }
         .header img { width: 80px; margin-bottom: 10px; }
         .header h2 { margin: 0; color: #333; font-size: 20px; text-transform: uppercase; }
         
@@ -27,8 +27,8 @@
         .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #444; }
         .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         
-        /* STYLE KHUSUS UNTUK KOLOM NK AGAR TERLIHAT PENTING */
-        .nk-display { background-color: #eefbff; border: 1px solid #007bff !important; color: #007bff; font-weight: bold; text-align: center; }
+        /* STYLE KOLOM NK OTOMATIS */
+        .nk-field { background-color: #f0faff; border: 1.5px solid #007bff !important; color: #007bff; font-weight: bold; text-align: center; }
 
         .btn-submit { width: 100%; padding: 14px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .footer-text { text-align: center; margin-top: 20px; font-size: 13px; }
@@ -53,7 +53,7 @@
         <form id="regForm" onsubmit="prosesDaftar(event)">
             <div class="form-group">
                 <label>Nomor Komsel (NK) - Dihasilkan Otomatis</label>
-                <input type="text" id="reg_nk" class="nk-display" placeholder="Akan muncul otomatis..." readonly>
+                <input type="text" id="reg_nk" class="nk-field" placeholder="Akan muncul otomatis..." readonly>
             </div>
 
             <div class="form-group"><label>Nama Lengkap</label><input type="text" id="reg_nama" required></div>
@@ -68,16 +68,16 @@
                     <option value="">-- Pilih Jabatan --</option>
                     <option value="Anggota Komsel">Anggota Komsel</option>
                     <option value="Ketua Komsel">Ketua Komsel</option>
-                    <option value="Wakil Ketua Komsel">Wakil Ketua Komsel</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>Komsel JC</label>
-                <select id="reg_jc" required onchange="updateNKPreview()">
+                <select id="reg_jc" required onchange="buatNK()">
                     <option value="">-- Pilih Lokasi JC --</option>
-                    <option value="1">JC 1</option><option value="2">JC 2</option><option value="3">JC 3</option>
-                    <option value="4">JC 4</option><option value="5">JC 5</option>
+                    <option value="JC1">JC 1</option><option value="JC2">JC 2</option>
+                    <option value="JC3">JC 3</option><option value="JC4">JC 4</option>
+                    <option value="JC5">JC 5</option>
                 </select>
             </div>
 
@@ -110,26 +110,27 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // FUNGSI UNTUK MENAMPILKAN PREVIEW NK SAAT PILIH JC
-        async function updateNKPreview() {
+        // LOGIKA NK OTOMATIS: NK-PPP-[NOMOR URUT]-[INPUT JC]-2026
+        async function buatNK() {
             const jc = document.getElementById('reg_jc').value;
             if (!jc) { document.getElementById('reg_nk').value = ""; return; }
             
-            const totalDoc = await db.collection("users").get();
-            const urutan = String(totalDoc.size + 1).padStart(3, '0');
-            const tahun = new Date().getFullYear();
-            document.getElementById('reg_nk').value = `NK-PPP-${urutan}-JC${jc}-${tahun}`;
+            const snapshot = await db.collection("users").get();
+            const urutan = String(snapshot.size + 1).padStart(3, '0');
+            const tahun = "2026";
+            
+            const nkFinal = `NK-PPP-${urutan}-${jc}-${tahun}`;
+            document.getElementById('reg_nk').value = nkFinal;
         }
 
         async function prosesDaftar(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
             const nk = document.getElementById('reg_nk').value;
-            btn.innerText = "Memproses...";
+            btn.innerText = "Mendaftarkan...";
             btn.disabled = true;
 
             try {
-                // Simpan ke Firebase agar sinkron dengan Admin
                 await db.collection("users").add({
                     nama: document.getElementById('reg_nama').value,
                     email: document.getElementById('reg_email').value,
@@ -139,14 +140,14 @@
                     jabatan: document.getElementById('reg_jabatan').value,
                     komsel: document.getElementById('reg_jc').value,
                     gol_darah: document.getElementById('reg_goldar').value,
-                    nomor_komsel: nk, // NK Tersimpan ke Database
+                    nomor_komsel: nk, // DISIMPAN AGAR MUNCUL DI DATABASE ADMINISTRATOR
                     tanggal_daftar: new Date().toISOString()
                 });
 
-                alert("✅ BERHASIL! Nomor Komsel Anda: " + nk);
+                alert("BERHASIL! Nomor Komsel Anda: " + nk);
                 window.location.href = "index.html";
 
-            } catch (err) { alert("🚨 Error: " + err.message); btn.disabled = false; btn.innerText = "DAFTAR SEKARANG"; }
+            } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "DAFTAR SEKARANG"; }
         }
     </script>
 </body>
