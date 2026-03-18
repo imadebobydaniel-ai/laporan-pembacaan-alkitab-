@@ -25,10 +25,16 @@
         .bg-global { background: linear-gradient(90deg, #6610f2, #6f42c1); }
         .bg-kehadiran { background: linear-gradient(90deg, #28a745, #a8e063); }
 
-        .blood-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
-        .blood-box { background: #fff5f5; border: 1px solid #ffcccc; padding: 10px; border-radius: 12px; text-align: center; }
-        .blood-box span { display: block; font-weight: bold; color: #dc3545; font-size: 18px; }
-        .blood-box label { font-size: 11px; color: #777; }
+        /* Modal Pop Up */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .modal-box h4 { margin-top: 0; color: #dc3545; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        
+        .blood-list { list-style: none; padding: 0; margin: 15px 0; text-align: left; }
+        .blood-list li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f9f9f9; font-weight: 500; }
+        .blood-list li b { color: #dc3545; }
+
+        .modal-btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
 
         .btn-back { display: block; text-align: center; margin-top: 10px; text-decoration: none; color: #007bff; font-weight: bold; font-size: 14px; padding: 15px; background: white; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     </style>
@@ -38,85 +44,65 @@
 <div class="container">
     <div class="card">
         <h3><i class="fa-solid fa-chart-pie"></i> Capaian Baca Alkitab</h3>
-        
         <div class="form-group">
             <label>Pilih Komsel</label>
             <select id="select-komsel-alkitab" onchange="updateStatistikAlkitab()">
-                <option value="JC 1">JC 1</option>
-                <option value="JC 2">JC 2</option>
-                <option value="JC 3">JC 3</option>
-                <option value="JC 4">JC 4</option>
-                <option value="JC 5">JC 5</option>
+                <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option><option value="JC 4">JC 4</option><option value="JC 5">JC 5</option>
             </select>
         </div>
-
         <div class="stat-section">
-            <div class="stat-label">
-                <span id="label-komsel-alkitab">Capaian JC 1</span>
-                <span id="pct-alkitab-komsel">0%</span>
-            </div>
-            <div class="progress-container">
-                <div id="bar-alkitab-komsel" class="progress-bar bg-alkitab" style="width: 0%"></div>
-            </div>
+            <div class="stat-label"><span id="label-komsel-alkitab">Capaian JC 1</span><span id="pct-alkitab-komsel">0%</span></div>
+            <div class="progress-container"><div id="bar-alkitab-komsel" class="progress-bar bg-alkitab" style="width: 0%"></div></div>
         </div>
-
         <div class="stat-section">
-            <div class="stat-label">
-                <span>Seluruh Komsel (Global)</span>
-                <span id="pct-alkitab-global">0%</span>
-            </div>
-            <div class="progress-container">
-                <div id="bar-alkitab-global" class="progress-bar bg-global" style="width: 0%"></div>
-            </div>
+            <div class="stat-label"><span>Seluruh Komsel (Global)</span><span id="pct-alkitab-global">0%</span></div>
+            <div class="progress-container"><div id="bar-alkitab-global" class="progress-bar bg-global" style="width: 0%"></div></div>
         </div>
     </div>
 
     <div class="card">
         <h3><i class="fa-solid fa-calendar-check"></i> Statistik Kehadiran</h3>
-        
         <div class="form-group">
             <label>Pilih Komsel</label>
             <select id="select-komsel-hadir" onchange="updateStatistikHadir()">
-                <option value="JC 1">JC 1</option>
-                <option value="JC 2">JC 2</option>
-                <option value="JC 3">JC 3</option>
-                <option value="JC 4">JC 4</option>
-                <option value="JC 5">JC 5</option>
+                <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option><option value="JC 4">JC 4</option><option value="JC 5">JC 5</option>
             </select>
         </div>
-
         <div class="stat-section">
-            <div class="stat-label">
-                <span id="label-komsel-hadir">Kehadiran JC 1</span>
-                <span id="pct-hadir-komsel">0%</span>
-            </div>
-            <div class="progress-container">
-                <div id="bar-hadir-komsel" class="progress-bar bg-kehadiran" style="width: 0%"></div>
-            </div>
+            <div class="stat-label"><span id="label-komsel-hadir">Kehadiran JC 1</span><span id="pct-hadir-komsel">0%</span></div>
+            <div class="progress-container"><div id="bar-hadir-komsel" class="progress-bar bg-kehadiran" style="width: 0%"></div></div>
         </div>
-
         <div class="stat-section">
-            <div class="stat-label">
-                <span>Seluruh Komsel (Global)</span>
-                <span id="pct-hadir-global">0%</span>
-            </div>
-            <div class="progress-container">
-                <div id="bar-hadir-global" class="progress-bar bg-global" style="width: 0%"></div>
-            </div>
+            <div class="stat-label"><span>Seluruh Komsel (Global)</span><span id="pct-hadir-global">0%</span></div>
+            <div class="progress-container"><div id="bar-hadir-global" class="progress-bar bg-global" style="width: 0%"></div></div>
         </div>
     </div>
 
     <div class="card">
         <h3><i class="fa-solid fa-droplet"></i> Data Golongan Darah</h3>
-        <div class="blood-grid">
-            <div class="blood-box"><span id="goldar-a">0</span><label>Tipe A</label></div>
-            <div class="blood-box"><span id="goldar-b">0</span><label>Tipe B</label></div>
-            <div class="blood-box"><span id="goldar-ab">0</span><label>Tipe AB</label></div>
-            <div class="blood-box"><span id="goldar-o">0</span><label>Tipe O</label></div>
+        <div class="form-group">
+            <label>Lihat Distribusi Per Komsel</label>
+            <select id="select-komsel-darah" onchange="openBloodModal()">
+                <option value="" disabled selected>Pilih Komsel...</option>
+                <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option><option value="JC 4">JC 4</option><option value="JC 5">JC 5</option>
+            </select>
         </div>
     </div>
 
     <a href="menu.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu Utama</a>
+</div>
+
+<div id="bloodModal" class="modal-overlay">
+    <div class="modal-box">
+        <h4 id="modalTitleDarah">Data Darah JC 1</h4>
+        <ul class="blood-list">
+            <li>Golongan Darah O <b id="val-o">0 Orang</b></li>
+            <li>Golongan Darah A <b id="val-a">0 Orang</b></li>
+            <li>Golongan Darah B <b id="val-b">0 Orang</b></li>
+            <li>Golongan Darah AB <b id="val-ab">0 Orang</b></li>
+        </ul>
+        <button class="modal-btn" onclick="closeBloodModal()">TUTUP</button>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -138,72 +124,72 @@
     const totalDays = new Date(new Date().getFullYear(), currentMonth, 0).getDate();
 
     async function updateStatistikAlkitab() {
-        const selectedJC = document.getElementById('select-komsel-alkitab').value;
-        const jcNumber = selectedJC.replace("JC ", "");
-        document.getElementById('label-komsel-alkitab').innerText = "Capaian " + selectedJC;
-
-        const snapUsers = await db.collection("users").where("komsel", "==", jcNumber).get();
-        const totalJemaat = snapUsers.size || 0;
-
-        const snapLaporan = await db.collection("laporan_bacaan")
-            .where("komsel", "==", jcNumber)
-            .where("bulan", "==", currentMonth).get();
-        
-        const targetLaporan = totalJemaat * totalDays;
-        const pctKomsel = targetLaporan > 0 ? Math.min((snapLaporan.size / targetLaporan) * 100, 100).toFixed(1) : 0;
-        
-        document.getElementById('pct-alkitab-komsel').innerText = pctKomsel + "%";
-        document.getElementById('bar-alkitab-komsel').style.width = pctKomsel + "%";
+        const jc = document.getElementById('select-komsel-alkitab').value;
+        const jcN = jc.replace("JC ", "");
+        document.getElementById('label-komsel-alkitab').innerText = "Capaian " + jc;
+        const snapUsers = await db.collection("users").where("komsel", "==", jcN).get();
+        const snapLaporan = await db.collection("laporan_bacaan").where("komsel", "==", jcN).where("bulan", "==", currentMonth).get();
+        const target = snapUsers.size * totalDays;
+        const pct = target > 0 ? Math.min((snapLaporan.size / target) * 100, 100).toFixed(1) : 0;
+        document.getElementById('pct-alkitab-komsel').innerText = pct + "%";
+        document.getElementById('bar-alkitab-komsel').style.width = pct + "%";
     }
 
     async function updateStatistikHadir() {
-        const selectedJC = document.getElementById('select-komsel-hadir').value;
-        const jcNumber = selectedJC.replace("JC ", "");
-        document.getElementById('label-komsel-hadir').innerText = "Kehadiran " + selectedJC;
-
-        const snapHadir = await db.collection("kehadiran").where("komsel", "==", jcNumber).get();
-        let hadir = 0; let total = snapHadir.size;
-        
+        const jc = document.getElementById('select-komsel-hadir').value;
+        const jcN = jc.replace("JC ", "");
+        document.getElementById('label-komsel-hadir').innerText = "Kehadiran " + jc;
+        const snapHadir = await db.collection("kehadiran").where("komsel", "==", jcN).get();
+        let hadir = 0; 
         snapHadir.forEach(doc => { if(doc.data().status === "Hadir") hadir++; });
-        
-        const pctHadir = total > 0 ? ((hadir / total) * 100).toFixed(1) : 0;
-        
-        document.getElementById('pct-hadir-komsel').innerText = pctHadir + "%";
-        document.getElementById('bar-hadir-komsel').style.width = pctHadir + "%";
+        const pct = snapHadir.size > 0 ? ((hadir / snapHadir.size) * 100).toFixed(1) : 0;
+        document.getElementById('pct-hadir-komsel').innerText = pct + "%";
+        document.getElementById('bar-hadir-komsel').style.width = pct + "%";
     }
 
-    async function loadGlobalAndStatic() {
-        // Alkitab Global
-        const snapAllLapor = await db.collection("laporan_bacaan").where("bulan", "==", currentMonth).get();
-        const snapAllUsers = await db.collection("users").get();
-        const globalAlkitabTarget = snapAllUsers.size * totalDays;
-        const pctAlkitabGlobal = globalAlkitabTarget > 0 ? Math.min((snapAllLapor.size / globalAlkitabTarget) * 100, 100).toFixed(1) : 0;
-        document.getElementById('pct-alkitab-global').innerText = pctAlkitabGlobal + "%";
-        document.getElementById('bar-alkitab-global').style.width = pctAlkitabGlobal + "%";
-
-        // Kehadiran Global
-        const snapAllHadir = await db.collection("kehadiran").get();
-        let gHadir = 0;
-        snapAllHadir.forEach(doc => { if(doc.data().status === "Hadir") gHadir++; });
-        const pctHadirGlobal = snapAllHadir.size > 0 ? ((gHadir / snapAllHadir.size) * 100).toFixed(1) : 0;
-        document.getElementById('pct-hadir-global').innerText = pctHadirGlobal + "%";
-        document.getElementById('bar-hadir-global').style.width = pctHadirGlobal + "%";
-
-        // Golongan Darah
+    async function openBloodModal() {
+        const jc = document.getElementById('select-komsel-darah').value;
+        const jcN = jc.replace("JC ", "");
+        document.getElementById('modalTitleDarah').innerText = "Data Darah " + jc;
+        
+        const snapUsers = await db.collection("users").where("komsel", "==", jcN).get();
         let darah = { A: 0, B: 0, AB: 0, O: 0 };
-        snapAllUsers.forEach(doc => {
+        snapUsers.forEach(doc => {
             const gd = doc.data().golongan_darah;
             if(darah.hasOwnProperty(gd)) darah[gd]++;
         });
-        document.getElementById('goldar-a').innerText = darah.A;
-        document.getElementById('goldar-b').innerText = darah.B;
-        document.getElementById('goldar-ab').innerText = darah.AB;
-        document.getElementById('goldar-o').innerText = darah.O;
+
+        document.getElementById('val-a').innerText = darah.A + " Orang";
+        document.getElementById('val-b').innerText = darah.B + " Orang";
+        document.getElementById('val-ab').innerText = darah.AB + " Orang";
+        document.getElementById('val-o').innerText = darah.O + " Orang";
+        document.getElementById('bloodModal').style.display = "flex";
+    }
+
+    function closeBloodModal() {
+        document.getElementById('bloodModal').style.display = "none";
+        document.getElementById('select-komsel-darah').value = "";
+    }
+
+    async function loadGlobal() {
+        const snapL = await db.collection("laporan_bacaan").where("bulan", "==", currentMonth).get();
+        const snapU = await db.collection("users").get();
+        const target = snapU.size * totalDays;
+        const pctA = target > 0 ? Math.min((snapL.size / target) * 100, 100).toFixed(1) : 0;
+        document.getElementById('pct-alkitab-global').innerText = pctA + "%";
+        document.getElementById('bar-alkitab-global').style.width = pctA + "%";
+
+        const snapH = await db.collection("kehadiran").get();
+        let gH = 0;
+        snapH.forEach(doc => { if(doc.data().status === "Hadir") gH++; });
+        const pctH = snapH.size > 0 ? ((gH / snapH.size) * 100).toFixed(1) : 0;
+        document.getElementById('pct-hadir-global').innerText = pctH + "%";
+        document.getElementById('bar-hadir-global').style.width = pctH + "%";
     }
 
     updateStatistikAlkitab();
     updateStatistikHadir();
-    loadGlobalAndStatic();
+    loadGlobal();
 </script>
 </body>
 </html>
