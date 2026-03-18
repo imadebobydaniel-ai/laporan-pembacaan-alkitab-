@@ -113,9 +113,19 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+    // Mengambil ID edit (jika ada)
     const editID = localStorage.getItem("editMemberID");
 
     window.onload = async function() {
+        // PERBAIKAN: Jika tidak ada editID atau datang bukan dari admin, 
+        // pastikan tombol back ke login.html
+        if (!editID) {
+            document.getElementById("btn-back").href = "login.html";
+            document.getElementById("btn-back").innerHTML = '<i class="fa-solid fa-arrow-left"></i> Kembali ke Login Page';
+            return;
+        }
+
+        // Jika dalam mode EDIT (Data dari Admin)
         if (editID) {
             document.getElementById("form-title").innerText = "EDIT DATA ANGGOTA";
             document.getElementById("btn-submit-text").innerText = "SIMPAN PERUBAHAN";
@@ -154,6 +164,7 @@
         try {
             if (editID) {
                 await db.collection("users").doc(editID).update(userData);
+                localStorage.removeItem("editMemberID"); // Bersihkan setelah edit selesai
             } else {
                 await db.collection("users").add({ ...userData, tanggalDaftar: new Date().toLocaleDateString() });
             }
@@ -162,8 +173,13 @@
     }
 
     function redirectAfterSuccess() {
-        if (editID) { localStorage.removeItem("editMemberID"); window.location.href = 'admin.html'; }
-        else { window.location.href = 'login.html'; }
+        // Pastikan memori bersih saat pindah halaman
+        localStorage.removeItem("editMemberID"); 
+        if (editID) { 
+            window.location.href = 'admin.html'; 
+        } else { 
+            window.location.href = 'login.html'; 
+        }
     }
 </script>
 </body>
