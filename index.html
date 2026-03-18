@@ -47,31 +47,32 @@
 </form>
 
 <script>
-    // Fungsi Toggle Password Login
-    function togglePassLogin() {
-        const passInput = document.getElementById('login_password');
-        const eyeIcon = document.getElementById('eyeIconLogin');
-        if (passInput.type === 'password') {
-            passInput.type = 'text';
-            eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
-        } else {
-            passInput.type = 'password';
-            eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+        // Fungsi Toggle Password Login
+        function togglePassLogin() {
+            const passInput = document.getElementById('login_password');
+            const eyeIcon = document.getElementById('eyeIconLogin');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passInput.type = 'password';
+                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
         }
-    }
 
-    // Navigasi tombol MASUK ke menu.html
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('login_email').value;
-        const password = document.getElementById('login_password').value;
+        // Navigasi tombol MASUK yang stabil ke menu.html
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Menghentikan refresh form otomatis
+            
+            const email = document.getElementById('login_email').value;
+            const password = document.getElementById('login_password').value;
 
-        if (email && password) {
-            // Langsung arahkan ke file menu.html
-            window.location.href = "menu.html"; 
-        }
-    });
-</script>
+            if (email && password) {
+                // Menggunakan replace agar history login tidak memicu balik ke index
+                window.location.replace("menu.html"); 
+            }
+        });
+    </script>
     </script>
     </script>
 </body>
