@@ -8,6 +8,29 @@
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
         
+        /* CSS Running Text */
+        .top-bar-running {
+            background: #ffffff;
+            border-bottom: 2px solid #dc3545;
+            color: #007bff;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 8px 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .running-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 25s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
         /* Header Responsif */
         header { 
             display: flex; 
@@ -80,7 +103,6 @@
         
         .profile-section { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 25px; }
         
-        /* Style Foto Profil agar bulat sempurna */
         .profile-img-container { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 10px auto; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #eee; }
         .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
         .profile-section i { font-size: 80px; color: #007bff; }
@@ -97,13 +119,15 @@
 </head>
 <body>
 
+    <div class="top-bar-running">
+        <div id="running-text" class="running-content"> Memuat data... </div>
+    </div>
+
     <header>
         <div id="display-tanggal"></div>
-
         <div class="center-title">
             <h2>PONDOK PEMULIHAN PAPUA</h2>
         </div>
-
         <div class="right-area">
             <div id="digital-clock">00:00:00 WIT</div>
             <a href="setting.html" class="setting-icon"><i class="fa-solid fa-gear"></i></a>
@@ -125,17 +149,15 @@
         <div class="menu-grid">
             <a href="profil.html" class="menu-item menu-box"><i class="fa-solid fa-user-gear"></i>Profil Saya</a>
             <a href="kehadiran.html" class="menu-item menu-box"><i class="fa-solid fa-calendar-check"></i>Kehadiran</a>
-           
-            <a href="baca-alkitab.html" class="menu-item menu-box"><i class="fa-solid fa-book-bible"></i>laporan Baca Alkitab</a>
+            <a href="baca-alkitab.html" class="menu-item menu-box"><i class="fa-solid fa-book-bible"></i>Laporan Baca Alkitab</a>
             <a href="statistik.html" class="menu-item menu-box"><i class="fa-solid fa-chart-line"></i>Statistik</a>
-            
-            <a href="laporan-komsel.html" class="menu-item menu-box">
-    <i class="fa-solid fa-file-contract"></i>Laporan Komsel
-</a>
+            <a href="laporan-komsel.html" class="menu-item menu-box"><i class="fa-solid fa-file-contract"></i>Laporan Komsel</a>
+            <a href="#" class="menu-item menu-box"><i class="fa-solid fa-file-lines"></i>Lapor Komsel</a>
             <a href="#" class="menu-item menu-box"><i class="fa-solid fa-location-dot"></i>Lacak Domba</a>
             <a href="#" class="menu-item menu-box"><i class="fa-solid fa-calendar-day"></i>Kegiatan</a>
             <a href="javascript:location.reload()" class="menu-item menu-box" style="color: #28a745;"><i class="fa-solid fa-rotate"></i>Refresh</a>
         </div>
+        
         <a href="index.html" class="btn-logout" onclick="localStorage.clear()">KELUAR</a>
     </div>
 
@@ -143,7 +165,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // Konfigurasi Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
             authDomain: "boby-apps-project.firebaseapp.com",
@@ -155,22 +176,28 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Fungsi Update Tanggal dan Jam secara Real-time
-        function updateWaktu() {
+        function updateWaktuDanRunningText() {
             const now = new Date();
-            const opsiTanggal = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
-            document.getElementById('display-tanggal').innerText = now.toLocaleDateString('id-ID', opsiTanggal);
+            const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            
+            const dayName = days[now.getDay()];
+            const date = now.getDate();
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+            const time = now.toLocaleTimeString('id-ID', { hour12: false });
 
-            const jam = String(now.getHours()).padStart(2, '0');
-            const menit = String(now.getMinutes()).padStart(2, '0');
-            const detik = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('digital-clock').innerText = `${jam}:${menit}:${detik} WIT`;
+            // Update Header Clock
+            document.getElementById('display-tanggal').innerText = `${dayName}, ${date} ${monthName} ${year}`;
+            document.getElementById('digital-clock').innerText = `${time} WIT`;
+
+            // Update Running Text Content
+            const runningContent = `${dayName}, ${date} ${monthName} ${year} | ${time} WIT | PONDOK PEMULIHAN PAPUA SISTEM INFORMASI KOMSEL JC | COPYRIGHT BY. IMADE BOBY`;
+            document.getElementById('running-text').innerText = runningContent;
         }
 
-        // Ambil data User dari Firebase secara Real-Time
         function syncUserData() {
             const userEmail = localStorage.getItem("userEmail");
-
             if (!userEmail) {
                 window.location.href = "index.html";
                 return;
@@ -180,7 +207,6 @@
                 .onSnapshot((querySnapshot) => {
                     if (!querySnapshot.empty) {
                         const data = querySnapshot.docs[0].data();
-                        
                         document.getElementById('disp_nama').innerText = data.nama || "User";
                         document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
 
@@ -199,32 +225,20 @@
                 });
         }
 
-        // FUNGSI GPS BARU
         function requestGPS() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        console.log("GPS Terkoneksi");
-                    },
-                    (error) => {
-                        if (error.code === 1) {
-                            alert("Mohon aktifkan Izin Lokasi di Pengaturan HP untuk fitur Lacak Domba.");
-                        } else {
-                            console.error("GPS Error: " + error.message);
-                        }
-                    },
+                    () => console.log("GPS Aktif"),
+                    (err) => console.error("GPS Error: " + err.message),
                     { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
                 );
             }
         }
 
-        // Event listener agar GPS terpancing saat user menyentuh layar pertama kali
-        document.body.addEventListener('touchstart', function() {
-            requestGPS();
-        }, {once: true}); 
+        document.body.addEventListener('touchstart', () => requestGPS(), {once: true}); 
 
-        setInterval(updateWaktu, 1000);
-        updateWaktu();
+        setInterval(updateWaktuDanRunningText, 1000);
+        updateWaktuDanRunningText();
         syncUserData();
         requestGPS(); 
     </script>
