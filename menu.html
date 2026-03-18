@@ -7,106 +7,39 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
-        
-        /* Baris Pertama: Info Statis */
-        .top-info-bar {
-            background: #ffffff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 15px;
-            font-weight: bold;
-            font-size: 12px;
-            border-bottom: 1px solid #ddd;
-        }
+        .top-info-bar { background: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; font-weight: bold; font-size: 12px; border-bottom: 1px solid #ddd; }
         #display-tanggal { color: #007bff; }
         #digital-clock { color: #ff0000; }
-
-        /* Baris Kedua: Header dengan Running Text */
-        header { 
-            background: #ffffff; 
-            border-bottom: 2px solid #dc3545;
-            padding: 10px 0;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .running-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 25s linear infinite;
-            font-weight: 900;
-            font-size: 14px;
-            color: #FFD700; /* Kuning Gold */
-            text-shadow: 
-                -1px -1px 0 #000,  
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000; /* Outline Hitam */
-            text-transform: uppercase;
-        }
-
-        @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
-
-        /* Layout Utama */
+        header { background: #ffffff; border-bottom: 2px solid #dc3545; padding: 10px 0; overflow: hidden; white-space: nowrap; position: relative; display: flex; align-items: center; }
+        .running-content { display: inline-block; padding-left: 100%; animation: marquee 25s linear infinite; font-weight: 900; font-size: 14px; color: #FFD700; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; text-transform: uppercase; }
+        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         .container { padding: 20px; max-width: 450px; margin: auto; text-align: center; }
         .org-title { margin: 10px 0 20px 0; font-weight: 800; color: #222; text-transform: uppercase; }
-        
-        .profile-section { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 20px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-            margin-bottom: 25px; 
-            position: relative; /* Untuk posisi ikon gear */
-        }
-        
-        /* Posisi Baru Tombol Setting */
-        .setting-icon-profile { 
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            color: #555; 
-            font-size: 20px; 
-            text-decoration: none; 
-        }
-
+        .profile-section { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 25px; position: relative; }
+        .setting-icon-profile { position: absolute; top: 15px; right: 15px; color: #555; font-size: 20px; text-decoration: none; }
         .profile-img-container { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 10px auto; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #eee; }
         .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
         .profile-section i.fa-circle-user { font-size: 80px; color: #007bff; }
         .profile-section h2 { margin: 5px 0; font-size: 22px; color: #333; }
         .profile-section p { margin: 0; color: #007bff; font-weight: bold; }
-
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .menu-box { background: white; padding: 20px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #333; font-weight: bold; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .menu-box i { font-size: 26px; margin-bottom: 10px; color: #007bff; }
-        
         .btn-logout { background: #222; color: #fff; padding: 12px 30px; border-radius: 50px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block; margin-top: 30px; border: 2px solid #007bff; }
     </style>
 </head>
 <body>
-
     <div class="top-info-bar">
         <div id="display-tanggal">Memuat Tanggal...</div>
         <div id="digital-clock">00:00:00 WIT</div>
     </div>
-
     <header>
         <div id="running-text" class="running-content">Memuat data...</div>
     </header>
-
     <div class="container">
         <h3 class="org-title">Menu Utama</h3>
-        
         <div class="profile-section">
             <a href="setting.html" class="setting-icon-profile"><i class="fa-solid fa-gear"></i></a>
-            
             <div class="profile-img-container" id="photo-area">
                 <i class="fa-solid fa-circle-user" id="default-icon"></i>
                 <img id="user-photo" src="" style="display: none;">
@@ -114,7 +47,6 @@
             <h2 id="disp_nama">User</h2>
             <p id="disp_komsel">KOMSEL JC</p>
         </div>
-
         <div class="menu-grid">
             <a href="profil.html" class="menu-item menu-box"><i class="fa-solid fa-user-gear"></i>Profil Saya</a>
             <a href="kehadiran.html" class="menu-item menu-box"><i class="fa-solid fa-calendar-check"></i>Kehadiran</a>
@@ -125,72 +57,45 @@
             <a href="#" class="menu-item menu-box"><i class="fa-solid fa-location-dot"></i>Lacak Domba</a>
             <a href="#" class="menu-item menu-box"><i class="fa-solid fa-calendar-day"></i>Kegiatan</a>
             <a href="javascript:location.reload()" class="menu-item menu-box" style="color: #28a745;"><i class="fa-solid fa-rotate"></i>Refresh</a>
+            <a href="saran.html" class="menu-item menu-box"><i class="fa-solid fa-comment-dots"></i>Saran & Masukan</a>
         </div>
-        
         <a href="index.html" class="btn-logout" onclick="localStorage.clear()">KELUAR</a>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
-            authDomain: "boby-apps-project.firebaseapp.com",
-            projectId: "boby-apps-project",
-            storageBucket: "boby-apps-project.appspot.com",
-            messagingSenderId: "125984859692",
-            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", authDomain: "boby-apps-project.firebaseapp.com", projectId: "boby-apps-project", storageBucket: "boby-apps-project.appspot.com", messagingSenderId: "125984859692", appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
         function updateWaktuDanRunningText() {
             const now = new Date();
             const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
             const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            
             const dayName = days[now.getDay()];
             const date = now.getDate();
             const monthName = months[now.getMonth()];
             const year = now.getFullYear();
             const time = now.toLocaleTimeString('id-ID', { hour12: false });
-
-            // Update Baris Pertama
             document.getElementById('display-tanggal').innerText = `${dayName}, ${date} ${monthName} ${year}`;
             document.getElementById('digital-clock').innerText = `${time} WIT`;
-
-            // Update Baris Kedua (Running Text)
             const runningContent = `${dayName}, ${date} ${monthName} ${year} | ${time} WIT | PONDOK PEMULIHAN PAPUA SISTEM INFORMASI KOMSEL JC | COPYRIGHT BY. IMADE BOBY`;
             document.getElementById('running-text').innerText = runningContent;
         }
-
         function syncUserData() {
             const userEmail = localStorage.getItem("userEmail");
             if (!userEmail) { window.location.href = "index.html"; return; }
-
-            db.collection("users").where("email", "==", userEmail)
-                .onSnapshot((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        const data = querySnapshot.docs[0].data();
-                        document.getElementById('disp_nama').innerText = data.nama || "User";
-                        document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
-
-                        const photoImg = document.getElementById('user-photo');
-                        const defaultIcon = document.getElementById('default-icon');
-                        
-                        if (data.fotoUrl) {
-                            photoImg.src = data.fotoUrl;
-                            photoImg.style.display = "block";
-                            defaultIcon.style.display = "none";
-                        } else {
-                            photoImg.style.display = "none";
-                            defaultIcon.style.display = "block";
-                        }
-                    }
-                });
+            db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    const data = querySnapshot.docs[0].data();
+                    document.getElementById('disp_nama').innerText = data.nama || "User";
+                    document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
+                    const photoImg = document.getElementById('user-photo');
+                    const defaultIcon = document.getElementById('default-icon');
+                    if (data.fotoUrl) { photoImg.src = data.fotoUrl; photoImg.style.display = "block"; defaultIcon.style.display = "none"; } 
+                    else { photoImg.style.display = "none"; defaultIcon.style.display = "block"; }
+                }
+            });
         }
-
         setInterval(updateWaktuDanRunningText, 1000);
         updateWaktuDanRunningText();
         syncUserData();
