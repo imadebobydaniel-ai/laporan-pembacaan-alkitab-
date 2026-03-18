@@ -13,15 +13,16 @@
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
-        .form-group select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; outline: none; }
+        .form-group select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; outline: none; background: #fff; }
 
         .stat-section { margin-bottom: 25px; }
         .stat-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 8px; }
         .stat-label span:last-child { color: #007bff; }
 
         .progress-container { background: #eee; border-radius: 10px; height: 12px; width: 100%; overflow: hidden; position: relative; }
-        .progress-bar { height: 100%; border-radius: 10px; transition: width 0.5s ease-in-out; }
+        .progress-bar { height: 100%; border-radius: 10px; transition: width 0.8s ease-in-out; }
         .bg-alkitab { background: linear-gradient(90deg, #007bff, #00c6ff); }
+        .bg-global { background: linear-gradient(90deg, #6610f2, #6f42c1); }
         .bg-kehadiran { background: linear-gradient(90deg, #28a745, #a8e063); }
 
         .blood-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
@@ -40,7 +41,7 @@
         
         <div class="form-group">
             <label>Pilih Komsel</label>
-            <select id="select-komsel" onchange="updateStatistikKomsel()">
+            <select id="select-komsel-alkitab" onchange="updateStatistikAlkitab()">
                 <option value="JC 1">JC 1</option>
                 <option value="JC 2">JC 2</option>
                 <option value="JC 3">JC 3</option>
@@ -51,7 +52,7 @@
 
         <div class="stat-section">
             <div class="stat-label">
-                <span id="label-komsel">Capaian JC 1</span>
+                <span id="label-komsel-alkitab">Capaian JC 1</span>
                 <span id="pct-alkitab-komsel">0%</span>
             </div>
             <div class="progress-container">
@@ -65,30 +66,48 @@
                 <span id="pct-alkitab-global">0%</span>
             </div>
             <div class="progress-container">
-                <div id="bar-alkitab-global" class="progress-bar bg-alkitab" style="width: 0%"></div>
+                <div id="bar-alkitab-global" class="progress-bar bg-global" style="width: 0%"></div>
             </div>
         </div>
     </div>
 
     <div class="card">
         <h3><i class="fa-solid fa-calendar-check"></i> Statistik Kehadiran</h3>
+        
+        <div class="form-group">
+            <label>Pilih Komsel</label>
+            <select id="select-komsel-hadir" onchange="updateStatistikHadir()">
+                <option value="JC 1">JC 1</option>
+                <option value="JC 2">JC 2</option>
+                <option value="JC 3">JC 3</option>
+                <option value="JC 4">JC 4</option>
+                <option value="JC 5">JC 5</option>
+            </select>
+        </div>
+
         <div class="stat-section">
             <div class="stat-label">
-                <span>Tingkat Kehadiran Komsel</span>
-                <span id="pct-hadir">0%</span>
+                <span id="label-komsel-hadir">Kehadiran JC 1</span>
+                <span id="pct-hadir-komsel">0%</span>
             </div>
             <div class="progress-container">
-                <div id="bar-hadir" class="progress-bar bg-kehadiran" style="width: 0%"></div>
+                <div id="bar-hadir-komsel" class="progress-bar bg-kehadiran" style="width: 0%"></div>
             </div>
         </div>
-        <div class="stat-label" style="font-size: 11px; color: #888;">
-            <span id="count-hadir">Hadir: 0</span>
-            <span id="count-absen">Tidak Hadir: 0</span>
+
+        <div class="stat-section">
+            <div class="stat-label">
+                <span>Seluruh Komsel (Global)</span>
+                <span id="pct-hadir-global">0%</span>
+            </div>
+            <div class="progress-container">
+                <div id="bar-hadir-global" class="progress-bar bg-global" style="width: 0%"></div>
+            </div>
         </div>
     </div>
 
     <div class="card">
-        <h3><i class="fa-solid fa-droplet"></i> Distribusi Golongan Darah</h3>
+        <h3><i class="fa-solid fa-droplet"></i> Data Golongan Darah</h3>
         <div class="blood-grid">
             <div class="blood-box"><span id="goldar-a">0</span><label>Tipe A</label></div>
             <div class="blood-box"><span id="goldar-b">0</span><label>Tipe B</label></div>
@@ -118,41 +137,61 @@
     const currentMonth = new Date().getMonth() + 1;
     const totalDays = new Date(new Date().getFullYear(), currentMonth, 0).getDate();
 
-    async function updateStatistikKomsel() {
-        const selectedJC = document.getElementById('select-komsel').value;
-        document.getElementById('label-komsel').innerText = "Capaian " + selectedJC;
+    async function updateStatistikAlkitab() {
+        const selectedJC = document.getElementById('select-komsel-alkitab').value;
+        const jcNumber = selectedJC.replace("JC ", "");
+        document.getElementById('label-komsel-alkitab').innerText = "Capaian " + selectedJC;
 
-        // Hitung total jemaat di komsel tersebut
-        const snapUsers = await db.collection("users").where("komsel", "==", selectedJC.replace("JC ", "")).get();
-        const totalJemaat = snapUsers.size || 1; // Hindari pembagian dengan nol
+        const snapUsers = await db.collection("users").where("komsel", "==", jcNumber).get();
+        const totalJemaat = snapUsers.size || 0;
 
-        // Ambil laporan bacaan bulan ini untuk komsel tersebut
         const snapLaporan = await db.collection("laporan_bacaan")
-            .where("komsel", "==", selectedJC.replace("JC ", ""))
+            .where("komsel", "==", jcNumber)
             .where("bulan", "==", currentMonth).get();
         
-        const countLapor = snapLaporan.size;
         const targetLaporan = totalJemaat * totalDays;
-        const pctKomsel = Math.min((countLapor / targetLaporan) * 100, 100).toFixed(1);
+        const pctKomsel = targetLaporan > 0 ? Math.min((snapLaporan.size / targetLaporan) * 100, 100).toFixed(1) : 0;
         
         document.getElementById('pct-alkitab-komsel').innerText = pctKomsel + "%";
         document.getElementById('bar-alkitab-komsel').style.width = pctKomsel + "%";
     }
 
-    async function loadGlobalData() {
-        // Alkitab Global
-        const snapGlobal = await db.collection("laporan_bacaan")
-            .where("bulan", "==", currentMonth).get();
-        const totalUserSnap = await db.collection("users").get();
-        const globalTarget = totalUserSnap.size * totalDays;
-        const pctGlobal = globalTarget > 0 ? Math.min((snapGlobal.size / globalTarget) * 100, 100).toFixed(1) : 0;
+    async function updateStatistikHadir() {
+        const selectedJC = document.getElementById('select-komsel-hadir').value;
+        const jcNumber = selectedJC.replace("JC ", "");
+        document.getElementById('label-komsel-hadir').innerText = "Kehadiran " + selectedJC;
+
+        const snapHadir = await db.collection("kehadiran").where("komsel", "==", jcNumber).get();
+        let hadir = 0; let total = snapHadir.size;
         
-        document.getElementById('pct-alkitab-global').innerText = pctGlobal + "%";
-        document.getElementById('bar-alkitab-global').style.width = pctGlobal + "%";
+        snapHadir.forEach(doc => { if(doc.data().status === "Hadir") hadir++; });
+        
+        const pctHadir = total > 0 ? ((hadir / total) * 100).toFixed(1) : 0;
+        
+        document.getElementById('pct-hadir-komsel').innerText = pctHadir + "%";
+        document.getElementById('bar-hadir-komsel').style.width = pctHadir + "%";
+    }
+
+    async function loadGlobalAndStatic() {
+        // Alkitab Global
+        const snapAllLapor = await db.collection("laporan_bacaan").where("bulan", "==", currentMonth).get();
+        const snapAllUsers = await db.collection("users").get();
+        const globalAlkitabTarget = snapAllUsers.size * totalDays;
+        const pctAlkitabGlobal = globalAlkitabTarget > 0 ? Math.min((snapAllLapor.size / globalAlkitabTarget) * 100, 100).toFixed(1) : 0;
+        document.getElementById('pct-alkitab-global').innerText = pctAlkitabGlobal + "%";
+        document.getElementById('bar-alkitab-global').style.width = pctAlkitabGlobal + "%";
+
+        // Kehadiran Global
+        const snapAllHadir = await db.collection("kehadiran").get();
+        let gHadir = 0;
+        snapAllHadir.forEach(doc => { if(doc.data().status === "Hadir") gHadir++; });
+        const pctHadirGlobal = snapAllHadir.size > 0 ? ((gHadir / snapAllHadir.size) * 100).toFixed(1) : 0;
+        document.getElementById('pct-hadir-global').innerText = pctHadirGlobal + "%";
+        document.getElementById('bar-hadir-global').style.width = pctHadirGlobal + "%";
 
         // Golongan Darah
         let darah = { A: 0, B: 0, AB: 0, O: 0 };
-        totalUserSnap.forEach(doc => {
+        snapAllUsers.forEach(doc => {
             const gd = doc.data().golongan_darah;
             if(darah.hasOwnProperty(gd)) darah[gd]++;
         });
@@ -162,9 +201,9 @@
         document.getElementById('goldar-o').innerText = darah.O;
     }
 
-    // Inisialisasi
-    updateStatistikKomsel();
-    loadGlobalData();
+    updateStatistikAlkitab();
+    updateStatistikHadir();
+    loadGlobalAndStatic();
 </script>
 </body>
 </html>
