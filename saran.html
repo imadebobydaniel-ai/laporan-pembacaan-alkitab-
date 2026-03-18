@@ -8,36 +8,41 @@
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
-        
         h3 { color: #333; margin-bottom: 20px; text-transform: uppercase; font-size: 18px; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-        
         .info-user { background: #e7f1ff; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: #007bff; font-weight: bold; text-align: left; }
-        
-        textarea { width: 100%; height: 180px; padding: 15px; border-radius: 15px; border: 1px solid #ddd; outline: none; font-family: inherit; font-size: 14px; box-sizing: border-box; background: #fafafa; transition: border 0.3s; }
-        textarea:focus { border: 1px solid #007bff; background: #fff; }
-
-        .btn-kirim { width: 100%; background: #007bff; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn-kirim:active { transform: scale(0.98); background: #0056b3; }
-        
+        textarea { width: 100%; height: 180px; padding: 15px; border-radius: 15px; border: 1px solid #ddd; outline: none; font-family: inherit; font-size: 14px; box-sizing: border-box; background: #fafafa; }
+        .btn-kirim { width: 100%; background: #007bff; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 20px; }
         .btn-back { display: block; margin-top: 15px; text-decoration: none; color: #666; font-size: 14px; font-weight: bold; }
+        
+        /* Style untuk Pesan Sukses Block Display */
+        #success-message {
+            display: none;
+            background: #28a745;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h3><i class="fa-solid fa-comment-dots"></i> Kirim Saran</h3>
-    
-    <div class="info-user" id="user-info-display">
-        Memuat identitas pengirim...
+    <div id="success-message">
+        Terimakasih Atas Saran dan Masukannya
     </div>
 
-    <textarea id="text-saran" placeholder="Tuliskan saran, kritik, atau masukan Anda di sini agar sistem kami lebih baik lagi..."></textarea>
-    
-    <button class="btn-kirim" onclick="prosesKirimSaran()" id="btn-submit">
-        <i class="fa-solid fa-paper-plane"></i> KIRIM SEKARANG
-    </button>
-    
-    <a href="menu.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</a>
+    <div id="form-area">
+        <h3><i class="fa-solid fa-comment-dots"></i> Kirim Saran</h3>
+        <div class="info-user" id="user-info-display">Memuat identitas pengirim...</div>
+        <textarea id="text-saran" placeholder="Tuliskan saran, kritik, atau masukan Anda di sini..."></textarea>
+        <button class="btn-kirim" onclick="prosesKirimSaran()" id="btn-submit">
+            <i class="fa-solid fa-paper-plane"></i> KIRIM SEKARANG
+        </button>
+        <a href="menu.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</a>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -58,35 +63,25 @@
     let currentUserName = "";
     let currentUserJC = "";
 
-    // 1. Ambil Identitas Pengirim Secara Otomatis
     async function getSenderIdentity() {
         const email = localStorage.getItem("userEmail");
-        if (!email) {
-            window.location.href = "index.html";
-            return;
-        }
-
+        if (!email) { window.location.href = "index.html"; return; }
         const userSnap = await db.collection("users").where("email", "==", email).get();
         if (!userSnap.empty) {
             const data = userSnap.docs[0].data();
             currentUserName = data.nama;
             currentUserJC = data.komsel;
-            document.getElementById('user-info-display').innerHTML = `
-                <i class="fa-solid fa-user"></i> ${currentUserName} <br>
-                <i class="fa-solid fa-users"></i> Komsel JC ${currentUserJC}
-            `;
+            document.getElementById('user-info-display').innerHTML = `<i class="fa-solid fa-user"></i> ${currentUserName} <br><i class="fa-solid fa-users"></i> Komsel JC ${currentUserJC}`;
         }
     }
 
-    // 2. Kirim Data ke Firebase
     async function prosesKirimSaran() {
         const saranText = document.getElementById('text-saran').value.trim();
         const btn = document.getElementById('btn-submit');
+        const successMsg = document.getElementById('success-message');
+        const formArea = document.getElementById('form-area');
 
-        if (!saranText) {
-            alert("Harap tuliskan saran Anda terlebih dahulu.");
-            return;
-        }
+        if (!saranText) { alert("Harap tuliskan saran Anda terlebih dahulu."); return; }
 
         btn.disabled = true;
         btn.innerHTML = "Mengirim...";
@@ -105,17 +100,20 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            alert("Terima kasih! Saran Anda telah berhasil dikirim ke database.");
-            window.location.href = "menu.html";
+            // Sembunyikan Form dan Tampilkan Pesan Sukses Block Display
+            formArea.style.display = "none";
+            successMsg.style.display = "block";
+
+            // Kembali ke menu otomatis setelah 3 detik
+            setTimeout(() => { window.location.href = "menu.html"; }, 3000);
 
         } catch (error) {
             console.error("Gagal mengirim:", error);
-            alert("Terjadi kesalahan teknis. Coba lagi.");
+            alert("Terjadi kesalahan teknis.");
             btn.disabled = false;
             btn.innerHTML = "KIRIM SEKARANG";
         }
     }
-
     window.onload = getSenderIdentity;
 </script>
 </body>
