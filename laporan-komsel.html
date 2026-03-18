@@ -26,6 +26,30 @@
         .btn-export { background: #28a745; color: white; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
         .btn-export:active { transform: scale(0.98); background: #218838; }
         .btn-back { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #007bff; color: white; text-align: center; padding: 15px; border-radius: 15px; text-decoration: none; font-weight: bold; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        /* Style Blocking Notif Display */
+        #notif-block {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-notif {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+        }
+        .modal-notif i { font-size: 50px; color: #dc3545; margin-bottom: 15px; }
+        .modal-notif p { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 20px; line-height: 1.5; }
+        .btn-close-notif { background: #333; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -88,11 +112,18 @@
     <a href="menu.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> KEMBALI</a>
 </div>
 
+<div id="notif-block">
+    <div class="modal-notif">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <p id="notif-text">Pesan Notifikasi</p>
+        <button class="btn-close-notif" onclick="closeNotif()">TUTUP</button>
+    </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-    // Konfigurasi Firebase (MENGGUNAKAN CONFIG ASLI ANDA)
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -106,6 +137,15 @@
 
     let userJC = "";
     let myChart;
+
+    function showNotif(msg) {
+        document.getElementById("notif-text").innerText = msg;
+        document.getElementById("notif-block").style.display = "flex";
+    }
+
+    function closeNotif() {
+        document.getElementById("notif-block").style.display = "none";
+    }
 
     async function initSession() {
         const email = localStorage.getItem("userEmail") || "imade.bobydaniel@gmail.com"; 
@@ -143,17 +183,14 @@
         });
     }
 
-    // FUNGSI VALIDASI TERINTEGRASI DATABASE
     async function validateAndExport() {
         const passInput = document.getElementById("pks-password").value;
-        
         if(!passInput) {
-            alert("Silakan masukkan password PKS/Admin.");
+            showNotif("Silakan masukkan password PKS/Admin.");
             return;
         }
 
         try {
-            // 1. Cek jika password adalah milik Administrator
             const adminCheck = await db.collection("users")
                 .where("jabatan", "==", "Administrator")
                 .where("password", "==", passInput).get();
@@ -163,7 +200,6 @@
                 return;
             }
 
-            // 2. Cek jika password adalah milik PKS (Ketua Komsel) yang sesuai dengan JC ini
             const pksCheck = await db.collection("users")
                 .where("komsel", "==", userJC)
                 .where("jabatan", "==", "Ketua Komsel")
@@ -172,18 +208,16 @@
             if(!pksCheck.empty) {
                 runExportProcess();
             } else {
-                alert("Otoritas Ditolak! Password salah atau Anda bukan PKS untuk " + userJC);
+                showNotif("Otoritas Ditolak! Password salah atau Anda bukan PKS untuk " + userJC);
             }
-
         } catch (error) {
-            alert("Error validasi: " + error.message);
+            showNotif("Error validasi: " + error.message);
         }
     }
 
     function runExportProcess() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        
         doc.setFontSize(16);
         doc.text("LAPORAN KOMSEL PONDOK PEMULIHAN PAPUA", 10, 20);
         doc.setFontSize(12);
@@ -191,13 +225,8 @@
         doc.text("Periode: " + document.getElementById("filter-periode").value + " Bulan", 10, 40);
         doc.text("Komitmen: " + document.getElementById("komitmen-user").value, 10, 50);
         doc.text("Status: Laporan Tervalidasi", 10, 60);
-
         doc.save(`Laporan_${userJC}_${new Date().toLocaleDateString()}.pdf`);
-        alert("Akses Diterima. PDF Berhasil diunduh.");
-        
-        if(confirm("Kirim notifikasi ke WhatsApp?")) {
-            window.open(`https://wa.me/?text=Laporan PDF untuk ${userJC} telah berhasil diekspor.`);
-        }
+        showNotif("Akses Diterima. PDF Berhasil diunduh.");
     }
 
     window.onload = initSession;
