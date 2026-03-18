@@ -186,6 +186,25 @@
         document.getElementById('pct-hadir-global').innerText = pctH + "%";
         document.getElementById('bar-hadir-global').style.width = pctH + "%";
     }
+    // Fungsi Sinkronisasi Statistik
+async function sinkronkanStatistik() {
+    // 1. Ambil Laporan Bacaan (Capaian 100%)
+    const snapLaporan = await db.collection("laporan_bacaan").get();
+    const totalDataLaporan = snapLaporan.size;
+    
+    // Perhitungan otomatis berdasarkan jumlah jemaat & hari (Pola 100%)
+    updateVisualAlkitab(totalDataLaporan);
+
+    // 2. Ambil Kehadiran
+    const snapHadir = await db.collection("kehadiran").get();
+    let countHadir = 0;
+    snapHadir.forEach(doc => {
+        if(doc.data().status === "Hadir") countHadir++;
+    });
+    
+    // Sinkronkan ke Progress Bar Kehadiran
+    updateVisualHadir(countHadir, snapHadir.size);
+}
 
     updateStatistikAlkitab();
     updateStatistikHadir();
