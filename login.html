@@ -104,12 +104,43 @@
         document.getElementById("error-block").style.display = "none";
     }
 
+    // Fungsi Sinkronisasi Realtime (Pindahkan ke laporan-komsel.html jika diperlukan di sana)
+    function sinkronisasiRealtime() {
+        let jcRaw = localStorage.getItem("userKomsel") || "5";
+        const jcStr = String(jcRaw);
+
+        const periodeSelect = document.getElementById("filter-periode");
+        const periode = periodeSelect ? parseInt(periodeSelect.value) : 1;
+        
+        const batasWaktu = new Date();
+        batasWaktu.setMonth(batasWaktu.getMonth() - periode);
+        const tsBatas = firebase.firestore.Timestamp.fromDate(batasWaktu);
+
+        db.collection("kehadiran")
+            .where("komsel", "==", jcStr) 
+            .where("tanggal", ">=", tsBatas)
+            .onSnapshot(snap => {
+                if (snap.empty) {
+                    const listHadir = document.getElementById("list-hadir");
+                    const listIzin = document.getElementById("list-izin");
+                    if(listHadir) listHadir.innerHTML = "Tidak ada data";
+                    if(listIzin) listIzin.innerHTML = "Tidak ada data";
+                    return;
+                }
+                // Sisa pengolahan data Anda di sini
+            }, err => {
+                console.error("Firebase Error:", err);
+                const listHadir = document.getElementById("list-hadir");
+                if(listHadir) listHadir.innerHTML = "Error ambil data";
+            });
+    }
+
     async function prosesLogin() {
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('pass').value;
 
         if (!email || !pass) {
-            showError("Data Kosong", "Silakan masukkan email dan password dengan benar.");
+            showError("Data Kosong", "Silakan isi email dan password.");
             return;
         }
 
@@ -123,14 +154,13 @@
                 const user = snapshot.docs[0].data();
                 localStorage.setItem("userEmail", email);
                 localStorage.setItem("userName", user.nama);
-                localStorage.setItem("userKomsel", user.komsel);
+                localStorage.setItem("userKomsel", String(user.komsel)); 
                 window.location.href = "menu.html";
             } else {
-                showError("Akses Ditolak", "Email atau Password yang Anda masukkan tidak terdaftar.");
+                showError("Akses Ditolak", "Email atau Password salah.");
             }
         } catch (e) { 
-            showError("Kendala Koneksi", "Pastikan internet stabil. Di HP, pastikan pengaturan Cookie tidak diblokir.");
-            console.error(e);
+            showError("Kendala Koneksi", "Gagal terhubung ke database.");
         }
     }
 </script>
