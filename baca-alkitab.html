@@ -20,8 +20,6 @@
         .btn-enabled { background-color: #333; color: white; }
         .btn-disabled { background-color: #ccc; color: #666; cursor: not-allowed; }
         .btn-home { display: inline-block; margin-top: 25px; color: #007bff; text-decoration: none; font-size: 14px; font-weight: bold; }
-
-        /* CSS Overlay Blokir (Sama dengan Menu Kehadiran) */
         #block-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: white; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
     </style>
 </head>
@@ -40,12 +38,12 @@
 
     <div class="target-box">
         <span class="label-pasal">Pasal Utama:</span>
-        <span class="nama-pasal" id="pasal-utama">Matius 19 - 22</span>
+        <span class="nama-pasal" id="pasal-utama">Memuat...</span>
     </div>
 
     <div class="hikmat-box">
         <span class="label-pasal">Pasal Hikmat:</span>
-        <span class="nama-pasal" id="pasal-hikmat" style="color: #d9480f;">Amsal 19</span>
+        <span class="nama-pasal" id="pasal-hikmat" style="color: #d9480f;">Memuat...</span>
     </div>
 
     <label class="check-item">
@@ -78,11 +76,36 @@
     const db = firebase.firestore();
     const userEmail = localStorage.getItem("userEmail");
 
-    // Tampilkan Tanggal Hari Ini
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', options);
+    // --- 1. LOGIKA TARGET OTOMATIS ---
+    function updateTargetHarian() {
+        const sekarang = new Date();
+        const tanggalMulai = new Date("2026-03-01"); // Tanggal Referensi
+        
+        const selisihWaktu = sekarang.getTime() - tanggalMulai.getTime();
+        const hariKe = Math.floor(selisihWaktu / (1000 * 3600 * 24)) + 1;
 
-    // 1. CEK APAKAH SUDAH LAPOR SAAT HALAMAN DIBUKA
+        const listTarget = [
+            { utama: "Matius 1 - 4", hikmat: "Amsal 1" }, 
+            { utama: "Matius 5 - 8", hikmat: "Amsal 2" },
+            { utama: "Matius 9 - 12", hikmat: "Amsal 3" },
+            { utama: "Matius 13 - 15", hikmat: "Amsal 4" },
+            { utama: "Matius 16 - 18", hikmat: "Amsal 5" },
+            { utama: "Matius 19 - 22", hikmat: "Amsal 19" }, // Hari 19
+            { utama: "Matius 23 - 26", hikmat: "Amsal 20" }, // Hari 20 (20 Mar)
+            { utama: "Matius 27 - 28 & Markus 1-2", hikmat: "Amsal 21" } // Hari 21
+        ];
+
+        const index = hariKe - 1;
+        if (listTarget[index]) {
+            document.getElementById("pasal-utama").innerText = listTarget[index].utama;
+            document.getElementById("pasal-hikmat").innerText = listTarget[index].hikmat;
+        } else {
+            document.getElementById("pasal-utama").innerText = "Selesai / Update Jadwal";
+            document.getElementById("pasal-hikmat").innerText = "-";
+        }
+    }
+
+    // --- 2. CEK LAPORAN HARI INI ---
     async function cekLaporanHariIni() {
         if (!userEmail) return;
         const hariIni = new Date();
@@ -96,13 +119,13 @@
                 .get();
 
             if (!snap.empty) {
-                tampilkanPesanBlokir("Anda tadi Sudah Melaporkan", "fa-circle-exclamation", "#ffc107");
+                tampilkanPesanBlokir("Anda sudah melaporkan hari ini", "fa-circle-exclamation", "#ffc107");
             }
         } catch (e) { console.error(e); }
     }
 
     function tampilkanPesanBlokir(pesan, icon, color) {
-        document.getElementById('block-title').innerText = pesan === "Terimakasih Atas Laporan Anda" ? "BERHASIL!" : "MAAF!";
+        document.getElementById('block-title').innerText = pesan.includes("Terimakasih") ? "BERHASIL!" : "MAAF!";
         document.getElementById('block-message').innerText = pesan;
         const iconEl = document.getElementById('block-icon');
         iconEl.className = "fa-solid " + icon;
@@ -114,47 +137,10 @@
         const c1 = document.getElementById('check1').checked;
         const c2 = document.getElementById('check2').checked;
         const btn = document.getElementById('btnKirim');
-        
-        if (c1 && c2) {
-            btn.disabled = false;
-            btn.className = "btn-kirim btn-enabled";
-        } else {
-            btn.disabled = true;
-            btn.className = "btn-kirim btn-disabled";
-        }
-        // --- LOGIKA TARGET OTOMATIS BERBASIS SERVER ---
-
-async function updateTargetHarian() {
-    // 1. Ambil waktu sekarang dari server (atau simulasi server time yang stabil)
-    const sekarang = new Date();
-    
-    // 2. Tentukan Tanggal Mulai (Contoh: 1 Maret 2026 sebagai Hari ke-1)
-    const tanggalMulai = new Date("2026-03-01"); 
-    
-    // 3. Hitung selisih hari
-    const selisihWaktu = sekarang.getTime() - tanggalMulai.getTime();
-    const hariKe = Math.floor(selisihWaktu / (1000 * 3600 * 24)) + 1;
-
-    // 4. Daftar Target Pasal (Bisa ditambah terus ke bawah)
-    const listTarget = [
-        { utama: "Matius 1 - 4", hikmat: "Amsal 14" }, // Hari 1
-        { utama: "Matius 5 - 8", hikmat: "Amsal 15" }, // Hari 2
-        // ... dst
-        { utama: "Matius 19 - 22", hikmat: "Amsal 19" }, // Hari 19 (Kemarin)
-        { utama: "Matius 23 - 26", hikmat: "Amsal 20" }, // Hari 20 (Hari Ini)
-        { utama: "Matius 27 - 28 & Markus 1-2", hikmat: "Amsal 21" } // Hari 21 (Besok)
-    ];
-
-    // 5. Tampilkan ke UI (Ambil data berdasarkan hariKe)
-    const index = hariKe - 1; // Karena array mulai dari 0
-    if (listTarget[index]) {
-        document.getElementById("target-utama").innerText = listTarget[index].utama;
-        document.getElementById("target-hikmat").innerText = listTarget[index].hikmat;
-    }
-}
+        btn.disabled = !(c1 && c2);
+        btn.className = (c1 && c2) ? "btn-kirim btn-enabled" : "btn-kirim btn-disabled";
     }
 
-    // 2. FUNGSI KIRIM LAPORAN
     async function kirimLaporan() {
         const btn = document.getElementById('btnKirim');
         btn.innerText = "Mengirim...";
@@ -174,9 +160,7 @@ async function updateTargetHarian() {
                 tanggal: firebase.firestore.Timestamp.now()
             });
 
-            // Tampilkan pesan Sukses setelah berhasil input
             tampilkanPesanBlokir("Terimakasih Atas Laporan Anda", "fa-circle-check", "#2ecc71");
-
         } catch (e) {
             alert("Terjadi kesalahan.");
             btn.innerText = "KIRIM LAPORAN SEKARANG";
@@ -184,8 +168,14 @@ async function updateTargetHarian() {
         }
     }
 
-    // Jalankan cek saat window dimuat
-    window.onload = cekLaporanHariIni;
+    window.onload = function() {
+        // Jalankan Urutan Logika
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', options);
+        
+        updateTargetHarian();
+        cekLaporanHariIni();
+    };
 </script>
 </body>
 </html>
