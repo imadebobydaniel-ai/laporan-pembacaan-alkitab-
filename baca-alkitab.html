@@ -10,21 +10,15 @@
         .container { max-width: 450px; margin: auto; text-align: center; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
         h3 { color: #333; text-transform: uppercase; margin-bottom: 15px; }
-        
         .target-box { background: #e7f1ff; padding: 15px; border-radius: 15px; border: 1px solid #b3d7ff; margin-bottom: 20px; }
         .target-box h4 { margin: 5px 0; color: #007bff; font-size: 18px; }
         .target-box p { margin: 0; font-size: 13px; color: #555; }
-
         .check-item { display: flex; align-items: center; background: #f9f9f9; padding: 12px; border-radius: 10px; margin-bottom: 10px; text-align: left; }
         .check-item input { width: 20px; height: 20px; margin-right: 15px; cursor: pointer; }
         .check-item label { font-weight: bold; color: #333; cursor: pointer; flex: 1; }
-
         .btn-selesai { width: 100%; background: #28a745; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
         .btn-selesai:disabled { background: #ccc; cursor: not-allowed; }
-
         .btn-back { display: inline-block; margin-top: 20px; text-decoration: none; color: #007bff; font-weight: bold; font-size: 14px; }
-
-        /* MODAL BLOCKING STYLE */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-box { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 400px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .modal-box i { font-size: 50px; margin-bottom: 15px; }
@@ -43,12 +37,12 @@
         
         <div class="target-box">
             <p>Pasal Utama:</p>
-            <h4 id="display-pasal">Matius --</h4>
+            <h4 id="display-pasal">Memuat...</h4>
         </div>
 
         <div class="target-box" style="background: #fff4e5; border-color: #ffe5b3;">
             <p>Pasal Hikmat:</p>
-            <h4 id="display-amsal">Amsal --</h4>
+            <h4 id="display-amsal">Memuat...</h4>
         </div>
 
         <div id="checklist-area">
@@ -77,8 +71,6 @@
     </div>
 </div>
 
-<audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -91,15 +83,31 @@
         messagingSenderId: "125984859692",
         appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     const userEmail = localStorage.getItem("userEmail");
-    const today = new Date();
-    const dateKey = today.toISOString().split('T')[0];
+    
+    // Fungsi inisialisasi waktu dan pasal
+    function initHalaman() {
+        const sekarang = new Date();
+        const opsi = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
+        
+        document.getElementById('tgl-sekarang').innerText = sekarang.toLocaleDateString('id-ID', opsi);
+        
+        // Pasal Amsal otomatis sesuai tanggal (1-31)
+        document.getElementById('display-amsal').innerText = "Amsal " + sekarang.getDate();
 
-    // Fungsi Panggil Modal
-    function showModal(title, msg, type, redirect = false) {
+        // Hitung urutan pasal (Mulai 18 Maret 2026 sebagai hari ke-0)
+        const tglMulai = new Date("2026-03-18");
+        const selisihHari = Math.floor((sekarang - tglMulai) / (1000 * 60 * 60 * 24));
+        const startPasal = 15 + (selisihHari * 4);
+        const endPasal = startPasal + 3;
+        document.getElementById('display-pasal').innerText = "Matius " + startPasal + " - " + endPasal;
+    }
+
+    // Modal Control
+    function showModal(title, msg, type, stayAtPage = true) {
         const modal = document.getElementById('customModal');
         const icon = document.getElementById('modalIcon');
         const actionBtn = document.getElementById('modalAction');
@@ -107,131 +115,93 @@
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalMsg').innerText = msg;
 
-        // Atur warna berdasarkan tipe
-        if (type === 'success') {
-            icon.className = "fa-solid fa-circle-check";
-            icon.style.color = "#28a745";
-        } else if (type === 'warning') {
-            icon.className = "fa-solid fa-triangle-exclamation";
-            icon.style.color = "#ffc107";
-        } else if (type === 'error') {
-            icon.className = "fa-solid fa-circle-xmark";
-            icon.style.color = "#dc3545";
-        }
+        if (type === 'success') { icon.className = "fa-solid fa-circle-check"; icon.style.color = "#28a745"; }
+        else if (type === 'warning') { icon.className = "fa-solid fa-triangle-exclamation"; icon.style.color = "#ffc107"; }
+        else if (type === 'error') { icon.className = "fa-solid fa-circle-xmark"; icon.style.color = "#dc3545"; }
 
         modal.style.display = "flex";
 
-        if (redirect) {
-            actionBtn.onclick = function() { window.location.href = "menu.html"; };
-        } else {
-            actionBtn.onclick = closeModal;
-        }
+        actionBtn.onclick = function() {
+            closeModal();
+            if (!stayAtPage) window.location.href = "menu.html";
+        };
     }
 
-    function closeModal() {
-        document.getElementById('customModal').style.display = "none";
-    }
+    function closeModal() { document.getElementById('customModal').style.display = "none"; }
 
-    function initHalaman() {
-        const opsi = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
-        document.getElementById('tgl-sekarang').innerText = today.toLocaleDateString('id-ID', opsi);
-        document.getElementById('display-amsal').innerText = "Amsal " + today.getDate();
-
-        const tglMulai = new Date("2026-03-18");
-        const selisihHari = Math.floor((today - tglMulai) / (1000 * 60 * 60 * 24));
-        const startPasal = 15 + (selisihHari * 4);
-        const endPasal = startPasal + 3;
-        document.getElementById('display-pasal').innerText = "Matius " + startPasal + " - " + endPasal;
-    }
-
-    function cekAlarm() {
-        const sekarang = new Date();
-        if (sekarang.getHours() === 21 && sekarang.getMinutes() === 30) {
-            const sound = document.getElementById('alarm-sound');
-            sound.play().catch(() => {});
-            showModal("WAKTU PELAPORAN", "Segera kirim laporan bacaan Alkitab Anda sebelum batas waktu 22:30!", "warning");
-        }
-    }
-    setInterval(cekAlarm, 60000);
-
+    // Validation
     const checkUtama = document.getElementById('check-utama');
     const checkAmsal = document.getElementById('check-amsal');
     const btnSubmit = document.getElementById('btn-submit');
 
-    function validateCheck() {
-        btnSubmit.disabled = !(checkUtama.checked && checkAmsal.checked);
-    }
+    function validateCheck() { btnSubmit.disabled = !(checkUtama.checked && checkAmsal.checked); }
     checkUtama.addEventListener('change', validateCheck);
     checkAmsal.addEventListener('change', validateCheck);
 
-   async function kirimLaporan() {
-    if (!userEmail) {
-        showModal("EROR", "Sesi berakhir, silakan login kembali.", "error");
-        return;
-    }
+    async function kirimLaporan() {
+        if (!userEmail) { showModal("EROR", "Silakan login kembali.", "error", false); return; }
 
-    const sekarang = new Date();
-    const jam = sekarang.getHours();
-    const menit = sekarang.getMinutes();
+        const sekarang = new Date();
+        const jam = sekarang.getHours();
+        const menit = sekarang.getMinutes();
+        const dateKey = sekarang.toISOString().split('T')[0];
 
-    // 1. Batas waktu laporan (22:30)
-    if (jam > 22 || (jam === 22 && menit > 30)) {
-        showModal("AKSES DITOLAK", "Maaf, batas waktu pelaporan adalah 22:30.", "error");
-        return;
-    }
-
-    btnSubmit.innerText = "Memproses...";
-    btnSubmit.disabled = true;
-
-    try {
-        // A. Ambil Nama & Komsel dari koleksi users secara otomatis
-        const userSnap = await db.collection("users").where("email", "==", userEmail).get();
-        if (userSnap.empty) {
-            showModal("GAGAL", "Data profil Anda tidak ditemukan.", "error");
+        // 1. Batas waktu laporan 23:30 (Blokir jika jam 23 dan menit > 30, atau jam > 23)
+        if (jam > 23 || (jam === 23 && menit > 30)) {
+            showModal("AKSES DITOLAK", "Batas waktu lapor hari ini sudah lewat (23:30). Silakan lapor lagi besok jam 00:01.", "error");
             return;
         }
 
-        const userData = userSnap.docs[0].data();
-        const namaUser = userData.nama;
-        const komselUser = userData.komsel; // Ini kunci agar statistik jalan
+        btnSubmit.innerText = "Memproses...";
+        btnSubmit.disabled = true;
 
-        // B. Cek agar tidak lapor dua kali di hari yang sama
-        const cekLaporan = await db.collection("laporan_bacaan")
-            .where("email", "==", userEmail)
-            .where("tanggal_str", "==", dateKey)
-            .get();
+        try {
+            // Ambil data user
+            const userSnap = await db.collection("users").where("email", "==", userEmail).get();
+            if (userSnap.empty) { showModal("GAGAL", "Data profil tidak ditemukan.", "error"); return; }
+            
+            const userData = userSnap.docs[0].data();
 
-        if (!cekLaporan.empty) {
-            showModal("INFO", "Anda sudah melapor hari ini.", "warning", true);
-            return;
+            // Cek duplikasi hari ini
+            const cekLaporan = await db.collection("laporan_bacaan")
+                .where("email", "==", userEmail)
+                .where("tanggal_str", "==", dateKey)
+                .get();
+
+            if (!cekLaporan.empty) {
+                showModal("INFO", "Anda sudah melapor untuk hari ini.", "warning");
+                return;
+            }
+
+            // Simpan Data
+            await db.collection("laporan_bacaan").add({
+                email: userEmail,
+                nama: userData.nama,
+                komsel: String(userData.komsel),
+                tanggal: firebase.firestore.Timestamp.now(),
+                tanggal_str: dateKey,
+                pasal_utama: document.getElementById('display-pasal').innerText,
+                pasal_amsal: document.getElementById('display-amsal').innerText,
+                waktu_kirim: jam.toString().padStart(2, '0') + ":" + menit.toString().padStart(2, '0')
+            });
+
+            // Berhasil: Tetap di halaman (stayAtPage = true)
+            showModal("BERHASIL", "Laporan berhasil terkirim!", "success");
+            
+            // Reset checklist
+            checkUtama.checked = false;
+            checkAmsal.checked = false;
+            validateCheck();
+
+        } catch (error) {
+            console.error(error);
+            showModal("GAGAL", "Gagal mengirim. Periksa koneksi.", "error");
+        } finally {
+            btnSubmit.innerText = "KIRIM LAPORAN SEKARANG";
         }
-
-        // C. Simpan ke Firestore
-        await db.collection("laporan_bacaan").add({
-            email: userEmail,
-            nama: namaUser,
-            komsel: String(komselUser), // Disimpan sebagai string agar cocok dengan filter
-            tanggal: firebase.firestore.Timestamp.now(), // Digunakan untuk filter periode di statistik
-            tanggal_str: dateKey,
-            pasal_utama: document.getElementById('display-pasal').innerText,
-            pasal_amsal: document.getElementById('display-amsal').innerText,
-            bulan: (sekarang.getMonth() + 1),
-            tahun: sekarang.getFullYear()
-        });
-
-        showModal("BERHASIL", "Laporan berhasil terkirim!", "success", true);
-
-    } catch (error) {
-        console.error(error);
-        showModal("GAGAL", "Terjadi kesalahan koneksi.", "error");
-    } finally {
-        btnSubmit.innerText = "KIRIM LAPORAN SEKARANG";
-        btnSubmit.disabled = false;
     }
-}
 
     initHalaman();
-    cekAlarm();
 </script>
 </body>
 </html>
