@@ -3,13 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistik Terintegrasi - Pondok Pemulihan Papua</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-   <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistik - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -18,15 +11,11 @@
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .card-header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
         .card-header h3 { margin: 0; font-size: 16px; color: #333; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        /* Layout untuk filter berdampingan */
         .filter-row { display: flex; gap: 10px; margin-bottom: 15px; }
         .filter-row .filter-group { flex: 1; margin-bottom: 0; }
-        
         .filter-group { margin-bottom: 15px; }
         .filter-group label { display: block; font-size: 12px; font-weight: bold; color: #666; margin-bottom: 5px; }
         select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; background: #fff; font-size: 14px; outline: none; }
-        
         .stat-row { margin-bottom: 15px; }
         .stat-label-container { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
         .label-pct { color: #007bff; }
@@ -34,7 +23,6 @@
         .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease-in-out; }
         .bar-jc { background: #00a8ff; }
         .bar-global { background: #6c5ce7; }
-        
         .blood-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .blood-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
         .blood-count { text-align: right; font-weight: bold; color: #007bff; }
@@ -58,12 +46,7 @@
             <div class="filter-group">
                 <label>Periode Laporan</label>
                 <select id="month-alkitab" onchange="loadAlkitab()">
-                    <option value="1">1 Bulan Terakhir</option>
-                    <option value="2">2 Bulan Terakhir</option>
-                    <option value="3">3 Bulan Terakhir</option>
-                    <option value="4">4 Bulan Terakhir</option>
-                    <option value="5">5 Bulan Terakhir</option>
-                    <option value="6">6 Bulan Terakhir</option>
+                    <option value="1">1 Bulan Terakhir</option><option value="6">6 Bulan Terakhir</option>
                 </select>
             </div>
         </div>
@@ -78,47 +61,14 @@
     </div>
 
     <div class="card">
-        <div class="card-header"><h3><i class="fa-solid fa-calendar-check"></i> STATISTIK KEHADIRAN</h3></div>
-        <div class="filter-row">
-            <div class="filter-group">
-                <label>Pilih Komsel</label>
-                <select id="sel-hadir" onchange="loadHadir()">
-                    <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option>
-                    <option value="JC 3">JC 3</option><option value="JC 4">JC 4</option>
-                    <option value="JC 5" selected>JC 5</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Periode Laporan</label>
-                <select id="month-hadir" onchange="loadHadir()">
-                    <option value="1">1 Bulan Terakhir</option>
-                    <option value="2">2 Bulan Terakhir</option>
-                    <option value="3">3 Bulan Terakhir</option>
-                    <option value="4">4 Bulan Terakhir</option>
-                    <option value="5">5 Bulan Terakhir</option>
-                    <option value="6">6 Bulan Terakhir</option>
-                </select>
-            </div>
-        </div>
-        <div class="stat-row">
-            <div class="stat-label-container"><span id="lbl-hadir">Kehadiran JC 5</span><span class="label-pct" id="val-hadir">0%</span></div>
-            <div class="progress-container"><div class="progress-bar bar-jc" id="bar-hadir"></div></div>
-        </div>
-        <div class="stat-row">
-            <div class="stat-label-container"><span>Seluruh Komsel (Global)</span><span class="label-pct" id="val-hadir-global" style="color:#6c5ce7">0%</span></div>
-            <div class="progress-container"><div class="progress-bar bar-global" id="bar-hadir-global"></div></div>
-        </div>
-    </div>
-
-    <div class="card">
         <div class="card-header"><h3><i class="fa-solid fa-droplet"></i> DATA GOLONGAN DARAH</h3></div>
         <div class="filter-group">
             <label>Lihat Distribusi Per Komsel</label>
-            <select id="sel-darah" onchange="loadDarah()">
-                <option value="" disabled selected>Pilih Komsel...</option>
+            <select id="sel-darah">
+                <option value="">Semua Komsel</option>
                 <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option>
                 <option value="JC 3">JC 3</option><option value="JC 4">JC 4</option>
-                <option value="JC 5">JC 5</option>
+                <option value="JC 5" selected>JC 5</option>
             </select>
         </div>
         <table class="blood-table">
@@ -144,96 +94,70 @@
         messagingSenderId: "125984859692",
         appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+    // 1. FUNGSI REAL-TIME GOLONGAN DARAH
+    const bloodSelector = document.getElementById("sel-darah");
+    
+    db.collection("users").onSnapshot((snapshot) => {
+        updateBloodStats(snapshot);
+    });
+
+    bloodSelector.addEventListener("change", () => {
+        db.collection("users").get().then(updateBloodStats);
+    });
+
+    function updateBloodStats(snapshot) {
+        const filterJC = bloodSelector.value;
+        let golA = 0, golB = 0, golAB = 0, golO = 0;
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            // Samakan filter dengan field 'komsel' (misal: "5")
+            const targetJC = filterJC.replace("JC ", "");
+
+            if (filterJC === "" || data.komsel === targetJC) {
+                const darah = data.golongan_darah; 
+                if (darah === "A") golA++;
+                else if (darah === "B") golB++;
+                else if (darah === "AB") golAB++;
+                else if (darah === "O") golO++;
+            }
+        });
+
+        // Update ID sesuai HTML: c-A, c-B, c-O, c-AB
+        document.getElementById("c-A").innerText = golA + " Orang";
+        document.getElementById("c-B").innerText = golB + " Orang";
+        document.getElementById("c-AB").innerText = golAB + " Orang";
+        document.getElementById("c-O").innerText = golO + " Orang";
+    }
+
+    // 2. FUNGSI CAPAIAN (Sesuai Logika Lama Anda)
     async function calculateStats(collectionName, jcValue, monthCount, labelId, valId, barId, valGlobalId, barGlobalId) {
-        // Tentukan batas waktu berdasarkan dropdown bulan
         const dateLimit = new Date();
         dateLimit.setMonth(dateLimit.getMonth() - parseInt(monthCount));
         const timestampLimit = firebase.firestore.Timestamp.fromDate(dateLimit);
 
-        // 1. Hitung Total Anggota (Denominator)
         const allUsers = await db.collection("users").get();
-        const jcUsers = await db.collection("users").where("komsel", "==", jcValue).get();
+        const jcUsers = await db.collection("users").where("komsel", "==", jcValue.replace("JC ","")).get();
         
-        // 2. Hitung Jumlah Laporan Berdasarkan Waktu (Numerator)
-        const allReports = await db.collection(collectionName)
-            .where("tanggal", ">=", timestampLimit)
-            .get();
-            
-        const jcReports = await db.collection(collectionName)
-            .where("komsel", "==", jcValue)
-            .where("tanggal", ">=", timestampLimit)
-            .get();
+        const allReports = await db.collection(collectionName).where("tanggal", ">=", timestampLimit).get();
+        const jcReports = await db.collection(collectionName).where("komsel", "==", jcValue.replace("JC ","")).where("tanggal", ">=", timestampLimit).get();
 
-        // 3. Kalkulasi JC %
         const pctJC = jcUsers.size > 0 ? (jcReports.size / jcUsers.size * 100).toFixed(1) : 0;
         document.getElementById(labelId).innerText = "Capaian " + jcValue;
         document.getElementById(valId).innerText = pctJC + "%";
         document.getElementById(barId).style.width = pctJC + "%";
 
-        // 4. Kalkulasi Global %
         const pctGlobal = allUsers.size > 0 ? (allReports.size / allUsers.size * 100).toFixed(1) : 0;
         document.getElementById(valGlobalId).innerText = pctGlobal + "%";
         document.getElementById(barGlobalId).style.width = pctGlobal + "%";
     }
 
-    const loadAlkitab = () => calculateStats(
-        "laporan_bacaan", 
-        document.getElementById('sel-alkitab').value, 
-        document.getElementById('month-alkitab').value, 
-        'lbl-alkitab', 'val-alkitab', 'bar-alkitab', 'val-alkitab-global', 'bar-alkitab-global'
-    );
+    const loadAlkitab = () => calculateStats("laporan_bacaan", document.getElementById('sel-alkitab').value, document.getElementById('month-alkitab').value, 'lbl-alkitab', 'val-alkitab', 'bar-alkitab', 'val-alkitab-global', 'bar-alkitab-global');
 
-    const loadHadir = () => calculateStats(
-        "kehadiran", 
-        document.getElementById('sel-hadir').value, 
-        document.getElementById('month-hadir').value, 
-        'lbl-hadir', 'val-hadir', 'bar-hadir', 'val-hadir-global', 'bar-hadir-global'
-    );
-
-    async function loadDarah() {
-        const jc = document.getElementById('sel-darah').value;
-        const counts = { 'A': 0, 'B': 0, 'O': 0, 'AB': 0 };
-        const snap = await db.collection("users").where("komsel", "==", jc).get();
-        snap.forEach(doc => {
-            const g = doc.data().golongan_darah;
-            if (counts.hasOwnProperty(g)) counts[g]++;
-        });
-        for (let t in counts) document.getElementById('c-' + t).innerText = counts[t] + " Orang";
-    }
-  // Fungsi Mendengarkan Data secara Real-time
-db.collection("users").onSnapshot((snapshot) => {
-    // Ambil nilai filter dari dropdown (Misal: "JC 5" atau "Pilih Komsel...")
-    const filterJC = document.getElementById("filterKomsel").value; // Pastikan ID dropdown benar
-
-    // Reset hitungan setiap ada perubahan di database
-    let golA = 0, golB = 0, golAB = 0, golO = 0;
-
-    snapshot.forEach((doc) => {
-        const data = doc.data();
-        
-        // Logika Filter: Jika "Pilih Komsel..." (tampilkan semua) 
-        // ATAU jika komsel di data cocok dengan pilihan dropdown
-        if (filterJC === "" || data.komsel === filterJC.replace("JC ", "")) {
-            
-            const darah = data.golongan_darah; // Gunakan field standar Anda
-
-            if (darah === "A") golA++;
-            else if (darah === "B") golB++;
-            else if (darah === "AB") golAB++;
-            else if (darah === "O") golO++;
-        }
-    });
-
-    // Update tampilan angka di kartu (Pastikan ID elemen sesuai)
-    document.getElementById("count_a").innerText = golA + " Orang";
-    document.getElementById("count_b").innerText = golB + " Orang";
-    document.getElementById("count_ab").innerText = golAB + " Orang";
-    document.getElementById("count_o").innerText = golO + " Orang";
-});
-    window.onload = () => { loadAlkitab(); loadHadir(); };
+    window.onload = () => { loadAlkitab(); };
 </script>
 </body>
 </html>
