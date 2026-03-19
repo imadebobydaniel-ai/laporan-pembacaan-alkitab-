@@ -17,6 +17,35 @@
         .btn-blue { background: #007bff; color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .footer-links { margin-top: 20px; font-size: 14px; }
         .footer-links a { color: #007bff; text-decoration: none; font-weight: bold; }
+
+        /* MODAL ERROR SYSTEM */
+        #error-block {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .error-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .error-card i { font-size: 60px; color: #dc3545; margin-bottom: 15px; }
+        .error-card h4 { margin: 10px 0; color: #333; font-size: 18px; }
+        .error-card p { color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+        .btn-close-error {
+            background: #dc3545; color: white; border: none;
+            padding: 12px 0; width: 100%; border-radius: 10px;
+            font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -40,6 +69,15 @@
     </div>
 </div>
 
+<div id="error-block">
+    <div class="error-card">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <h4 id="error-title">Gagal Masuk</h4>
+        <p id="error-text">Terjadi kendala saat menghubungkan ke sistem.</p>
+        <button class="btn-close-error" onclick="hideError()">COBA LAGI</button>
+    </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -55,9 +93,25 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // Fungsi Tampilkan Error
+    function showError(title, message) {
+        document.getElementById("error-title").innerText = title;
+        document.getElementById("error-text").innerText = message;
+        document.getElementById("error-block").style.display = "flex";
+    }
+
+    function hideError() {
+        document.getElementById("error-block").style.display = "none";
+    }
+
     async function prosesLogin() {
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('pass').value;
+
+        if (!email || !pass) {
+            showError("Data Kosong", "Silakan masukkan email dan password dengan benar.");
+            return;
+        }
 
         try {
             const snapshot = await db.collection("users")
@@ -72,9 +126,12 @@
                 localStorage.setItem("userKomsel", user.komsel);
                 window.location.href = "menu.html";
             } else {
-                alert("Email atau Password Salah!");
+                showError("Akses Ditolak", "Email atau Password yang Anda masukkan tidak terdaftar.");
             }
-        } catch (e) { alert("Error: " + e.message); }
+        } catch (e) { 
+            showError("Kendala Koneksi", "Pastikan internet stabil. Di HP, pastikan pengaturan Cookie tidak diblokir.");
+            console.error(e);
+        }
     }
 </script>
 </body>
