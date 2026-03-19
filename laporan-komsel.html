@@ -111,15 +111,19 @@
         myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Alkitab', 'Hadir'],
+                labels: ['Alkitab', 'Hadir', 'Izin'],
                 datasets: [{
                     label: '% Capaian',
-                    data: [0, 0],
-                    backgroundColor: ['#3182ce', '#38a169'],
+                    data: [0, 0, 0],
+                    backgroundColor: ['#3182ce', '#38a169', '#e53e3e'],
                     borderRadius: 5
                 }]
             },
-            options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+            options: { 
+                maintainAspectRatio: false, 
+                scales: { y: { beginAtZero: true, max: 100 } },
+                plugins: { legend: { display: false } }
+            }
         });
     }
 
@@ -129,7 +133,7 @@
         batasWaktu.setMonth(batasWaktu.getMonth() - periode);
         const tsBatas = firebase.firestore.Timestamp.fromDate(batasWaktu);
 
-        // 1. Ambil Data Kehadiran (Hadir & Izin)
+        // Ambil Data Kehadiran (Hadir & Izin)
         db.collection("kehadiran")
             .where("komsel", "==", String(userJC))
             .where("tanggal", ">=", tsBatas)
@@ -142,7 +146,7 @@
                     if(d.status === "Hadir") {
                         hCount++;
                         htmlH += `<div class="name-item">${d.nama}</div>`;
-                    } else {
+                    } else if(d.status === "Tidak Hadir") {
                         iCount++;
                         htmlI += `<div class="name-item">${d.nama}<br><span class="reason">(${d.alasan || 'Izin'})</span></div>`;
                     }
@@ -153,29 +157,23 @@
                 
                 const total = hCount + iCount;
                 myChart.data.datasets[0].data[1] = total > 0 ? Math.round((hCount/total)*100) : 0;
+                myChart.data.datasets[0].data[2] = total > 0 ? Math.round((iCount/total)*100) : 0;
                 myChart.update();
             });
 
-        // 2. Ambil Data Baca Alkitab
+        // Ambil Data Baca Alkitab
         db.collection("laporan_bacaan")
             .where("komsel", "==", String(userJC))
             .where("tanggal", ">=", tsBatas)
             .onSnapshot(snap => {
                 let htmlA = "";
                 const uniqueNames = new Set();
-
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    uniqueNames.add(d.nama);
-                });
-
-                uniqueNames.forEach(name => {
-                    htmlA += `<div class="name-item">${name}</div>`;
-                });
+                snap.forEach(doc => { uniqueNames.add(doc.data().nama); });
+                uniqueNames.forEach(name => { htmlA += `<div class="name-item">${name}</div>`; });
 
                 document.getElementById("list-alkitab").innerHTML = htmlA || "---";
                 
-                // Kalkulasi target (Contoh: 10 orang x 4 minggu x periode bulan)
+                // Target: 10 jemaat x 4 minggu x periode
                 const target = 10 * (periode * 4); 
                 const persenA = Math.min(Math.round((snap.size / target) * 100), 100);
                 myChart.data.datasets[0].data[0] = persenA;
@@ -183,7 +181,6 @@
             });
     }
 
-    // Fungsi Export PDF tetap sama dengan filter dinamis
     async function validateAndExport() {
         const pass = document.getElementById("pks-password").value;
         const check = await db.collection("users").where("komsel", "==", userJC).where("jabatan", "==", "Ketua Komsel").where("password", "==", pass).get();
@@ -191,7 +188,6 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             doc.text(`LAPORAN KOMSEL JC ${userJC}`, 10, 20);
-            doc.text(`Periode: ${document.getElementById("filter-periode").value} Bulan`, 10, 30);
             doc.save(`JC_${userJC}_Report.pdf`);
         } else { alert("Password Salah!"); }
     }
