@@ -6,30 +6,36 @@
     <title>Administrator - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #007bff; --dark: #333; --light: #f4f7f6; }
+        :root { --primary: #007bff; --dark: #333; --light: #f4f7f6; --success: #28a745; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; padding: 20px; }
         .admin-container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        
         .header-section { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
         .btn-logout { background: #dc3545; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
-        
         .search-box { position: relative; margin-bottom: 20px; width: 100%; max-width: 400px; }
         .search-box input { width: 100%; padding: 12px 40px 12px 15px; border: 1px solid #ddd; border-radius: 10px; outline: none; }
         .search-box i { position: absolute; right: 15px; top: 13px; color: #aaa; }
 
-        /* Fitur Table Scroll & Freeze */
-        .table-responsive { overflow-x: auto; max-width: 100%; position: relative; border-radius: 10px; border: 1px solid #eee; }
+        /* Table Styling */
+        .table-responsive { overflow-x: auto; border-radius: 10px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; min-width: 1400px; }
-        table th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; white-space: nowrap; }
-        table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; color: var(--dark); white-space: nowrap; }
-        
+        table th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
+        table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; color: var(--dark); }
         .freeze-col { position: sticky; left: 0; z-index: 2; background: white !important; border-right: 2px solid #eee; }
         th.freeze-col { z-index: 3; background: var(--primary) !important; }
-
-        .password-view { font-family: monospace; background: #f0f0f0; padding: 3px 6px; border-radius: 4px; color: #555; }
         .action-icons { display: flex; gap: 15px; font-size: 18px; }
-        .btn-edit { color: #28a745; cursor: pointer; }
+        .btn-edit { color: var(--success); cursor: pointer; }
         .btn-delete { color: #dc3545; cursor: pointer; }
+
+        /* Modal Edit Styling */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 5% auto; padding: 25px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; }
+        .modal-header { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .readonly-field { background: #f0f0f0; cursor: not-allowed; font-weight: bold; }
+        .btn-save { width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .close-modal { position: absolute; right: 20px; top: 20px; font-size: 20px; cursor: pointer; color: #aaa; }
 
         #loading-state { text-align: center; padding: 40px; color: var(--primary); font-weight: bold; }
     </style>
@@ -42,9 +48,7 @@
             <h2 style="margin:0;">Dashboard Administrator</h2>
             <p style="margin:5px 0 0; color:#777; font-size: 13px;">Manajemen Data Anggota Pondok Pemulihan Papua</p>
         </div>
-        <div class="nav-buttons">
-            <a href="login_admin.html" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</a>
-        </div>
+        <a href="login_admin.html" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</a>
     </div>
 
     <div class="search-box">
@@ -63,7 +67,7 @@
                     <th>Nama Anggota</th>
                     <th>WhatsApp</th>
                     <th>Email</th>
-                    <th>Password (View Only)</th>
+                    <th>Password</th>
                     <th>Alamat</th>
                     <th>Gol. Darah</th>
                     <th>Jabatan</th>
@@ -74,6 +78,41 @@
             </thead>
             <tbody id="memberData"></tbody>
         </table>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeEditModal()">&times;</span>
+        <div class="modal-header"><h3>Edit Data Anggota</h3></div>
+        <form id="formUpdate">
+            <input type="hidden" id="edit_id">
+            <div class="form-group">
+                <label>Nomor Komsel (NK)</label>
+                <input type="text" id="edit_nk" class="readonly-field" readonly>
+            </div>
+            <div class="form-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="edit_nama" required>
+            </div>
+            <div class="form-group">
+                <label>WhatsApp</label>
+                <input type="text" id="edit_wa" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="edit_email" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="text" id="edit_pass" class="readonly-field" readonly>
+            </div>
+            <div class="form-group">
+                <label>Alamat</label>
+                <textarea id="edit_alamat" rows="2" required></textarea>
+            </div>
+            <button type="submit" class="btn-save">SIMPAN PERUBAHAN</button>
+        </form>
     </div>
 </div>
 
@@ -92,84 +131,84 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    // 1. Fungsi Load Data
     async function loadData() {
         const tableBody = document.getElementById("memberData");
-        const loading = document.getElementById("loading-state");
-        const table = document.getElementById("adminTable");
-
         try {
             const snapshot = await db.collection("users").get();
             tableBody.innerHTML = "";
-            
             snapshot.forEach((doc) => {
-                const data = doc.data();
-                const row = `
+                const d = doc.data();
+                tableBody.innerHTML += `
                     <tr>
                         <td class="freeze-col"><input type="checkbox" class="user-checkbox"></td>
-                        <td style="left: 45px;" class="freeze-col"><b>${data.nomor_komsel || '-'}</b></td>
-                        <td>${data.nama || '-'}</td>
-                        <td>${data.no_hp || '-'}</td>
-                        <td>${data.email || '-'}</td>
-                        <td><span class="password-view">${data.password || '******'}</span></td>
-                        <td>${data.alamat || '-'}</td>
-                        <td>${data.golongan_darah || '-'}</td>
-                        <td>${data.jabatan || '-'}</td>
-                        <td>JC ${data.komsel || '-'}</td>
-                        <td><span style="color:${data.status === 'Aktif' ? 'green' : 'red'}">${data.status || 'Pending'}</span></td>
+                        <td style="left: 45px;" class="freeze-col"><b>${d.nomor_komsel || '-'}</b></td>
+                        <td>${d.nama || '-'}</td>
+                        <td>${d.no_hp || '-'}</td>
+                        <td>${d.email || '-'}</td>
+                        <td><code>${d.password || '-'}</code></td>
+                        <td>${d.alamat || '-'}</td>
+                        <td>${d.golongan_darah || d.gol_darah || '-'}</td>
+                        <td>${d.jabatan || '-'}</td>
+                        <td>JC ${d.komsel || '-'}</td>
+                        <td>${d.status || 'Aktif'}</td>
                         <td class="action-icons">
-                            <i class="fas fa-edit btn-edit" onclick="goToEdit('${doc.id}')" title="Edit Data"></i>
-                            <i class="fas fa-trash btn-delete" onclick="deleteMember('${doc.id}', '${data.nama}')" title="Hapus Data"></i>
+                            <i class="fas fa-edit btn-edit" onclick="openEditModal('${doc.id}')"></i>
+                            <i class="fas fa-trash btn-delete" onclick="deleteMember('${doc.id}', '${d.nama}')"></i>
                         </td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
+                    </tr>`;
             });
+            document.getElementById("loading-state").style.display = "none";
+            document.getElementById("adminTable").style.display = "table";
+        } catch (e) { alert("Gagal muat: " + e.message); }
+    }
 
-            loading.style.display = "none";
-            table.style.display = "table";
-        } catch (error) {
-            loading.innerHTML = "Gagal memuat data: " + error.message;
+    // FUNGSI EDIT (DALAM SATU FILE)
+    async function openEditModal(id) {
+        const doc = await db.collection("users").doc(id).get();
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById("edit_id").value = id;
+            document.getElementById("edit_nk").value = data.nomor_komsel || "";
+            document.getElementById("edit_nama").value = data.nama || "";
+            document.getElementById("edit_wa").value = data.no_hp || "";
+            document.getElementById("edit_email").value = data.email || "";
+            document.getElementById("edit_pass").value = data.password || "";
+            document.getElementById("edit_alamat").value = data.alamat || "";
+            document.getElementById("editModal").style.display = "block";
         }
     }
 
-    // 2. Fungsi Filter Pencarian
+    function closeEditModal() { document.getElementById("editModal").style.display = "none"; }
+
+    document.getElementById("formUpdate").onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("edit_id").value;
+        try {
+            await db.collection("users").doc(id).update({
+                nama: document.getElementById("edit_nama").value,
+                no_hp: document.getElementById("edit_wa").value,
+                email: document.getElementById("edit_email").value,
+                alamat: document.getElementById("edit_alamat").value
+            });
+            alert("Berhasil diperbarui!");
+            closeEditModal();
+            loadData();
+        } catch (e) { alert("Gagal: " + e.message); }
+    };
+
+    async function deleteMember(id, nama) {
+        if (confirm("Hapus " + nama + "?")) {
+            await db.collection("users").doc(id).delete();
+            loadData();
+        }
+    }
+
     function filterTable() {
         let input = document.getElementById("searchInput").value.toLowerCase();
-        let rows = document.getElementById("memberData").getElementsByTagName("tr");
-        for (let i = 0; i < rows.length; i++) {
-            let text = rows[i].innerText.toLowerCase();
-            rows[i].style.display = text.includes(input) ? "" : "none";
-        }
+        let rows = document.querySelectorAll("#memberData tr");
+        rows.forEach(row => { row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none"; });
     }
 
-    // 3. Fungsi Navigasi ke Edit (Berdiri Sendiri)
-    function goToEdit(id) {
-        if (!id) return;
-        localStorage.setItem("editMemberID", id);
-        window.location.href = 'registrasi.html';
-    }
-
-    // 4. Fungsi Hapus Member
-    async function deleteMember(id, nama) {
-        if (confirm("Apakah Anda yakin ingin menghapus data " + nama + "?")) {
-            try {
-                await db.collection("users").doc(id).delete();
-                alert("Data berhasil dihapus");
-                location.reload();
-            } catch (error) {
-                alert("Gagal menghapus: " + error.message);
-            }
-        }
-    }
-
-    // 5. Checkbox All
-    document.getElementById('checkAll').onclick = function() {
-        let checkboxes = document.querySelectorAll('.user-checkbox');
-        for (let checkbox of checkboxes) { checkbox.checked = this.checked; }
-    }
-
-    // Jalankan saat halaman siap
     window.onload = loadData;
 </script>
 </body>
