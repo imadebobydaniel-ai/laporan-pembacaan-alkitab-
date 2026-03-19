@@ -96,6 +96,10 @@
         document.getElementById('boxAlasan').style.display = 'none';
         document.getElementById('btnHadir').style.display = 'flex';
         document.getElementById('btnTidakHadir').style.display = 'flex';
+        
+        const btnHadir = document.getElementById('btnHadir');
+        btnHadir.disabled = false;
+        btnHadir.innerHTML = `SAYA HADIR <i class="fa-solid fa-circle-check"></i>`;
     }
 
     function tampilkanModal(title, text, icon, color) {
@@ -107,9 +111,10 @@
         document.getElementById('modal-notif').style.display = 'flex';
     }
 
+    // FUNGSI RESET DEFAULT (TIDAK EXIT KE MENU)
     function tutupModal() {
         document.getElementById('modal-notif').style.display = 'none';
-        window.location.href = "menu.html";
+        batalProses(); // Memanggil fungsi reset tampilan agar kembali ke posisi default
     }
 
     // --- FUNGSI CORE ---
@@ -163,7 +168,6 @@
             tanggal: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Tampilkan Modal Tidak Hadir
         tampilkanModal("Laporan Terkirim", "Keterangan anda sudah diinput", "fa-clipboard-check", "#e91e63");
     }
 </script>
