@@ -26,6 +26,8 @@
         .modal-box p { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 20px; }
         .password-container { position: relative; }
         .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; }
+        
+        /* Penekanan visual untuk kolom NK */
         #nk-display { background: #fff3cd !important; border: 2px solid #ffc107 !important; color: #856404; font-weight: bold; }
     </style>
 </head>
@@ -137,14 +139,17 @@
         const jcValue = document.getElementById("komsel").value;
         const nkInput = document.getElementById("nk-display");
         const loadingText = document.getElementById("nk-loading-text");
+
         if (jcValue) {
             loadingText.style.display = "block";
             nkInput.value = "Generating...";
+
             try {
                 const snapshot = await db.collection("users").get();
                 const urutanNext = snapshot.size + 1;
                 const formatUrutan = String(urutanNext).padStart(3, '0');
                 const tahun = new Date().getFullYear();
+                
                 const nkBaru = `NK-PPP-${formatUrutan}-JC${jcValue}-${tahun}`;
                 nkInput.value = nkBaru;
                 loadingText.style.display = "none";
@@ -160,7 +165,6 @@
         const nkBaru = document.getElementById("nk-display").value;
         const fotoFile = document.getElementById("foto").files[0];
 
-        // Validasi termasuk foto
         if(!document.getElementById("nama").value || !jcValue || nkBaru === "" || !fotoFile) {
             alert("Harap lengkapi semua data dan upload Foto Profil!");
             return;
@@ -170,7 +174,6 @@
         btn.disabled = true;
 
         try {
-            // Proses Foto ke Base64
             const reader = new FileReader();
             reader.readAsDataURL(fotoFile);
             reader.onload = async function () {
