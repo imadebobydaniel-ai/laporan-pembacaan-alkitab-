@@ -16,6 +16,12 @@
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; }
         .btn-blue { background: #007bff; color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
         
+        /* Tambahan Style untuk Link Bawah */
+        .footer-links { margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
+        .link-regis { display: block; color: #007bff; text-decoration: none; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
+        .link-admin { display: block; color: #888; text-decoration: none; font-size: 12px; }
+        .link-admin:hover { color: #333; }
+
         #error-block {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px;
@@ -37,6 +43,13 @@
     <input type="email" id="email" placeholder="Email Anggota">
     <input type="password" id="pass" placeholder="Password">
     <button class="btn-blue" onclick="prosesLogin()">MASUK</button>
+
+    <div class="footer-links">
+        <a href="registrasi.html" class="link-regis">BELUM PUNYA AKUN? DAFTAR SEKARANG</a>
+        <a href="admin-login.html" class="link-admin">
+            <i class="fa-solid fa-user-shield"></i> LOGIN ADMINISTRATOR
+        </a>
+    </div>
 </div>
 
 <div id="error-block">
@@ -86,7 +99,7 @@
         }
 
         try {
-            // Gunakan satu Query saja untuk email
+            // Gunakan satu Query saja untuk email (Case Sensitive)
             const snapshot = await db.collection("users").where("email", "==", emailInput).get();
 
             if (snapshot.empty) {
