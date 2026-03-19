@@ -69,7 +69,7 @@
             <div class="filter-group">
                 <label>Periode</label>
                 <select id="month-hadir">
-                    <option value="1">1 Bulan Terakhir</option><option value="2">2 Bulan Terakhir</option><option value="3">3 Bulan Terakhir</option><option value="4">4 Bulan Terakhir</option><option value="5">5 Bulan Terakhir</option><option value="6">6 Bulan Terakhir</option>
+                    <option value="1">1 Bulan Terakhir</option><option value="2">2 Bulan Terakhir</option><option value="3">3 Bulan Terakhir</option><option value="6">6 Bulan Terakhir</option>
                 </select>
             </div>
         </div>
@@ -93,8 +93,7 @@
             <div class="filter-group">
                 <label>Periode</label>
                 <select id="month-tidak-hadir">
-                    <option value="1">1 Bulan Terakhir</option><option value="2">2 Bulan Terakhir</option>
-                    <option value="3">3 Bulan Terakhir</option><option value="6">6 Bulan Terakhir</option>
+                    <option value="1">1 Bulan Terakhir</option><option value="2">2 Bulan Terakhir</option><option value="6">6 Bulan Terakhir</option>
                 </select>
             </div>
         </div>
@@ -140,10 +139,10 @@
     const db = firebase.firestore();
 
     let cachedUsers = [];
+    let listenersSet = false; // Flag untuk memastikan listener hanya dipasang sekali
 
-    // FUNGSI PENGAMAN PERSENTASE (Mencegah NaN dan 600%)
     function calculateSafePct(reports, users) {
-        if (!users || users === 0) return 0;
+        if (!users || users <= 0 || reports <= 0) return 0; // Kunci utama: 0 jika tak ada data
         let pct = (reports / users) * 100;
         return pct > 100 ? 100 : pct.toFixed(1);
     }
@@ -153,6 +152,8 @@
         const monthSelect = document.getElementById(monthId);
 
         const updateData = () => {
+            if (cachedUsers.length === 0) return; // Jangan hitung jika data user belum siap
+
             const selectedJC = jcSelect.value;
             const months = parseInt(monthSelect.value);
             const dateLimit = new Date();
@@ -164,10 +165,10 @@
                 .onSnapshot(snapshot => {
                     let totalGlobalReports = snapshot.size;
                     let totalJCReports = 0;
-                    snapshot.forEach(doc => { if (doc.data().komsel == selectedJC) totalJCReports++; });
+                    snapshot.forEach(doc => { if (String(doc.data().komsel) === String(selectedJC)) totalJCReports++; });
 
                     const totalGlobalUsers = cachedUsers.length;
-                    const totalJCUsers = cachedUsers.filter(u => u.komsel == selectedJC).length;
+                    const totalJCUsers = cachedUsers.filter(u => String(u.komsel) === String(selectedJC)).length;
 
                     const pctJC = calculateSafePct(totalJCReports, totalJCUsers);
                     document.getElementById(valId).innerText = pctJC + "%";
@@ -181,6 +182,7 @@
                     }
                 });
         };
+        
         jcSelect.addEventListener('change', updateData);
         monthSelect.addEventListener('change', updateData);
         updateData();
@@ -192,7 +194,7 @@
             const filterJC = selDarah.value;
             let counts = { "A": 0, "B": 0, "O": 0, "AB": 0 };
             cachedUsers.forEach(user => {
-                if (filterJC === "" || user.komsel == filterJC) {
+                if (filterJC === "" || String(user.komsel) === String(filterJC)) {
                     if (counts.hasOwnProperty(user.golongan_darah)) counts[user.golongan_darah]++;
                 }
             });
@@ -202,18 +204,11 @@
         renderBlood();
     }
 
-    db.collection("users").onSnapshot(snapshot => {
-        cachedUsers = snapshot.docs.map(doc => doc.data());
-        setupRealtimeListener("laporan_bacaan", "sel-alkitab", "month-alkitab", "lbl-alkitab", "val-alkitab", "bar-alkitab", "val-alkitab-global", "bar-alkitab-global", "Capaian");
-        setupRealtimeListener("kehadiran", "sel-hadir", "month-hadir", "lbl-hadir", "val-hadir", "bar-hadir", "val-hadir-global", "bar-hadir-global", "Kehadiran");
-        setupTidakHadirListener();
-        setupBloodRealtime();
-    });
-
     function setupTidakHadirListener() {
         const jcSelect = document.getElementById("sel-tidak-hadir");
         const monthSelect = document.getElementById("month-tidak-hadir");
         const update = () => {
+            if (cachedUsers.length === 0) return;
             const dateLimit = new Date();
             dateLimit.setMonth(dateLimit.getMonth() - parseInt(monthSelect.value));
             db.collection("kehadiran")
@@ -221,8 +216,8 @@
                 .where("tanggal", ">=", firebase.firestore.Timestamp.fromDate(dateLimit))
                 .onSnapshot(snapshot => {
                     let jcCount = 0;
-                    snapshot.forEach(doc => { if(doc.data().komsel == jcSelect.value) jcCount++; });
-                    const totalJCUsers = cachedUsers.filter(u => u.komsel == jcSelect.value).length;
+                    snapshot.forEach(doc => { if(String(doc.data().komsel) === String(jcSelect.value)) jcCount++; });
+                    const totalJCUsers = cachedUsers.filter(u => String(u.komsel) === String(jcSelect.value)).length;
                     const pct = calculateSafePct(jcCount, totalJCUsers);
                     document.getElementById("val-tidak-hadir").innerText = pct + "%";
                     document.getElementById("bar-tidak-hadir").style.width = pct + "%";
@@ -233,6 +228,23 @@
         monthSelect.onchange = update;
         update();
     }
+
+    // LOAD DATA USERS DAHULU, BARU AKTIFKAN LISTENER STATISTIK
+    db.collection("users").onSnapshot(snapshot => {
+        cachedUsers = snapshot.docs.map(doc => doc.data());
+        
+        if (!listenersSet && cachedUsers.length > 0) {
+            setupRealtimeListener("laporan_bacaan", "sel-alkitab", "month-alkitab", "lbl-alkitab", "val-alkitab", "bar-alkitab", "val-alkitab-global", "bar-alkitab-global", "Capaian");
+            setupRealtimeListener("kehadiran", "sel-hadir", "month-hadir", "lbl-hadir", "val-hadir", "bar-hadir", "val-hadir-global", "bar-hadir-global", "Kehadiran");
+            setupTidakHadirListener();
+            setupBloodRealtime();
+            listenersSet = true; // Listener hanya disetel sekali
+        } else if (listenersSet) {
+            // Jika user berubah datanya, paksa render ulang golongan darah
+            const event = new Event('change');
+            document.getElementById('sel-darah').dispatchEvent(event);
+        }
+    });
 </script>
 </body>
 </html>
