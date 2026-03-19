@@ -139,26 +139,34 @@
         this.classList.toggle('fa-eye-slash');
     });
 
+    // FUNGSI UNTUK MEMUNCULKAN KOLOM NK SECARA INSTAN
     async function updateNKPreview() {
         const jcValue = document.getElementById("komsel").value;
         const nkGroup = document.getElementById("group-nk");
         const nkInput = document.getElementById("nk-display");
+
         if (jcValue) {
+            // Munculkan grupnya dulu agar tidak disangka hilang
             nkGroup.style.display = "block";
-            nkInput.value = "Menghitung...";
-            const nkBaru = await generateNK(jcValue);
-            nkInput.value = nkBaru;
+            nkInput.value = "Sedang Membuat NK...";
+
+            try {
+                // Ambil data terbaru dari collection "users"
+                const snapshot = await db.collection("users").get();
+                const urutanNext = snapshot.size + 1;
+                const formatUrutan = String(urutanNext).padStart(3, '0');
+                const tahun = new Date().getFullYear();
+                
+                // Set nilai NK ke dalam input field
+                const nkBaru = `NK-PPP-${formatUrutan}-JC${jcValue}-${tahun}`;
+                nkInput.value = nkBaru;
+            } catch (error) {
+                console.error("Gagal mengambil urutan:", error);
+                nkInput.value = "Gagal mengambil nomor";
+            }
         } else {
             nkGroup.style.display = "none";
         }
-    }
-
-    async function generateNK(jcValue) {
-        const snapshot = await db.collection("users").get();
-        const urutanNext = snapshot.size + 1;
-        const formatUrutan = String(urutanNext).padStart(3, '0');
-        const tahun = new Date().getFullYear();
-        return `NK-PPP-${formatUrutan}-JC${jcValue}-${tahun}`;
     }
 
     async function handleRegistrasi() {
@@ -166,8 +174,8 @@
         const jcValue = document.getElementById("komsel").value;
         const nkBaru = document.getElementById("nk-display").value;
 
-        if(!document.getElementById("nama").value || !jcValue) {
-            alert("Harap lengkapi Nama dan Lokasi JC!");
+        if(!document.getElementById("nama").value || !jcValue || !nkBaru || nkBaru === "Sedang Membuat NK...") {
+            alert("Harap lengkapi semua data dan tunggu hingga NK muncul!");
             return;
         }
 
