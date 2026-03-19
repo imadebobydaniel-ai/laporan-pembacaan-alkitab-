@@ -23,6 +23,8 @@
         .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease-in-out; }
         .bar-jc { background: #00a8ff; }
         .bar-global { background: #6c5ce7; }
+        /* Style Tambahan untuk Bar Tidak Hadir */
+        .bar-tidak-hadir { background: #e91e63; }
         .blood-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .blood-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
         .blood-count { text-align: right; font-weight: bold; color: #007bff; }
@@ -85,6 +87,39 @@
         <div class="stat-row">
             <div class="stat-label-container"><span>Seluruh Komsel (Global)</span><span class="label-pct" id="val-hadir-global" style="color:#6c5ce7">0%</span></div>
             <div class="progress-container"><div class="progress-bar bar-global" id="bar-hadir-global"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-circle-xmark" style="color: #e91e63;"></i> STATISTIK KETIDAK HADIRAN</h3></div>
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>Pilih Komsel</label>
+                <select id="sel-tidak-hadir" onchange="loadTidakHadir()">
+                    <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option>
+                    <option value="JC 3">JC 3</option><option value="JC 4">JC 4</option>
+                    <option value="JC 5" selected>JC 5</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Periode Laporan</label>
+                <select id="month-tidak-hadir" onchange="loadTidakHadir()">
+                    <option value="1">1 Bulan Terakhir</option>
+                    <option value="2">2 Bulan Terakhir</option>
+                    <option value="3">3 Bulan Terakhir</option>
+                    <option value="4">4 Bulan Terakhir</option>
+                    <option value="5">5 Bulan Terakhir</option>
+                    <option value="6">6 Bulan Terakhir</option>
+                </select>
+            </div>
+        </div>
+        <div class="stat-row">
+            <div class="stat-label-container"><span id="lbl-tidak-hadir">Ketidak Hadiran JC 5</span><span class="label-pct" id="val-tidak-hadir" style="color:#e91e63">0%</span></div>
+            <div class="progress-container"><div class="progress-bar bar-tidak-hadir" id="bar-tidak-hadir"></div></div>
+        </div>
+        <div class="stat-row">
+            <div class="stat-label-container"><span>Seluruh Komsel (Global)</span><span class="label-pct" id="val-tidak-hadir-global" style="color:#6c5ce7">0%</span></div>
+            <div class="progress-container"><div class="progress-bar bar-global" id="bar-tidak-hadir-global"></div></div>
         </div>
     </div>
 
@@ -152,7 +187,7 @@
     }
 
     // FUNGSI CAPAIAN (UMUM)
-    async function calculateStats(collectionName, jcValue, monthCount, labelId, valId, barId, valGlobalId, barGlobalId) {
+    async function calculateStats(collectionName, jcValue, monthCount, labelId, valId, barId, valGlobalId, barGlobalId, labelTextPrefix) {
         const dateLimit = new Date();
         dateLimit.setMonth(dateLimit.getMonth() - parseInt(monthCount));
         const timestampLimit = firebase.firestore.Timestamp.fromDate(dateLimit);
@@ -163,7 +198,7 @@
         const jcReports = await db.collection(collectionName).where("komsel", "==", jcValue.replace("JC ","")).where("tanggal", ">=", timestampLimit).get();
 
         const pctJC = jcUsers.size > 0 ? (jcReports.size / jcUsers.size * 100).toFixed(1) : 0;
-        document.getElementById(labelId).innerText = "Kehadiran " + jcValue;
+        document.getElementById(labelId).innerText = labelTextPrefix + " " + jcValue;
         document.getElementById(valId).innerText = pctJC + "%";
         document.getElementById(barId).style.width = pctJC + "%";
 
@@ -172,10 +207,20 @@
         document.getElementById(barGlobalId).style.width = pctGlobal + "%";
     }
 
-    const loadAlkitab = () => calculateStats("laporan_bacaan", document.getElementById('sel-alkitab').value, document.getElementById('month-alkitab').value, 'lbl-alkitab', 'val-alkitab', 'bar-alkitab', 'val-alkitab-global', 'bar-alkitab-global');
-    const loadHadir = () => calculateStats("kehadiran", document.getElementById('sel-hadir').value, document.getElementById('month-hadir').value, 'lbl-hadir', 'val-hadir', 'bar-hadir', 'val-hadir-global', 'bar-hadir-global');
+    // LOAD DATA
+    const loadAlkitab = () => calculateStats("laporan_bacaan", document.getElementById('sel-alkitab').value, document.getElementById('month-alkitab').value, 'lbl-alkitab', 'val-alkitab', 'bar-alkitab', 'val-alkitab-global', 'bar-alkitab-global', "Capaian");
+    
+    // Perhatikan: loadHadir menarik dari collection "kehadiran_hadir"
+    const loadHadir = () => calculateStats("kehadiran_hadir", document.getElementById('sel-hadir').value, document.getElementById('month-hadir').value, 'lbl-hadir', 'val-hadir', 'bar-hadir', 'val-hadir-global', 'bar-hadir-global', "Kehadiran");
+    
+    // Perhatikan: loadTidakHadir menarik dari collection "kehadiran_tidak_hadir"
+    const loadTidakHadir = () => calculateStats("kehadiran_tidak_hadir", document.getElementById('sel-tidak-hadir').value, document.getElementById('month-tidak-hadir').value, 'lbl-tidak-hadir', 'val-tidak-hadir', 'bar-tidak-hadir', 'val-tidak-hadir-global', 'bar-tidak-hadir-global', "Ketidak Hadiran");
 
-    window.onload = () => { loadAlkitab(); loadHadir(); };
+    window.onload = () => { 
+        loadAlkitab(); 
+        loadHadir(); 
+        loadTidakHadir(); 
+    };
 </script>
 </body>
 </html>
