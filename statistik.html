@@ -23,7 +23,6 @@
         .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease-in-out; }
         .bar-jc { background: #00a8ff; }
         .bar-global { background: #6c5ce7; }
-        /* Style Tambahan untuk Bar Tidak Hadir */
         .bar-tidak-hadir { background: #e91e63; }
         .blood-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .blood-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
@@ -48,7 +47,12 @@
             <div class="filter-group">
                 <label>Periode Laporan</label>
                 <select id="month-alkitab" onchange="loadAlkitab()">
-                    <option value="1">1 Bulan Terakhir</option><option value="6">6 Bulan Terakhir</option>
+                    <option value="1">1 Bulan Terakhir</option>
+                    <option value="2">2 Bulan Terakhir</option>
+                    <option value="3">3 Bulan Terakhir</option>
+                    <option value="4">4 Bulan Terakhir</option>
+                    <option value="5">5 Bulan Terakhir</option>
+                    <option value="6">6 Bulan Terakhir</option>
                 </select>
             </div>
         </div>
@@ -76,7 +80,12 @@
             <div class="filter-group">
                 <label>Periode Laporan</label>
                 <select id="month-hadir" onchange="loadHadir()">
-                    <option value="1">1 Bulan Terakhir</option><option value="6">6 Bulan Terakhir</option>
+                    <option value="1">1 Bulan Terakhir</option>
+                    <option value="2">2 Bulan Terakhir</option>
+                    <option value="3">3 Bulan Terakhir</option>
+                    <option value="4">4 Bulan Terakhir</option>
+                    <option value="5">5 Bulan Terakhir</option>
+                    <option value="6">6 Bulan Terakhir</option>
                 </select>
             </div>
         </div>
@@ -138,7 +147,7 @@
             <tr><td>A</td><td id="c-A" class="blood-count">0 Orang</td></tr>
             <tr><td>B</td><td id="c-B" class="blood-count">0 Orang</td></tr>
             <tr><td>O</td><td id="c-O" class="blood-count">0 Orang</td></tr>
-            <tr><td>AB</td><td id="c-AB" class="blood-count">1 Orang</td></tr>
+            <tr><td>AB</td><td id="c-AB" class="blood-count">0 Orang</td></tr>
         </table>
     </div>
 
@@ -162,12 +171,8 @@
 
     // REAL-TIME GOLONGAN DARAH
     const bloodSelector = document.getElementById("sel-darah");
-    db.collection("users").onSnapshot((snapshot) => {
-        updateBloodStats(snapshot);
-    });
-    bloodSelector.addEventListener("change", () => {
-        db.collection("users").get().then(updateBloodStats);
-    });
+    db.collection("users").onSnapshot((snapshot) => { updateBloodStats(snapshot); });
+    bloodSelector.addEventListener("change", () => { db.collection("users").get().then(updateBloodStats); });
 
     function updateBloodStats(snapshot) {
         const filterJC = bloodSelector.value;
@@ -186,7 +191,7 @@
         document.getElementById("c-O").innerText = golO + " Orang";
     }
 
-    // FUNGSI CAPAIAN (UMUM)
+    // FUNGSI UTAMA KALKULASI STATISTIK
     async function calculateStats(collectionName, jcValue, monthCount, labelId, valId, barId, valGlobalId, barGlobalId, labelTextPrefix) {
         const dateLimit = new Date();
         dateLimit.setMonth(dateLimit.getMonth() - parseInt(monthCount));
@@ -207,13 +212,9 @@
         document.getElementById(barGlobalId).style.width = pctGlobal + "%";
     }
 
-    // LOAD DATA
+    // HANDLER UNTUK MASING-MASING KARTU
     const loadAlkitab = () => calculateStats("laporan_bacaan", document.getElementById('sel-alkitab').value, document.getElementById('month-alkitab').value, 'lbl-alkitab', 'val-alkitab', 'bar-alkitab', 'val-alkitab-global', 'bar-alkitab-global', "Capaian");
-    
-    // Perhatikan: loadHadir menarik dari collection "kehadiran_hadir"
     const loadHadir = () => calculateStats("kehadiran_hadir", document.getElementById('sel-hadir').value, document.getElementById('month-hadir').value, 'lbl-hadir', 'val-hadir', 'bar-hadir', 'val-hadir-global', 'bar-hadir-global', "Kehadiran");
-    
-    // Perhatikan: loadTidakHadir menarik dari collection "kehadiran_tidak_hadir"
     const loadTidakHadir = () => calculateStats("kehadiran_tidak_hadir", document.getElementById('sel-tidak-hadir').value, document.getElementById('month-tidak-hadir').value, 'lbl-tidak-hadir', 'val-tidak-hadir', 'bar-tidak-hadir', 'val-tidak-hadir-global', 'bar-tidak-hadir-global', "Ketidak Hadiran");
 
     window.onload = () => { 
