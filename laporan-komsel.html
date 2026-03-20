@@ -14,7 +14,6 @@
         h3 { border-bottom: 2px solid #007bff; padding-bottom: 10px; font-size: 14px; text-transform: uppercase; margin-top: 0; color: #333; }
         select, input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; box-sizing: border-box; outline: none; }
         
-        /* Tambahan CSS Ikon Mata agar presisi */
         .pass-container { position: relative; width: 100%; }
         .pass-container input { padding-right: 45px; }
         .toggle-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #888; cursor: pointer; z-index: 10; }
@@ -120,7 +119,6 @@
         } catch (e) { console.error(e); }
     }
 
-    // Fungsi Toggle Password (Mata)
     function togglePass() {
         const pInput = document.getElementById("pks-password");
         const icon = document.getElementById("togglePass");
@@ -204,15 +202,29 @@
         }
     }
 
+    // Fungsi Pembantu untuk memproses logo_pondok.png
+    async function getBase64ImageFromUrl(imageUrl) {
+        try {
+            const res = await fetch(imageUrl);
+            const blob = await res.blob();
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.addEventListener("load", function () { resolve(reader.result); }, false);
+                reader.onerror = () => reject("Gagal membaca file.");
+                reader.readAsDataURL(blob);
+            });
+        } catch (e) { return null; }
+    }
+
     async function validateAndExport() {
         const pass = document.getElementById("pks-password").value;
         const ADMIN_KEY = "rahasia123";
         
         if(!pass) { alert("Masukkan password!"); return; }
 
-        // LOGIKA BARU: Cek Admin dulu, jika bukan, cek Firestore
         if (pass === ADMIN_KEY) {
-            proceedExport("Administrator");
+            const logoData = await getBase64ImageFromUrl('logo_pondok.png');
+            proceedExport("Administrator", logoData);
         } else {
             try {
                 const check = await db.collection("users")
@@ -222,7 +234,8 @@
                     .get();
                 
                 if(!check.empty) {
-                    proceedExport("PKS / Ketua Komsel");
+                    const logoData = await getBase64ImageFromUrl('logo_pondok.png');
+                    proceedExport("PKS / Ketua Komsel", logoData);
                 } else { 
                     alert("Password Salah!"); 
                 }
@@ -230,45 +243,50 @@
         }
     }
 
-    function proceedExport(role) {
+    function proceedExport(role, logoBase64) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF('p', 'mm', 'a4');
         const insightText = document.getElementById("text-insight").innerText;
         const periodeText = document.getElementById("filter-periode").options[document.getElementById("filter-periode").selectedIndex].text;
 
-        // --- KOP SURAT ---
+        // --- 1. LOGO ---
+        if (logoBase64) {
+            doc.addImage(logoBase64, 'PNG', 15, 10, 20, 20);
+        }
+
+        // --- 2. KOP SURAT ---
         doc.setFont("helvetica", "bold");
         doc.setFontSize(16);
-        doc.text("GBI PONDOK PEMULIHAN PAPUA", 105, 20, { align: "center" });
+        doc.text("GBI PONDOK PEMULIHAN PAPUA", 110, 20, { align: "center" });
         doc.setFontSize(12);
         doc.setFont("helvetica", "normal");
-        doc.text(`Laporan Perkembangan Komsel JC ${userJC}`, 105, 28, { align: "center" });
+        doc.text(`Laporan Perkembangan Komsel JC ${userJC}`, 110, 28, { align: "center" });
         doc.setLineWidth(0.8);
-        doc.line(20, 32, 190, 32); 
+        doc.line(15, 33, 195, 33); 
         doc.setLineWidth(0.2);
-        doc.line(20, 33.5, 190, 33.5);
+        doc.line(15, 34.5, 195, 34.5);
 
-        // --- ISI LAPORAN ---
+        // --- 3. ISI LAPORAN ---
         doc.setFontSize(10);
-        doc.text(`Periode: ${periodeText}`, 20, 45);
-        doc.text(`Diverifikasi oleh: ${role}`, 20, 50);
+        doc.text(`Periode: ${periodeText}`, 15, 45);
+        doc.text(`Diverifikasi oleh: ${role}`, 15, 50);
         
         doc.setFont("helvetica", "bold");
-        doc.text("PERFORMA CAPAIAN (%)", 20, 60);
+        doc.text("PERFORMA CAPAIAN (%)", 15, 60);
         doc.setFont("helvetica", "normal");
         const valFirman = myChart.data.datasets[0].data[0];
-        doc.text(`- Baca Firman: ${valFirman}%`, 25, 65);
+        doc.text(`- Baca Firman: ${valFirman}%`, 20, 65);
 
         doc.setFont("helvetica", "bold");
-        doc.text("RINGKASAN INSIGHT AI:", 20, 75);
+        doc.text("RINGKASAN INSIGHT AI:", 15, 75);
         doc.setFont("helvetica", "italic");
-        const splitInsight = doc.splitTextToSize(insightText, 170);
-        doc.text(splitInsight, 20, 80);
+        const splitInsight = doc.splitTextToSize(insightText, 175);
+        doc.text(splitInsight, 15, 80);
 
-        // --- MUTASI LIST ---
+        // --- 4. MUTASI LIST ---
         let yPos = 85 + (splitInsight.length * 6);
         doc.setFont("helvetica", "bold");
-        doc.text("DETAIL MUTASI AKTIVITAS:", 20, yPos);
+        doc.text("DETAIL MUTASI AKTIVITAS:", 15, yPos);
         yPos += 7;
         
         const items = document.querySelectorAll(".mutasi-item");
@@ -279,7 +297,7 @@
             const desc = item.querySelector(".mutasi-desc").innerText;
             doc.setFontSize(9);
             doc.setFont("helvetica", "normal");
-            doc.text(`${tgl} - ${nama} (${desc})`, 20, yPos);
+            doc.text(`${tgl} - ${nama} (${desc})`, 15, yPos);
             yPos += 6;
         });
 
