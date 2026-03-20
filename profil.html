@@ -83,19 +83,18 @@
         
         #fileInput { display: none; }
 
-        /* NOTIFIKASI BLOCK DISPLAY */
+        /* --- FITUR TAMBAHAN: NOTIFIKASI BLOCK DISPLAY --- */
         #notif-block {
             position: fixed; top: 20px; left: 50%; 
             transform: translateX(-50%); 
             background: #2ecc71; color: white; 
             padding: 15px 25px; border-radius: 12px; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3); 
-            z-index: 10000; font-weight: bold; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2); 
+            z-index: 9999; font-weight: bold; 
             text-align: center; border: 2px solid white;
-            display: none; /* Sembunyi secara default */
+            display: none; /* Sembunyi awal */
             animation: slideDown 0.4s ease-out;
         }
-
         @keyframes slideDown {
             from { top: -100px; opacity: 0; }
             to { top: 20px; opacity: 1; }
@@ -135,6 +134,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+    // 1. KONFIGURASI FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -150,7 +150,7 @@
     const db = firebase.firestore();
     const userEmail = localStorage.getItem("userEmail");
 
-    // Load Data Otomatis
+    // Load Data Otomatis (Konsisten dengan script asli Bapak)
     if (!userEmail) {
         window.location.replace("index.html");
     } else {
@@ -169,15 +169,14 @@
             });
     }
 
-    // Fungsi Upload Foto Ramah HP
+    // --- FUNGSI UPLOAD OPTIMASI HP & NOTIFIKASI ---
     async function uploadFoto(input) {
         const file = input.files[0];
         if (!file || !userEmail) return;
 
-        // Batasi ukuran (Max 1MB) agar sinkronisasi Firestore lancar di HP
+        // Optimasi: Cek ukuran file (Max 1MB untuk kelancaran di HP)
         if (file.size > 1024 * 1024) { 
-            alert("Maaf Pak, foto terlalu besar. Gunakan foto yang ukurannya di bawah 1MB.");
-            input.value = ""; 
+            alert("Maaf Pak, foto terlalu besar (Max 1MB).");
             return;
         }
 
@@ -186,8 +185,8 @@
             const base64Image = e.target.result;
             const viewFoto = document.getElementById('view-foto');
             
-            // Efek Loading (Meredupkan gambar saat proses)
-            viewFoto.style.opacity = "0.4";
+            // Visual feedback: Redupkan saat upload
+            viewFoto.style.opacity = "0.5";
 
             try {
                 const snap = await db.collection("users").where("email", "==", userEmail).get();
@@ -197,14 +196,10 @@
                         fotoUrl: base64Image
                     });
                     
-                    // MUNCULKAN NOTIFIKASI BLOCK DISPLAY
+                    // Tampilkan Notifikasi Block
                     const notif = document.getElementById('notif-block');
                     notif.style.display = 'block';
-                    
-                    // Hilang otomatis setelah 3 detik
-                    setTimeout(() => {
-                        notif.style.display = 'none';
-                    }, 3000);
+                    setTimeout(() => { notif.style.display = 'none'; }, 3000);
                 }
             } catch (error) {
                 alert("Gagal simpan: " + error.message);
