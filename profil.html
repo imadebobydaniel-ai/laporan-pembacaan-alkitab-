@@ -217,18 +217,22 @@
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
+    
     const db = firebase.firestore();
     const storage = firebase.storage();
     const userEmail = localStorage.getItem("userEmail");
 
+    // Validasi Sesi
     if (!userEmail) {
         window.location.replace("index.html");
     } else {
+        // Load Data Profil & Foto secara Real-time
         db.collection("users").where("email", "==", userEmail)
             .onSnapshot((querySnapshot) => {
                 if (!querySnapshot.empty) {
                     const data = querySnapshot.docs[0].data();
                     
+                    // Update Foto jika ada URL di database
                     if (data.fotoUrl) {
                         document.getElementById('view-foto').src = data.fotoUrl;
                     }
@@ -245,29 +249,37 @@
             });
     }
 
+    // Fungsi Upload Foto ke Storage & Update Link ke Firestore
     async function uploadFoto(input) {
         const file = input.files[0];
         if (!file || !userEmail) return;
 
         const viewFoto = document.getElementById('view-foto');
-        viewFoto.style.opacity = "0.5";
+        viewFoto.style.opacity = "0.5"; // Indikator loading visual
         
+        // Simpan di folder 'users_photo' dengan nama file = email user
         const storageRef = storage.ref('users_photo/' + userEmail);
         
         try {
+            // 1. Upload ke Storage
             const uploadTask = await storageRef.put(file);
+            
+            // 2. Ambil Link Download
             const downloadURL = await uploadTask.ref.getDownloadURL();
             
+            // 3. Cari ID dokumen user di Firestore dan update field 'fotoUrl'
             const snap = await db.collection("users").where("email", "==", userEmail).get();
             if (!snap.empty) {
                 await db.collection("users").doc(snap.docs[0].id).update({
                     fotoUrl: downloadURL
                 });
             }
+            
             alert("Puji Tuhan! Foto Profil Berhasil Diperbarui.");
-            viewFoto.style.opacity = "1";
         } catch (error) {
+            console.error(error);
             alert("Gagal upload: " + error.message);
+        } finally {
             viewFoto.style.opacity = "1";
         }
     }
