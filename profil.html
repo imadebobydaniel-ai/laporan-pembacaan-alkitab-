@@ -70,7 +70,7 @@
         }
 
         .data-label { font-size: 10px; font-weight: 800; color: var(--biru-safir); text-transform: uppercase; margin-bottom: 4px; }
-        .data-value { font-size: 14px; color: var(--biru-tua); font-weight: 700; }
+        .data-value { font-size: 15px; color: var(--biru-tua); font-weight: 700; }
 
         .btn-back { 
             background: var(--biru-tua); color: white; 
@@ -83,7 +83,7 @@
         
         #fileInput { display: none; }
 
-        /* Gaya Kotak Notifikasi Block */
+        /* Notifikasi Block Style */
         #notif-block {
             position: fixed; top: 20px; left: 50%; 
             transform: translateX(-50%); 
@@ -92,7 +92,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
             z-index: 9999; font-weight: bold; 
             text-align: center; border: 2px solid white;
-            display: none; /* Sembunyi dulu */
+            display: none;
         }
     </style>
 </head>
@@ -110,11 +110,11 @@
         <div class="edit-badge" onclick="document.getElementById('fileInput').click()">
             <i class="fa-solid fa-camera"></i>
         </div>
-        <input type="file" id="fileInput" accept="image/*" onchange="prosesSimpanFoto(this)">
+        <input type="file" id="fileInput" accept="image/*" onchange="uploadFoto(this)">
     </div>
 
     <div class="info-section">
-        <div class="data-box"><div class="data-label">Nama Lengkap</div><div id="nama_lengkap" class="data-value">Memuat...</div></div>
+        <div class="data-box"><div class="data-label">Nama Lengkap</div><div id="nama_lengkap" class="data-value">Memuat data...</div></div>
         <div class="data-box"><div class="data-label">Email Aktif</div><div id="email_aktif" class="data-value">-</div></div>
         <div class="data-box"><div class="data-label">Nomor HP</div><div id="no_hp" class="data-value">-</div></div>
         <div class="data-box"><div class="data-label">Lokasi Komsel</div><div id="lokasi_komsel" class="data-value">-</div></div>
@@ -144,7 +144,6 @@
     const db = firebase.firestore();
     const userEmail = localStorage.getItem("userEmail");
 
-    // Tampilkan Data
     if (!userEmail) {
         window.location.replace("index.html");
     } else {
@@ -163,14 +162,12 @@
             });
     }
 
-    // Fungsi Ganti Foto & Notifikasi
-    async function prosesSimpanFoto(input) {
+    async function uploadFoto(input) {
         const file = input.files[0];
         if (!file || !userEmail) return;
 
-        // Cek ukuran
         if (file.size > 1024 * 1024) { 
-            alert("Maaf Pak, ukuran foto terlalu besar (Maksimal 1MB).");
+            alert("Maaf Pak, foto terlalu besar (Max 1MB).");
             return;
         }
 
@@ -188,14 +185,10 @@
                         fotoUrl: base64Image
                     });
                     
-                    // Tampilkan Notifikasi Block
+                    // Tampilkan notifikasi block
                     const boxNotif = document.getElementById('notif-block');
                     boxNotif.style.display = "block";
-                    
-                    // Hilang otomatis setelah 3 detik
-                    setTimeout(() => {
-                        boxNotif.style.display = "none";
-                    }, 3000);
+                    setTimeout(() => { boxNotif.style.display = "none"; }, 3000);
                 }
             } catch (error) {
                 alert("Gagal simpan: " + error.message);
