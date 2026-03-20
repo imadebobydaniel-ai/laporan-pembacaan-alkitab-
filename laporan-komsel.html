@@ -73,7 +73,7 @@
         <h3 style="border-color: #856404; color: #856404;"><i class="fa-solid fa-shield-halved"></i> Verifikasi PKS</h3>
         <input type="password" id="pks-password" placeholder="Masukkan Password PKS">
         <button class="btn-export" onclick="validateAndExport()">
-            <i class="fa-solid fa-file-pdf"></i> EKSPOR PDF
+            <i class="fa-solid fa-file-pdf"></i> EKSPOR PDF RESMI
         </button>
     </div>
 
@@ -142,9 +142,6 @@
         batasWaktu.setMonth(batasWaktu.getMonth() - periode);
         const tsBatas = firebase.firestore.Timestamp.fromDate(batasWaktu);
         
-        let dataMutasi = [];
-
-        // 1. Ambil Data Bacaan (Detail Mutasi)
         unsubBacaan = db.collection("laporan_bacaan")
             .where("komsel", "==", userJC)
             .where("tanggal", ">=", tsBatas)
@@ -167,7 +164,6 @@
                 });
                 document.getElementById("mutasi-list").innerHTML = html || '<div style="text-align:center; padding:20px; color:#bbb;">Tidak ada aktivitas.</div>';
                 
-                // Update Chart & Insight
                 const target = 20 * (periode * 4); 
                 const persen = Math.min(Math.round((count/target)*100), 100);
                 myChart.data.datasets[0].data[0] = persen;
@@ -193,14 +189,91 @@
     async function validateAndExport() {
         const pass = document.getElementById("pks-password").value;
         if(!pass) { alert("Masukkan password PKS!"); return; }
-        const check = await db.collection("users").where("komsel", "==", userJC).where("jabatan", "==", "Ketua Komsel").where("password", "==", pass).get();
-        if(!check.empty) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text(`LAPORAN RESMI JC ${userJC}`, 20, 20);
-            doc.text(`Dicetak pada: ${new Date().toLocaleString()}`, 20, 30);
-            doc.save(`Laporan_JC${userJC}.pdf`);
-        } else { alert("Password Salah!"); }
+        
+        try {
+            const check = await db.collection("users").where("komsel", "==", userJC).where("jabatan", "==", "Ketua Komsel").where("password", "==", pass).get();
+            
+            if(!check.empty) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const insightText = document.getElementById("text-insight").innerText;
+                const periodeText = document.getElementById("filter-periode").options[document.getElementById("filter-periode").selectedIndex].text;
+
+                // --- 1. KOP SURAT ---
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text("GBI PONDOK PEMULIHAN PAPUA", 105, 20, { align: "center" });
+                
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Laporan Perkembangan Komsel JC ${userJC}`, 105, 28, { align: "center" });
+                
+                doc.setLineWidth(0.8);
+                doc.line(20, 32, 190, 32); 
+                doc.setLineWidth(0.2);
+                doc.line(20, 33.5, 190, 33.5);
+
+                // --- 2. INFO LAPORAN ---
+                doc.setFontSize(10);
+                doc.text(`Periode: ${periodeText}`, 20, 45);
+                doc.text(`Tanggal Cetak: ${new Date().toLocaleString('id-ID')}`, 20, 50);
+
+                // --- 3. PERFORMA REALTIME (DARI CHART) ---
+                doc.setFont("helvetica", "bold");
+                doc.text("PERFORMA CAPAIAN (%)", 20, 60);
+                doc.setFont("helvetica", "normal");
+                const valFirman = myChart.data.datasets[0].data[0];
+                const valHadir = myChart.data.datasets[0].data[1];
+                doc.text(`- Baca Firman: ${valFirman}%`, 25, 65);
+                doc.text(`- Kehadiran   : ${valHadir}%`, 25, 70);
+
+                // --- 4. RINGKASAN INSIGHT AI ---
+                doc.setFont("helvetica", "bold");
+                doc.text("RINGKASAN PERKEMBANGAN (AI):", 20, 80);
+                doc.setFont("helvetica", "italic");
+                const splitInsight = doc.splitTextToSize(insightText, 170);
+                doc.text(splitInsight, 20, 85);
+
+                // --- 5. DAFTAR AKTIVITAS (MUTASI) ---
+                let yPos = 90 + (splitInsight.length * 6);
+                doc.setFont("helvetica", "bold");
+                doc.text("DETAIL AKTIVITAS JEMAAT (MUTASI):", 20, yPos);
+                yPos += 7;
+
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "bold");
+                doc.text("TGL", 20, yPos);
+                doc.text("NAMA JEMAAT / AKTIVITAS", 45, yPos);
+                doc.text("STATUS", 170, yPos);
+                doc.line(20, yPos + 2, 190, yPos + 2);
+                yPos += 8;
+
+                doc.setFont("helvetica", "normal");
+                const items = document.querySelectorAll(".mutasi-item");
+                items.forEach((item) => {
+                    if (yPos > 270) { doc.addPage(); yPos = 20; }
+                    const tgl = item.querySelector(".mutasi-date").innerText;
+                    const nama = item.querySelector(".mutasi-name").innerText;
+                    const desc = item.querySelector(".mutasi-desc").innerText;
+                    
+                    doc.text(tgl, 20, yPos);
+                    doc.text(`${nama} (${desc})`, 45, yPos);
+                    doc.text("BERHASIL", 170, yPos);
+                    yPos += 7;
+                });
+
+                // --- 6. TANDA TANGAN ---
+                yPos += 15;
+                if (yPos > 250) { doc.addPage(); yPos = 30; }
+                doc.setFont("helvetica", "bold");
+                doc.text("Jayapura, " + new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}), 150, yPos, { align: "center" });
+                doc.text("Mengetahui,", 150, yPos + 7, { align: "center" });
+                doc.text("Ketua Komsel JC " + userJC, 150, yPos + 32, { align: "center" });
+                doc.line(125, yPos + 33, 175, yPos + 33);
+
+                doc.save(`Laporan_Resmi_JC${userJC}.pdf`);
+            } else { alert("Password Salah atau Anda bukan Ketua Komsel!"); }
+        } catch (e) { alert("Error: " + e.message); }
     }
 
     window.onload = init;
