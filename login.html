@@ -15,17 +15,11 @@
         #text-status { margin: 10px 0; font-size: 16px; color: #555; font-weight: normal; display: block; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; }
         .btn-blue { background: #007bff; color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        
-        /* Tambahan Style untuk Link Bawah */
         .footer-links { margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
         .link-regis { display: block; color: #007bff; text-decoration: none; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
         .link-admin { display: block; color: #888; text-decoration: none; font-size: 12px; }
         .link-admin:hover { color: #333; }
-
-        #error-block {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px;
-        }
+        #error-block { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
         .error-card { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 320px; width: 100%; }
         .btn-close-error { background: #dc3545; color: white; border: none; padding: 12px 0; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; }
     </style>
@@ -99,7 +93,7 @@
         }
 
         try {
-            // Gunakan satu Query saja untuk email (Case Sensitive)
+            // 1. Cari user berdasarkan email
             const snapshot = await db.collection("users").where("email", "==", emailInput).get();
 
             if (snapshot.empty) {
@@ -107,19 +101,26 @@
                 return;
             }
 
-            const userDoc = snapshot.docs[0].data();
+            const doc = snapshot.docs[0];
+            const userDoc = doc.data();
 
+            // 2. Validasi Password
             if (userDoc.password === passInput) {
-                // SIMPAN DATA KE STORAGE
+                // --- SIMPAN SEMUA DATA YANG DIBUTUHKAN KE LOCALSTORAGE ---
+                localStorage.setItem("userId", doc.id);
                 localStorage.setItem("userEmail", emailInput);
                 localStorage.setItem("userName", userDoc.nama);
-                localStorage.setItem("userKomsel", String(userDoc.komsel));
                 
+                // Mengambil field 'komsel' dari database dan menyimpannya sebagai 'userJC'
+                localStorage.setItem("userJC", String(userDoc.komsel)); 
+                
+                // Pindah ke halaman menu
                 window.location.href = "menu.html";
             } else {
                 showError("Password Salah", "Periksa kembali password Anda.");
             }
         } catch (e) {
+            console.error("Login Error:", e);
             showError("Database Error", e.message);
         }
     }
