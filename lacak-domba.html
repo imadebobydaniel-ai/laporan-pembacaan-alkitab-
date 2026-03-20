@@ -12,15 +12,19 @@
         .header h2 { margin: 0; color: var(--biru-tua); font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
         .search-container { padding: 15px; background: white; margin: 10px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .search-box input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; box-sizing: border-box; outline: none; }
-        #map-container { width: 92%; height: 180px; background: #e5e3df; margin: auto; border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
+        #map-container { width: 92%; height: 180px; background: #e5e3df; margin: auto; border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
         .info-panel { background: #fff9db; border: 1px solid #ffe066; margin: 15px; padding: 12px; border-radius: 10px; font-size: 12px; text-align: center; line-height: 1.5; color: #856404; }
         .friends-list { padding: 0 15px 30px 15px; }
         .section-title { font-size: 13px; color: #666; margin: 15px 0 10px 5px; font-weight: bold; text-transform: uppercase; }
-        .friend-item { background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-        .friend-img { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 1px solid #eee; }
-        .friend-info { flex: 1; cursor: pointer; }
+        
+        /* Friend Item Style */
+        .friend-item { background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; }
+        .friend-img { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; border: 1px solid #eee; }
+        .friend-info { flex: 1; }
         .friend-info h4 { margin: 0; font-size: 14px; color: var(--biru-tua); }
         .friend-info p { margin: 2px 0; font-size: 11px; color: #777; }
+
+        /* Modal Style */
         .profile-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
         .profile-card { background: white; width: 85%; max-width: 320px; border-radius: 25px; overflow: hidden; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -28,25 +32,24 @@
         .card-avatar { width: 100px; height: 100px; border-radius: 50%; border: 5px solid white; margin-top: -50px; background: white; object-fit: cover; position: relative; z-index: 2; }
         .card-body { padding: 20px; }
         .card-body h3 { margin: 10px 0 5px; color: #333; font-size: 18px; }
-        .card-body p { margin: 0; color: #777; font-size: 13px; }
-        .btn { border: none; padding: 10px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-invite { background: var(--biru-safir); color: white; width: 100%; margin-top: 15px; }
-        .btn-close { background: #eee; color: #333; width: 100%; margin-top: 8px; }
-        .btn-sent { background: #e4e6eb !important; color: #4b4f56 !important; }
+        .card-body p { margin: 0; color: #777; font-size: 13px; margin-bottom: 15px; }
+        .btn { border: none; padding: 12px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-invite { background: var(--biru-safir); color: white; margin-top: 5px; }
+        .btn-close { background: #eee; color: #333; margin-top: 8px; }
         .back-btn { display: block; text-align: center; margin: 20px; color: var(--biru-safir); text-decoration: none; font-size: 14px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2 id="header-title"><i class="fa-solid fa-map-location-dot" style="color: var(--emas);"></i> Lacak Domba</h2>
+        <h2 id="header-title"><i class="fa-solid fa-map-location-dot" style="color: var(--emas);"></i> LACAK DOMBA</h2>
     </div>
 
-    <div class="info-panel" id="access-text">Memuat informasi akses...</div>
+    <div class="info-panel" id="access-text">Menghubungkan ke sistem...</div>
 
     <div class="search-container">
         <div class="search-box">
-            <input type="text" id="search-input" placeholder="Cari Nama Anggota (Contoh: Boby)...">
+            <input type="text" id="search-input" placeholder="Ketik Nama (Contoh: Boby)..." onkeyup="cariAnggota()">
         </div>
     </div>
 
@@ -54,30 +57,28 @@
         <div style="text-align: center; color: #666;">
             <i class="fa-solid fa-location-dot fa-2x" style="color: #ff4757; margin-bottom: 8px;"></i><br>
             <strong id="map-status" style="font-size: 14px;">Peta Siap</strong><br>
-            <small id="map-coord" style="font-size: 10px;">Pilih teman untuk melacak posisi</small>
+            <small id="map-coord" style="font-size: 10px;">Pilih anggota untuk melacak</small>
         </div>
     </div>
 
     <div class="friends-list">
-        <div id="search-results-section" style="display:none;">
+        <div id="search-results-section">
             <div class="section-title">Hasil Pencarian</div>
-            <div id="search-results"></div>
-        </div>
-        <div class="section-title">Teman Terhubung</div>
-        <div id="connected-friends">
-            <p style="font-size: 11px; color: #999; text-align: center; padding: 10px;">Gunakan fitur cari untuk menambah teman.</p>
+            <div id="search-results">
+                <p style="font-size: 11px; color: #999; text-align: center; padding: 10px;">Hasil pencarian akan muncul di sini.</p>
+            </div>
         </div>
     </div>
 
     <div id="modalProfil" class="profile-modal">
         <div class="profile-card">
             <div class="card-header"></div>
-            <img id="p-foto" src="" class="card-avatar">
+            <img id="p-foto" src="https://via.placeholder.com/100" class="card-avatar">
             <div class="card-body">
                 <h3 id="p-nama">Nama Anggota</h3>
                 <p id="p-jc">JC Group</p>
-                <button id="p-btn-action" class="btn btn-invite">
-                    <i class="fa-solid fa-user-plus"></i> ADD FRIEND
+                <button class="btn btn-invite" onclick="lacakSekarang()">
+                    <i class="fa-solid fa-crosshairs"></i> LACAK SEKARANG
                 </button>
                 <button class="btn btn-close" onclick="tutupProfil()">TUTUP</button>
             </div>
@@ -94,3 +95,88 @@
         const firebaseConfig = {
             apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
             authDomain: "boby-apps-project.firebaseapp.com",
+            projectId: "boby-apps-project",
+            storageBucket: "boby-apps-project.appspot.com",
+            messagingSenderId: "125984859692",
+            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.firestore();
+
+        // --- 2. INISIALISASI DATA LOGIN ---
+        window.onload = function() {
+            const userJC = localStorage.getItem("userJC");
+            const userName = localStorage.getItem("userName");
+
+            if (userJC && userName) {
+                document.getElementById('header-title').innerHTML = `<i class="fa-solid fa-map-location-dot" style="color: var(--emas);"></i> LACAK DOMBA JC ${userJC}`;
+                document.getElementById('access-text').innerText = `Anda login sebagai ${userName} (JC ${userJC})`;
+            } else {
+                document.getElementById('access-text').innerHTML = `<b style="color:red;">Sesi Berakhir. Silakan <a href="login.html">Login Ulang</a></b>`;
+            }
+        };
+
+        // --- 3. FUNGSI CARI ---
+        async function cariAnggota() {
+            const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+            const resultsDiv = document.getElementById('search-results');
+            const userJC = localStorage.getItem("userJC") || "1";
+
+            if (keyword.length < 2) {
+                resultsDiv.innerHTML = "<p style='text-align:center; font-size:11px; color:#999;'>Ketik minimal 2 huruf...</p>";
+                return;
+            }
+
+            try {
+                // Mencari hanya di JC yang sama
+                const snapshot = await db.collection("users").where("komsel", "==", userJC).get();
+                resultsDiv.innerHTML = "";
+                let found = false;
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.nama.toLowerCase().includes(keyword)) {
+                        found = true;
+                        resultsDiv.innerHTML += `
+                            <div class="friend-item" onclick="bukaProfil('${data.nama}', '${data.komsel}', '${data.foto}')">
+                                <img src="${data.foto || 'https://via.placeholder.com/55'}" class="friend-img">
+                                <div class="friend-info">
+                                    <h4>${data.nama}</h4>
+                                    <p>JC ${data.komsel} • ${data.jabatan || 'Anggota'}</p>
+                                </div>
+                                <i class="fa-solid fa-chevron-right" style="color:#eee"></i>
+                            </div>`;
+                    }
+                });
+
+                if (!found) resultsDiv.innerHTML = "<p style='text-align:center; font-size:11px; color:red;'>Anggota tidak ditemukan.</p>";
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // --- 4. MODAL & UI ---
+        function bukaProfil(nama, jc, foto) {
+            document.getElementById('p-nama').innerText = nama;
+            document.getElementById('p-jc').innerText = "Anggota JC Group " + jc;
+            document.getElementById('p-foto').src = foto || 'https://via.placeholder.com/100';
+            document.getElementById('modalProfil').style.display = 'flex';
+        }
+
+        function tutupProfil() {
+            document.getElementById('modalProfil').style.display = 'none';
+        }
+
+        function lacakSekarang() {
+            const nama = document.getElementById('p-nama').innerText;
+            document.getElementById('map-status').innerText = "Melacak: " + nama;
+            document.getElementById('map-coord').innerText = "Koordinat sedang disinkronkan...";
+            tutupProfil();
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('modalProfil')) { tutupProfil(); }
+        }
+    </script>
+</body>
+</html>
