@@ -138,7 +138,7 @@
         <div class="filter-row">
             <div class="filter-item">
                 <label>Komsel</label>
-                <select id="jc-absen" onchange="loadKehadiran()">
+                <select id="jc-absen" onchange="syncKehadiran('absen')">
                     <option value="JC 1">JC 1</option>
                     <option value="JC 2">JC 2</option>
                     <option value="JC 3">JC 3</option>
@@ -148,7 +148,7 @@
             </div>
             <div class="filter-item">
                 <label>Periode</label>
-                <select id="per-absen" onchange="loadKehadiran()">
+                <select id="per-absen" onchange="syncKehadiran('absen')">
                     <option value="1">1 Bulan Terakhir</option>
                     <option value="2">2 Bulan Terakhir</option>
                     <option value="3">3 Bulan Terakhir</option>
@@ -158,7 +158,7 @@
                 </select>
             </div>
         </div>
-        <div class="stat-line"><span>Persentase <span id="label-jc-absen-teks">JC 5</span></span><span class="val-txt" style="color: var(--merah-lux);" id="txt-absen-jc">0%</span></div>
+        <div class="stat-line"><span>Persentase <span id="label-jc-absen-teks">JC 5</span></span><span class="val-txt" style="color: var(--merah-lux);" id="txt-absen-jc">0.0%</span></div>
         <div class="progress-bg"><div id="bar-absen-jc" class="progress-fill" style="background: var(--merah-lux); width: 0%;"></div></div>
         <div class="detail-text" id="rincian-absen">Memuat bulan...</div>
     </div>
@@ -193,72 +193,4 @@
         authDomain: "boby-apps-project.firebaseapp.com",
         projectId: "boby-apps-project",
         storageBucket: "boby-apps-project.appspot.com",
-        messagingSenderId: "125984859692",
-        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
-    };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const db = firebase.firestore();
-
-    // Fungsi Pembantu Rincian Bulan
-    function formatPeriodeBulan(jumlah) {
-        const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        let hasil = [];
-        let d = new Date();
-        for (let i = 0; i < jumlah; i++) {
-            let temp = new Date(d.getFullYear(), d.getMonth() - i, 1);
-            hasil.push(namaBulan[temp.getMonth()]);
-        }
-        return "Periode: " + hasil.reverse().join(", ");
-    }
-
-    async function loadAlkitab() {
-        const jc = document.getElementById('jc-alkitab').value;
-        const per = parseInt(document.getElementById('per-alkitab').value);
-        document.getElementById('label-jc-baca').innerText = jc;
-        document.getElementById('rincian-alkitab').innerText = formatPeriodeBulan(per);
-        
-        // Logika perhitungan bisa Bapak hubungkan ke Firestore di sini
-        let simulasi = jc === "JC 5" ? 25 : 15;
-        document.getElementById('txt-baca-jc').innerText = simulasi.toFixed(1) + "%";
-        document.getElementById('bar-baca-jc').style.width = simulasi + "%";
-    }
-
-    async function loadKehadiran() {
-        // Sinkronisasi filter antara kartu Hadir dan Absen
-        const jc = document.getElementById('jc-hadir').value;
-        const per = parseInt(document.getElementById('per-hadir').value);
-        
-        // Update teks label dan rincian
-        document.getElementById('label-jc-hadir').innerText = jc;
-        document.getElementById('label-jc-absen-teks').innerText = jc;
-        const teksBulan = formatPeriodeBulan(per);
-        document.getElementById('rincian-hadir').innerText = teksBulan;
-        document.getElementById('rincian-absen').innerText = teksBulan;
-
-        // Simulasi Angka
-        let hadir = 0; // Ganti dengan query Firestore
-        let absen = 100 - hadir;
-
-        document.getElementById('txt-hadir-jc').innerText = hadir + "%";
-        document.getElementById('bar-hadir-jc').style.width = hadir + "%";
-        document.getElementById('txt-absen-jc').innerText = absen + "%";
-        document.getElementById('bar-absen-jc').style.width = absen + "%";
-    }
-
-    async function loadDarah() {
-        const jc = document.getElementById('jc-darah').value;
-        let q = db.collection("users");
-        if(jc !== "Semua") q = q.where("komsel", "==", jc.replace("JC ", ""));
-        const snap = await q.get();
-        let counts = { "A": 0, "B": 0, "O": 0, "AB": 0 };
-        snap.forEach(doc => { 
-            const d = doc.data().golongan_darah;
-            if(counts.hasOwnProperty(d)) counts[d]++;
-        });
-        for(let t in counts) { document.getElementById('count-'+t).innerText = counts[t] + " Orang"; }
-    }
-
-    window.onload = () => { loadAlkitab(); loadKehadiran(); loadDarah(); };
-</script>
-</body>
-</html>
+        messagingSenderId: "1259848596
