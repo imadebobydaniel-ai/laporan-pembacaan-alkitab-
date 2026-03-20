@@ -37,17 +37,25 @@
         <div class="filter-row">
             <div class="filter-item">
                 <label>Pilih Komsel</label>
-                <select id="jc-alkitab" onchange="loadAlkitab()">
-                    <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option>
-                    <option value="JC 4">JC 4</option><option value="JC 5" selected>JC 5</option><option value="JC 6">JC 6</option>
-                    <option value="JC 10">JC 10</option>
-                </select>
+               <select id="jc-alkitab" onchange="loadAlkitab()">
+    <option value="JC 1">JC 1</option>
+    <option value="JC 2">JC 2</option>
+    <option value="JC 3">JC 3</option>
+    <option value="JC 4">JC 4</option>
+    <option value="JC 5" selected>JC 5</option>
+    <option value="JC 6">JC 6</option>
+</select>
             </div>
             <div class="filter-item">
                 <label>Periode</label>
-                <select id="per-alkitab" onchange="loadAlkitab()">
-                    <option value="1">1 Bulan Terakhir</option><option value="3">3 Bulan Terakhir</option>
-                </select>
+               <select id="per-alkitab" onchange="loadAlkitab()">
+    <option value="1">1 Bulan Terakhir</option>
+    <option value="2">2 Bulan Terakhir</option>
+    <option value="3">3 Bulan Terakhir</option>
+    <option value="4">4 Bulan Terakhir</option>
+    <option value="5">5 Bulan Terakhir</option>
+    <option value="6">6 Bulan Terakhir</option>
+</select>
             </div>
         </div>
         <div class="stat-line"><span>Capaian <span id="label-jc-baca">JC 5</span></span><span class="val-txt" id="txt-baca-jc">0.0%</span></div>
@@ -119,22 +127,50 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    async function loadAlkitab() {
-        const jc = document.getElementById('jc-alkitab').value;
-        document.getElementById('label-jc-baca').innerText = jc;
-        const snap = await db.collection("laporan_bacaan").get();
-        let total = 0, jcCount = 0;
-        snap.forEach(doc => {
-            total++;
-            if(doc.data().komsel === jc.replace("JC ","")) jcCount++;
-        });
-        const pJC = total > 0 ? ((jcCount/total)*100).toFixed(1) : 0;
-        document.getElementById('txt-baca-jc').innerText = pJC + "%";
-        document.getElementById('bar-baca-jc').style.width = pJC + "%";
-        document.getElementById('txt-baca-global').innerText = (total > 0 ? "100.0%" : "0.0%");
-        document.getElementById('bar-baca-global').style.width = (total > 0 ? "100%" : "0%");
-    }
+   async function loadAlkitab() {
+    const jcTerpilih = document.getElementById('jc-alkitab').value;
+    const bulanPeriode = parseInt(document.getElementById('per-alkitab').value);
+    document.getElementById('label-jc-baca').innerText = jcTerpilih;
 
+    // Asumsi target per JC per bulan (silakan Bapak sesuaikan angkanya)
+    const targetPerJC = 20; 
+    const totalJC = 6; // JC 1 sampai JC 6
+    const targetGlobal = targetPerJC * totalJC * bulanPeriode;
+
+    const sekarang = new Date();
+    const tglMulai = new Date(sekarang.getFullYear(), sekarang.getMonth() - (bulanPeriode - 1), 1);
+    const tsMulai = firebase.firestore.Timestamp.fromDate(tglMulai);
+
+    try {
+        const snap = await db.collection("laporan_bacaan").where("tanggal", ">=", tsMulai).get();
+        
+        let jumlahLaporGlobal = 0;
+        let jumlahLaporJC = 0;
+
+        snap.forEach(doc => {
+            const d = doc.data();
+            jumlahLaporGlobal++;
+            // Cek jika data komsel cocok dengan pilihan (menghilangkan kata "JC ")
+            if (d.komsel === jcTerpilih.replace("JC ", "")) { 
+                jumlahLaporJC++; 
+            }
+        });
+
+        // HITUNG PERSENTASE YANG BENAR
+        // JC: (Jumlah lapor / Target JC x Bulan)
+        const persenJC = ((jumlahLaporJC / (targetPerJC * bulanPeriode)) * 100).toFixed(1);
+        // Global: (Total seluruh lapor / Total target seluruh jemaat x Bulan)
+        const persenGlobal = ((jumlahLaporGlobal / targetGlobal) * 100).toFixed(1);
+
+        // Update Tampilan
+        document.getElementById('txt-baca-jc').innerText = persenJC + "%";
+        document.getElementById('bar-baca-jc').style.width = (persenJC > 100 ? 100 : persenJC) + "%";
+        
+        document.getElementById('txt-baca-global').innerText = persenGlobal + "%";
+        document.getElementById('bar-baca-global').style.width = (persenGlobal > 100 ? 100 : persenGlobal) + "%";
+
+    } catch (e) { console.error("Gagal memuat data: ", e); }
+}
     async function loadKehadiran() {
         // Simulasi hitung sederhana karena data kehadiran butuh field status
         document.getElementById('txt-hadir-jc').innerText = "0%";
