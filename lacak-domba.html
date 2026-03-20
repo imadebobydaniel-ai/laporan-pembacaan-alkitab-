@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lacak Domba - Pondok Pemulihan Papua</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --biru-tua: #003366; --biru-safir: #0056b3; --hijau-zamrud: #2ecc71; --putih-bg: #f4f7fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--putih-bg); margin: 0; padding: 0; }
+        
+        .header { background: white; padding: 20px; text-align: center; border-bottom: 3px solid var(--biru-safir); }
+        .header h2 { margin: 0; color: var(--biru-tua); font-size: 18px; text-transform: uppercase; }
+
+        /* Search Bar Anggota */
+        .search-container { padding: 15px; background: white; margin: 10px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .search-box { display: flex; gap: 10px; }
+        .search-box input { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; }
+        .btn-search { background: var(--biru-safir); color: white; border: none; padding: 10px 15px; border-radius: 10px; }
+
+        /* Map Area Placeholder */
+        #map-container { 
+            width: 95%; height: 350px; background: #e5e3df; margin: auto; 
+            border-radius: 20px; position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* List Teman JC */
+        .friends-list { padding: 15px; }
+        .friend-item { 
+            background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .friend-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--hijau-zamrud); }
+        .friend-info { flex: 1; }
+        .friend-info h4 { margin: 0; font-size: 14px; color: var(--biru-tua); }
+        .friend-info p { margin: 0; font-size: 11px; color: #888; }
+        .btn-track { background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; }
+
+        .back-btn { display: block; text-align: center; margin: 20px; color: var(--biru-safir); text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2><i class="fa-solid fa-map-location-dot" style="color: var(--emas-lux);"></i> Lacak Domba (JC 5)</h2>
+    </div>
+
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="search-name" placeholder="Cari nama anggota JC 5...">
+            <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+    </div>
+
+    <div id="map-container">
+        <div style="text-align: center; color: #666;">
+            <i class="fa-solid fa-location-dot fa-3x" style="color: #ff4757; margin-bottom: 10px;"></i><br>
+            <strong>Peta Sedang Memuat...</strong><br>
+            <small>Hanya menampilkan teman di JC 5</small>
+        </div>
+    </div>
+
+    <div class="friends-list">
+        <h3 style="font-size: 14px; color: #666; margin-left: 5px;">Teman Komsel JC 5</h3>
+        
+        <div class="friend-item">
+            <img src="https://via.placeholder.com/100" class="friend-img">
+            <div class="friend-info">
+                <h4>Andi Pratama</h4>
+                <p><i class="fa-solid fa-circle" style="color: var(--hijau-zamrud); font-size: 8px;"></i> Aktif 2 menit lalu</p>
+            </div>
+            <button class="btn-track" onclick="trackMember('Andi')">LIHAT POSISI</button>
+        </div>
+
+        <div class="friend-item">
+            <img src="https://via.placeholder.com/100" class="friend-img">
+            <div class="friend-info">
+                <h4>Siska Wulandari</h4>
+                <p><i class="fa-solid fa-circle" style="color: #ccc; font-size: 8px;"></i> Terakhir terlihat 1 jam lalu</p>
+            </div>
+            <button class="btn-track" onclick="trackMember('Siska')">LIHAT POSISI</button>
+        </div>
+    </div>
+
+    <a href="menu.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Kembali ke Menu</a>
+
+    <script>
+        // Logika Identifikasi JC
+        const myJC = localStorage.getItem('userJC') || "Belum Set";
+
+        function trackMember(name) {
+            // Simulasi pergerakan peta
+            alert("Melacak posisi " + name + " di JC 5...");
+        }
+
+        // Script Mengambil GPS (PENTING UNTUK HP)
+        function updateMyPosition() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition((pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    console.log("Posisi Saya (" + myJC + "): ", lat, lon);
+                    // Kirim lat & lon ke database Bapak di sini
+                });
+            }
+        }
+        
+        window.onload = updateMyPosition;
+    </script>
+</body>
+</html>
