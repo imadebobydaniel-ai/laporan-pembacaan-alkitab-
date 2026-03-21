@@ -12,10 +12,8 @@
         .header { background: var(--biru); color: white; padding: 15px; text-align: center; border-bottom: 3px solid var(--emas); position: sticky; top: 0; z-index: 100; }
         .container { padding: 15px; }
 
-        /* Tombol Utama */
         .btn-add { background: var(--emas); color: var(--biru); padding: 15px; border-radius: 12px; border: none; font-weight: bold; width: 100%; margin-bottom: 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-        /* Modal Popup */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: white; width: 90%; max-width: 450px; padding: 25px; border-radius: 20px; position: relative; max-height: 90vh; overflow-y: auto; text-align: center; }
         
@@ -24,7 +22,6 @@
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
         input[readonly] { background: #f0f0f0; color: #777; }
 
-        /* Card Tiket Doa */
         .ticket-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 6px solid var(--emas); box-shadow: 0 3px 10px rgba(0,0,0,0.05); position: relative; text-align: left; }
         .ticket-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #888; margin-bottom: 8px; }
         .pokok-doa { font-weight: 600; color: var(--biru); margin: 10px 0; line-height: 1.4; }
@@ -45,12 +42,14 @@
 </div>
 
 <div class="container">
+    <h4 id="label-kelompok" style="color: var(--biru); margin: 0 0 15px 5px; text-transform: uppercase;">MEMUAT...</h4>
+    
     <button class="btn-add" onclick="openModal()">
         <i class="fa-solid fa-circle-plus"></i> ADD DOA BARU
     </button>
     
     <div id="list-doa">
-        <p style="text-align:center; color:#999;">Memuat data doa...</p>
+        <p style="text-align:center; color:#999;">Memuat data doa kelompok...</p>
     </div>
 </div>
 
@@ -69,18 +68,12 @@
         </div>
 
         <div class="form-group">
-            <label>Pilih Grup JC</label>
-            <select id="jcSelect">
-                <option value="JC1">JC-1</option>
-                <option value="JC2">JC-2</option>
-                <option value="JC3">JC-3</option>
-                <option value="JC4">JC-4</option>
-                <option value="JC5">JC-5</option>
-            </select>
+            <label>Kelompok JC Anda</label>
+            <input type="text" id="jcTampil" readonly>
         </div>
 
         <div class="form-group">
-            <label>Pokok Doa (SLA)</label>
+            <label>Pokok Doa (Pergumulan)</label>
             <textarea id="pokokDoa" rows="4" placeholder="Tulis pergumulan doa Anda..."></textarea>
         </div>
 
@@ -117,15 +110,23 @@
         messagingSenderId: "125984859692", 
         appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389" 
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     const userName = localStorage.getItem("userName") || "Anggota";
     const userEmail = localStorage.getItem("userEmail");
+    const userJC = localStorage.getItem("userJC") || "1"; // Mengambil data JC dari profile
+
+    window.onload = function() {
+        document.getElementById('label-kelompok').innerText = `LIST DOA KELOMPOK JC-${userJC}`;
+        getRiwayatDoa();
+    };
 
     async function openModal() {
         document.getElementById('doaModal').style.display = 'flex';
         document.getElementById('namaUser').value = userName;
+        document.getElementById('jcTampil').value = "JC-" + userJC;
+        
         const now = new Date();
         document.getElementById('tglDisplay').value = now.toLocaleDateString('id-ID');
 
@@ -146,7 +147,7 @@
             ticketId: document.getElementById('ticketNo').value,
             nama: userName,
             email: userEmail,
-            jc: document.getElementById('jcSelect').value,
+            jc: userJC, // Otomatis simpan sesuai JC user
             pokokDoa: pokok,
             tglInput: firebase.firestore.FieldValue.serverTimestamp(),
             status: "Proses",
@@ -156,18 +157,26 @@
 
         try {
             await db.collection("laporan_doa").add(data);
-            closeModal(); // Tutup form input
+            closeModal();
             document.getElementById('pokokDoa').value = "";
-            
-            // Tampilkan Notifikasi Block Display
             document.getElementById('notifSuccess').style.display = 'flex';
         } catch(e) { alert("Gagal koneksi database."); }
     }
 
     function getRiwayatDoa() {
-        db.collection("laporan_doa").orderBy("tglInput", "desc").onSnapshot((snapshot) => {
+        // FILTER BERDASARKAN JC USER
+        db.collection("laporan_doa")
+        .where("jc", "==", userJC) 
+        .orderBy("tglInput", "desc")
+        .onSnapshot((snapshot) => {
             const listDiv = document.getElementById('list-doa');
             listDiv.innerHTML = "";
+            
+            if (snapshot.empty) {
+                listDiv.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">Belum ada doa di kelompok JC-${userJC}.</p>`;
+                return;
+            }
+
             snapshot.forEach((doc) => {
                 const item = doc.data();
                 const id = doc.id;
@@ -186,7 +195,7 @@
                                 ${isAnswered ? 'DIKABULKAN' : 'DALAM DOA'}
                             </span>
                         </div>
-                        <div style="font-size:12px; font-weight:bold; color:var(--biru);">${item.nama} (${item.jc})</div>
+                        <div style="font-size:12px; font-weight:bold; color:var(--biru);">${item.nama} (JC-${item.jc})</div>
                         <div class="pokok-doa">"${item.pokokDoa}"</div>
                         <div class="sla-info">
                             <i class="fa-solid fa-hourglass-half"></i> ${isAnswered ? 'SLA Jawab: ' + item.totalHari : 'Berjalan: ' + days} Hari
@@ -195,6 +204,9 @@
                     </div>
                 `;
             });
+        }, (error) => {
+            console.log("Error:", error);
+            document.getElementById('list-doa').innerHTML = "<p style='color:red;'>Gagal memuat. Pastikan Index Firestore sudah aktif.</p>";
         });
     }
 
@@ -207,8 +219,6 @@
             });
         }
     }
-
-    window.onload = getRiwayatDoa;
 </script>
 </body>
 </html>
