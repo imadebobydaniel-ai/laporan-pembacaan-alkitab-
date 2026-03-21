@@ -306,6 +306,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
     const firebaseConfig = {
@@ -455,125 +456,84 @@ async function validateAndExport() {
     const items = document.querySelectorAll(".mutasi-item");
 
     if(!pass || pass !== "rahasia123") { 
-        alert("Password Otoritas Salah!"); 
+        alert("Password Salah!"); 
         return; 
     }
-    if (items.length === 0) { 
-        alert("Tidak ada data untuk laporan."); 
-        return; 
-    }
-
-    alert("Sedang memproses PDF... Mohon tunggu sebentar.");
     
+    // 1. Indikator Loading (Penting agar user tahu proses sedang jalan)
+    const btn = document.querySelector(".btn-export");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MEMPROSES...';
+    btn.disabled = true;
+
     try {
         const { jsPDF } = window.jspdf;
-        // Gunakan format A4 dengan kompresi aktif untuk HP
-        const doc = new jsPDF({
-            orientation: "p",
-            unit: "mm",
-            format: "a4",
-            compress: true 
-        });
-
+        // Settingan kompresi tinggi untuk HP
+        const doc = new jsPDF('p', 'mm', 'a4', true);
         const pageWidth = doc.internal.pageSize.getWidth();
-        const margin = 15;
-        const contentWidth = pageWidth - (margin * 2);
-
-        // --- LOAD LOGO ---
-        const logoData = await getLogoBase64();
-        let currentY = 15;
-
-        if (logoData) {
-            // Posisi Logo: Tengah Atas
-            doc.addImage(logoData, 'PNG', (pageWidth/2) - 10, currentY, 20, 20);
-            currentY += 25;
-        }
-
-        // --- KOP SURAT ---
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("GBI PONDOK PEMULIHAN PAPUA", pageWidth / 2, currentY, { align: "center" });
         
-        currentY += 6;
+        // --- KOP SURAT (Tanpa Fetch Luar agar tidak macet) ---
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("GBI PONDOK PEMULIHAN PAPUA", pageWidth / 2, 20, { align: "center" });
+        
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text(`LAPORAN PERKEMBANGAN KOMSEL JC ${userJC}`, pageWidth / 2, currentY, { align: "center" });
+        doc.text("Laporan Perkembangan Komsel JC " + userJC, pageWidth / 2, 26, { align: "center" });
         
-        currentY += 4;
-        doc.setFontSize(8);
-        doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, pageWidth / 2, currentY, { align: "center" });
-
-        currentY += 4;
         doc.setLineWidth(0.5);
-        doc.line(margin, currentY, pageWidth - margin, currentY); 
-        
-        currentY += 10;
+        doc.line(15, 30, pageWidth - 15, 30);
 
-        // --- FUNGSI HELPER UNTUK TEXT WRAPPING ---
-        const addSection = (title, content, isItalic = false) => {
+        let y = 40;
+
+        // --- FUNGSI AUTO-TEXT (Agar teks tidak keluar kertas) ---
+        const tulisSeksi = (judul, isi) => {
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(10);
-            doc.text(title, margin, currentY);
-            currentY += 6;
-            
-            doc.setFont("helvetica", isItalic ? "italic" : "normal");
-            doc.setFontSize(10);
-            let lines = doc.splitTextToSize(content, contentWidth);
-            doc.text(lines, margin, currentY);
-            currentY += (lines.length * 5) + 8;
+            doc.text(judul, 15, y);
+            y += 6;
+            doc.setFont("helvetica", "normal");
+            const splitIsi = doc.splitTextToSize(isi, pageWidth - 30);
+            doc.text(splitIsi, 15, y);
+            y += (splitIsi.length * 5) + 7;
         };
 
-        // --- ISI LAPORAN ---
         // I. Alkitab
-        let daftarNama = Array.from(items).map(el => 
-            `${el.getAttribute('data-nama')} (${el.getAttribute('data-bacaan')})`
-        ).join(", ");
-        
-        addSection("I. ANALISA CAPAIAN PEMBACAAN ALKITAB", 
-            `Capaian saat ini: ${myChart.data.datasets[0].data[0]}%. Jemaat: ${daftarNama}.`);
+        let daftar = "";
+        items.forEach(el => { 
+            daftar += el.getAttribute('data-nama') + " (" + el.getAttribute('data-bacaan') + "), "; 
+        });
+        tulisSeksi("I. ANALISA PEMBACAAN ALKITAB", 
+            `Capaian: ${myChart.data.datasets[0].data[0]}%. Jemaat: ${daftar.slice(0, -2)}`);
 
         // II & III. Kehadiran
-        addSection("II. ANALISA KEHADIRAN", 
+        tulisSeksi("II. ANALISA KEHADIRAN", 
             `Tingkat kehadiran mencapai ${myChart.data.datasets[0].data[1]}%.`);
             
-        addSection("III. ANALISA KETIDAKHADIRAN", 
-            `Ketidakhadiran (${myChart.data.datasets[0].data[2]}%) disebabkan faktor pekerjaan, kesehatan, dan transportasi.`);
+        tulisSeksi("III. ANALISA KETIDAKHADIRAN", 
+            `Terdapat ${myChart.data.datasets[0].data[2]}% absen karena kerja, sakit, atau transportasi.`);
 
-        // IV. Insight AI
-        const aiRef = document.getElementById("text-insight").innerText;
-        addSection("IV. REKOMENDASI SISTEM (AI)", aiRef, true);
-
-        // V. DIAGRAM (Optimasi Gambar agar tidak pecah di HP)
+        // IV. Diagram (Langsung ambil dari Canvas)
         doc.setFont("helvetica", "bold");
-        doc.text("V. VISUALISASI DATA", margin, currentY);
-        currentY += 5;
-        
+        doc.text("IV. DIAGRAM CAPAIAN", 15, y);
         const canvas = document.getElementById('performaChart');
-        const imgData = canvas.toDataURL('image/png', 1.0);
-        // Menjaga aspek rasio diagram (lebar 100mm, tinggi menyesuaikan)
-        doc.addImage(imgData, 'PNG', margin, currentY, 100, 55);
+        const imgData = canvas.toDataURL('image/jpeg', 0.8); // Pakai JPEG biar ringan
+        doc.addImage(imgData, 'JPEG', 15, y + 5, 100, 50);
 
-        // --- TANDA TANGAN ---
-        currentY += 70;
-        if(currentY > 250) { doc.addPage(); currentY = 20; } // Cek jika butuh halaman baru
+        // --- SIMPAN ---
+        const fileName = `Laporan_JC${userJC}_${Date.now()}.pdf`;
+        doc.save(fileName);
         
-        doc.setFont("helvetica", "normal");
-        doc.text("Mengetahui,", pageWidth - 60, currentY);
-        currentY += 20;
-        doc.setFont("helvetica", "bold");
-        doc.text("( ____________________ )", pageWidth - 65, currentY);
-        doc.setFontSize(8);
-        doc.text("Otoritas PKS / Admin", pageWidth - 55, currentY + 4);
+        alert("Berhasil! Periksa folder Download.");
 
-        // SAVE PDF
-        doc.save(`Laporan_JC${userJC}_${Date.now()}.pdf`);
-        
-    } catch (error) {
-        console.error(error);
-        alert("Gagal membuat PDF: " + error.message);
+    } catch (err) {
+        console.error(err);
+        alert("Error HP: " + err.message);
+    } finally {
+        // Kembalikan tombol ke semula
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 }
-
     window.onload = init;
 </script>
 </body>
