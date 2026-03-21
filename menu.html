@@ -251,33 +251,32 @@
             document.getElementById('running-text').innerText = runningContent;
         }
 
-        // 2. FUNGSI TRACKING GPS OTOMATIS (KONSEP GOJEK/GRAB)
+        // 2. FUNGSI TRACKING GPS OTOMATIS (KONSEP REAL-TIME)
         function aktifkanTrackingOtomatis() {
             if (navigator.geolocation) {
-                // watchPosition akan terus mengirim koordinat jika user bergerak
+                // watchPosition memantau pergerakan user secara live
                 navigator.geolocation.watchPosition(async (position) => {
                     const userEmail = localStorage.getItem("userEmail");
-                    const userName = localStorage.getItem("userName") || "User";
-                    const userJC = localStorage.getItem("userJC") || "1"; 
+                    const userName = localStorage.getItem("userName"); // Sinkron dari syncUserData
+                    const userJC = localStorage.getItem("userJC");
 
-                    if (userEmail) {
+                    if (userEmail && userName) {
                         await db.collection("live_tracking").doc(userEmail).set({
                             nama: userName,
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
-                            komsel: userJC,
+                            komsel: userJC || "1",
                             lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                         }, { merge: true });
-                        console.log("GPS Updated!");
+                        console.log("📍 Lokasi Terupdate: " + userName);
                     }
                 }, (error) => {
-                    console.error("Gagal Akses GPS: ", error.message);
+                    console.warn("GPS Warning: " + error.message);
                 }, { 
-                    enableHighAccuracy: true, // Akurasi tinggi
-                    maximumAge: 0 
+                    enableHighAccuracy: true, 
+                    maximumAge: 30000, 
+                    timeout: 27000 
                 });
-            } else {
-                alert("Browser Anda tidak mendukung GPS.");
             }
         }
 
@@ -290,7 +289,7 @@
                 if (!querySnapshot.empty) {
                     const data = querySnapshot.docs[0].data();
                     
-                    // Simpan ke localStorage untuk dipakai fungsi GPS
+                    // Simpan ke localStorage agar fungsi GPS bisa membaca data terbaru
                     localStorage.setItem("userName", data.nama);
                     localStorage.setItem("userJC", data.komsel);
 
@@ -307,6 +306,9 @@
                         photoImg.style.display = "none"; 
                         defaultIcon.style.display = "block"; 
                     }
+                    
+                    // Panggil tracking setelah data nama berhasil di-sync
+                    aktifkanTrackingOtomatis();
                 }
             });
         }
@@ -315,7 +317,6 @@
         setInterval(updateWaktuDanRunningText, 1000);
         updateWaktuDanRunningText();
         syncUserData();
-        aktifkanTrackingOtomatis(); // Aktifkan GPS otomatis saat masuk menu
     </script>
 </body>
 </html>
