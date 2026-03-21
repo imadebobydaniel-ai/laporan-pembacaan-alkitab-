@@ -55,7 +55,6 @@
             display: block;
         }
 
-        /* Styling Kotak Target */
         .target-box, .hikmat-box { 
             padding: 18px; 
             border-radius: 18px; 
@@ -90,7 +89,6 @@
             color: var(--biru-tua); 
         }
 
-        /* Checkbox Items */
         .check-item { 
             background: #f8f9fa; 
             padding: 15px; 
@@ -116,7 +114,6 @@
             cursor: pointer; 
         }
 
-        /* Tombol Kirim */
         .btn-kirim { 
             width: 100%; 
             padding: 18px; 
@@ -155,7 +152,6 @@
         }
         .btn-home:hover { color: var(--emas-lux); }
 
-        /* Screen Block Styling */
         #block-screen { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0, 51, 102, 0.98); color: white; z-index: 9999; 
@@ -171,7 +167,7 @@
         <i id="block-icon" class="fa-solid" style="font-size: 45px;"></i>
     </div>
     <h2 id="block-title" style="color: white; font-weight: 900;"></h2>
-    <p id="block-message" style="font-size: 18px; margin-top: 10px; color: var(--biru-muda); font-weight: 600;"></p>
+    <p id="block-message" style="font-size: 18px; margin-top: 10px; color: white; font-weight: 600;"></p>
     <button onclick="window.location.href='menu.html'" style="margin-top: 30px; padding: 15px 35px; border-radius: 50px; border: 2px solid var(--emas-lux); background: transparent; color: white; font-weight: 900; cursor: pointer; text-transform: uppercase;">Kembali Ke Menu</button>
 </div>
 
@@ -223,10 +219,18 @@
     const db = firebase.firestore();
     const userEmail = localStorage.getItem("userEmail");
 
+    // FUNGSI MENDAPATKAN WAKTU PAPUA (WIT)
+    function getWaktuPapua() {
+        return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jayapura"}));
+    }
+
     function updateTargetHarian() {
-        const sekarang = new Date();
+        const sekarang = getWaktuPapua();
+        // Set ke jam 00:00:00 agar perhitungan hari presisi
+        const hariIni = new Date(sekarang.getFullYear(), sekarang.getMonth(), sekarang.getDate());
         const tanggalMulai = new Date("2026-03-01"); 
-        const selisihWaktu = sekarang.getTime() - tanggalMulai.getTime();
+        
+        const selisihWaktu = hariIni.getTime() - tanggalMulai.getTime();
         const hariKe = Math.floor(selisihWaktu / (1000 * 3600 * 24)) + 1;
 
         const listTarget = [
@@ -248,8 +252,8 @@
             { utama: "Lukas 13 - 16", hikmat: "Amsal 16" },
             { utama: "Lukas 17 - 20", hikmat: "Amsal 17" },
             { utama: "Lukas 21 - 24", hikmat: "Amsal 18" },
-            { utama: "Matius 19 - 22", hikmat: "Amsal 19" }, 
-            { utama: "Matius 23 - 26", hikmat: "Amsal 20" }, 
+            { utama: "Yohanes 1 - 4", hikmat: "Amsal 19" }, 
+            { utama: "Yohanes 5 - 8", hikmat: "Amsal 20" }, 
             { utama: "Matius 27 - 28 & Markus 1-2", hikmat: "Amsal 21" }
         ];
 
@@ -263,13 +267,6 @@
         }
     }
 
-    function isWaktuPelaporanLewat() {
-        const sekarang = new Date();
-        const jam = sekarang.getHours();
-        const menit = sekarang.getMinutes();
-        return (jam >= 22 || (jam === 0 && menit < 30));
-    }
-
     function tampilkanPesanBlokir(pesan, icon, color) {
         document.getElementById('block-title').innerText = pesan.includes("Terimakasih") ? "BERHASIL!" : "SHALOM!";
         document.getElementById('block-message').innerText = pesan;
@@ -281,8 +278,8 @@
 
     async function cekLaporanHariIni() {
         if (!userEmail) return;
-        const hariIni = new Date();
-        hariIni.setHours(0,0,0,0);
+        const sekarang = getWaktuPapua();
+        const hariIni = new Date(sekarang.getFullYear(), sekarang.getMonth(), sekarang.getDate());
         const tsHariIni = firebase.firestore.Timestamp.fromDate(hariIni);
 
         try {
@@ -306,23 +303,19 @@
     }
 
     async function kirimLaporan() {
-        if (isWaktuPelaporanLewat()) {
-            tampilkanPesanBlokir("Waktu Pelaporan Sudah Lewat. Silakan melapor kembali besok pagi.", "fa-clock", "#e74c3c");
-            return;
-        }
-
         const btn = document.getElementById('btnKirim');
         btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Mengirim...";
         btn.disabled = true;
 
         try {
             const snapUser = await db.collection("users").where("email", "==", userEmail).get();
+            if (snapUser.empty) throw new Error("User tidak ditemukan");
             const u = snapUser.docs[0].data();
 
             await db.collection("laporan_bacaan").add({
-                nama: u.nama,
+                nama: u.nama || "Tanpa Nama",
                 email: userEmail,
-                komsel: String(u.komsel),
+                komsel: String(u.komsel || "-"),
                 pasal_utama: document.getElementById('pasal-utama').innerText,
                 pasal_hikmat: document.getElementById('pasal-hikmat').innerText,
                 tanggal: firebase.firestore.Timestamp.now()
@@ -330,21 +323,20 @@
 
             tampilkanPesanBlokir("Terimakasih Atas Laporan Anda. Tuhan Yesus Memberkati!", "fa-circle-check", "#2ecc71");
         } catch (e) {
-            alert("Koneksi gagal.");
+            console.error(e);
+            alert("Gagal mengirim laporan. Pastikan koneksi internet stabil.");
             btn.innerText = "KIRIM LAPORAN SEKARANG";
             btn.disabled = false;
         }
     }
 
     window.onload = function() {
+        const sekarang = getWaktuPapua();
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', options);
+        document.getElementById('current-date').innerText = sekarang.toLocaleDateString('id-ID', options);
+        
         updateTargetHarian();
-        if (isWaktuPelaporanLewat()) {
-            tampilkanPesanBlokir("Sesi Laporan Ditutup (22:00 - 00:30 WIT).", "fa-clock", "#e74c3c");
-        } else {
-            cekLaporanHariIni();
-        }
+        cekLaporanHariIni();
     };
 </script>
 </body>
