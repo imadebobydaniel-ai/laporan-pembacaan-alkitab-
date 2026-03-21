@@ -10,12 +10,12 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .login-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; border-top: 5px solid var(--biru); }
         img { width: 80px; margin-bottom: 15px; border-radius: 50%; }
-        h2 { color: var(--biru); margin-bottom: 20px; font-size: 20px; text-transform: uppercase; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--biru); }
+        h2 { color: var(--biru); margin-bottom: 20px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--biru); box-shadow: 0 0 5px rgba(0,51,102,0.2); }
         button { width: 100%; padding: 12px; background: var(--biru); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; border: 2px solid var(--emas); transition: 0.3s; }
         button:active { transform: scale(0.98); }
-        .error { color: #e74c3c; font-size: 13px; margin-top: 10px; display: none; font-weight: 600; }
+        .error { color: #e74c3c; font-size: 13px; margin-top: 10px; display: none; font-weight: 600; background: #ffe6e6; padding: 8px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -33,6 +33,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+    // Inisialisasi Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
         authDomain: "boby-apps-project.firebaseapp.com", 
@@ -44,10 +45,18 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // Hapus sisa-sisa session lama saat halaman login dibuka
+    window.onload = function() {
+        localStorage.clear();
+    };
+
     async function prosesLogin() {
         const emailInput = document.getElementById('email').value.trim();
         const passInput = document.getElementById('password').value.trim();
         const errorDiv = document.getElementById('error-msg');
+
+        // Reset tampilan error
+        errorDiv.style.display = "none";
 
         if(!emailInput || !passInput) {
             errorDiv.innerText = "Email dan Password wajib diisi!";
@@ -56,8 +65,11 @@
         }
 
         try {
-            // Langsung cek email dan password tanpa filter Device ID
-            const userRef = db.collection("users").where("email", "==", emailInput).where("password", "==", passInput);
+            // LOGIN SEDERHANA: Langsung cek email dan password di koleksi users
+            const userRef = db.collection("users")
+                             .where("email", "==", emailInput)
+                             .where("password", "==", passInput);
+            
             const snapshot = await userRef.get();
 
             if (snapshot.empty) {
@@ -66,19 +78,20 @@
                 return;
             }
 
-            // Ambil data user yang berhasil login
+            // Ambil data user
             const userDoc = snapshot.docs[0];
             const userData = userDoc.data();
 
-            // Simpan nama & email ke LocalStorage agar menu.html bisa mengenali siapa yang login
+            // SIMPAN DATA KE PENYIMPANAN HP (LocalStorage)
+            // Ini agar menu.html dan lacak-domba.html tahu siapa yang sedang online
             localStorage.setItem("userEmail", userData.email);
             localStorage.setItem("userName", userData.nama);
             
-            // Pindah ke menu utama
+            // Pindah ke halaman menu utama
             window.location.href = "menu.html";
 
         } catch (e) {
-            console.error(e);
+            console.error("Login Error:", e);
             errorDiv.innerText = "Gagal login. Periksa koneksi internet Anda.";
             errorDiv.style.display = "block";
         }
