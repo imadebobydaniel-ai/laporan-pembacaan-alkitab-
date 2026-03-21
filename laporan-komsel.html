@@ -425,70 +425,66 @@
         else if (persen >= 50) txt.innerText = "Stabilitas JC " + userJC + " terjaga. Disarankan penguatan mentoring personal.";
         else txt.innerText = "Perhatian: Partisipasi rendah. Segera lakukan follow-up atau visitasi jemaat JC " + userJC;
     }
-
-    async function validateAndExport() {
-        const pass = document.getElementById("pks-password").value;
-        if(pass !== "rahasia123") {
-            alert("Password Otoritas Salah!");
-            return;
-        }
-
-        const btn = document.querySelector(".btn-export");
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MENYIAPKAN PDF...';
-        btn.disabled = true;
-
-        setTimeout(async () => {
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
-                const pageWidth = doc.internal.pageSize.getWidth();
-
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(16);
-                doc.text("LAPORAN RESMI KOMSEL", pageWidth / 2, 20, { align: "center" });
-                doc.setFontSize(12);
-                doc.text("JC: " + userJC, pageWidth / 2, 28, { align: "center" });
-                doc.line(15, 32, pageWidth - 15, 32);
-
-                doc.setFontSize(10);
-                doc.setFont("helvetica", "normal");
-                doc.text("Dihasilkan pada: " + new Date().toLocaleString('id-ID'), 15, 40);
-                doc.text("Capaian Baca Alkitab: " + myChart.data.datasets[0].data[0] + "%", 15, 50);
-
-                const canvas = document.getElementById('performaChart');
-                const imgData = canvas.toDataURL('image/jpeg', 0.7);
-                doc.addImage(imgData, 'JPEG', 15, 60, 100, 55);
-
-                doc.text("Daftar Jemaat Aktif:", 15, 125);
-                let yPos = 132;
-                const items = document.querySelectorAll(".mutasi-item");
-                items.forEach((item, index) => {
-                    if (index < 15) {
-                        const nama = item.getAttribute('data-nama');
-                        doc.text("- " + nama, 20, yPos);
-                        yPos += 7;
-                    }
-                });
-
-                const pdfOutput = doc.output('blob');
-                const url = URL.createObjectURL(pdfOutput);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `Laporan_JC${userJC}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                alert("Laporan Berhasil Dibuat! Cek folder Download.");
-            } catch (e) {
-                alert("Gagal Ekspor: " + e.message);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }, 500);
+async function validateAndExport() {
+    const pass = document.getElementById("pks-password").value;
+    if(pass !== "rahasia123") {
+        alert("Password Otoritas Salah!");
+        return;
     }
+
+    const btn = document.querySelector(".btn-export");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PROSES...';
+    btn.disabled = true;
+
+    // Gunakan timeout agak lama agar HP punya napas untuk proses render
+    setTimeout(async () => {
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // Header & Konten (Sama seperti sebelumnya)
+            doc.setFontSize(18);
+            doc.text("LAPORAN KOMSEL PONDOK PEMULIHAN", 105, 20, { align: "center" });
+            doc.setFontSize(12);
+            doc.text("JC: " + userJC + " | Tanggal: " + new Date().toLocaleDateString(), 105, 30, { align: "center" });
+            
+            // Ambil Grafik
+            const canvas = document.getElementById('performaChart');
+            const imgData = canvas.toDataURL('image/jpeg', 0.6); // Kompresi lebih tinggi agar ringan
+            doc.addImage(imgData, 'JPEG', 15, 40, 100, 60);
+
+            // METODE 1: Blob URL (Standard)
+            const blob = doc.output('blob');
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Laporan_JC_${userJC}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // METODE 2: Fallback (Jika Metode 1 Gagal, buka di tab baru)
+            setTimeout(() => {
+                // Jika dalam 2 detik tidak ada tanda-tanda download, 
+                // kita coba buka PDF-nya langsung di layar.
+                const string = doc.output('datauristring');
+                const newWindow = window.open();
+                if(newWindow) {
+                    newWindow.document.write('<iframe width="100%" height="100%" src="' + string + '"></iframe>');
+                }
+            }, 2000);
+
+            alert("Proses selesai. Jika download tidak muncul otomatis, cek 'Tab Baru' di browser Anda.");
+
+        } catch (e) {
+            alert("Error Sistem: " + e.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }, 1000);
+}
 
     window.onload = init;
 </script>
