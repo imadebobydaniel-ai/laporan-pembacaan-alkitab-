@@ -8,40 +8,28 @@
     <style>
         :root { --biru-utama: #007bff; --ungu-global: #6f42c1; --merah-absen: #dc3545; --putih-bg: #f4f7fa; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--putih-bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        
-        /* Container khusus HP agar tidak melebar */
         .mobile-wrapper { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
-        
         .card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eee; }
         .card-header { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; border-bottom: 2px solid var(--biru-utama); padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; font-size: 13px; color: #333; }
-        
         .flex-row { display: flex; gap: 8px; margin-bottom: 12px; }
         .input-box { flex: 1; }
         label { font-size: 9px; font-weight: bold; color: #999; text-transform: uppercase; display: block; margin-bottom: 4px; }
         select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 11px; font-weight: bold; background: #fff; color: #444; }
-
-        /* Statistik & Progress */
         .stat-label-flex { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 4px; }
         .progress-bar { height: 8px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
         .progress-fill { height: 100%; border-radius: 10px; transition: width 0.5s; }
-
-        /* Golongan Darah */
         .blood-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f8f8f8; font-size: 13px; font-weight: 600; }
         .btn-detail { color: var(--biru-utama); cursor: pointer; text-decoration: underline; font-weight: bold; }
-
-        /* Popup Modal */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: white; width: 100%; max-width: 380px; border-radius: 15px; overflow: hidden; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal-header { background: var(--biru-utama); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .modal-body { max-height: 350px; overflow-y: auto; padding: 10px; }
-        
         .user-list-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-bottom: 1px solid #eee; }
         .user-list-item img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
         .user-info-text { display: flex; flex-direction: column; }
         .user-name { font-size: 14px; font-weight: bold; color: #333; margin: 0; }
         .user-jc { font-size: 11px; color: #666; margin: 0; font-weight: bold; }
-
         .btn-back { display: block; text-align: center; padding: 14px; background: white; color: var(--biru-utama); text-decoration: none; font-weight: bold; border-radius: 12px; border: 1px solid #ddd; margin-top: 10px; font-size: 13px; width: 100%; box-sizing: border-box; }
     </style>
 </head>
@@ -52,13 +40,10 @@
         <div class="card-header"><i class="fa-solid fa-earth-americas"></i> CAPAIAN BACA ALKITAB</div>
         <div class="flex-row">
             <div class="input-box"><label>Pilih Komsel</label>
-                <select><option>JC 1</option><option>JC 2</option><option>JC 3</option><option>JC 4</option><option selected>JC 5</option></select>
+                <select id="selectKomselCapaian"><option>JC 1</option><option>JC 2</option><option>JC 3</option><option>JC 4</option><option selected>JC 5</option></select>
             </div>
             <div class="input-box"><label>Periode</label>
-                <select>
-                    <option>1 Bulan Terakhir</option><option>2 Bulan Terakhir</option><option>3 Bulan Terakhir</option>
-                    <option>4 Bulan Terakhir</option><option>5 Bulan Terakhir</option><option>6 Bulan Terakhir</option>
-                </select>
+                <select><option>1 Bulan Terakhir</option><option>2 Bulan Terakhir</option><option>3 Bulan Terakhir</option><option>4 Bulan Terakhir</option><option>5 Bulan Terakhir</option><option>6 Bulan Terakhir</option></select>
             </div>
         </div>
         <div class="stat-item">
@@ -76,10 +61,7 @@
                 <select><option>JC 1</option><option>JC 2</option><option>JC 3</option><option>JC 4</option><option selected>JC 5</option></select>
             </div>
             <div class="input-box"><label>Periode</label>
-                <select>
-                    <option>1 Bulan Terakhir</option><option>2 Bulan Terakhir</option><option>3 Bulan Terakhir</option>
-                    <option>4 Bulan Terakhir</option><option>5 Bulan Terakhir</option><option>6 Bulan Terakhir</option>
-                </select>
+                <select><option>1 Bulan Terakhir</option><option>2 Bulan Terakhir</option><option>3 Bulan Terakhir</option><option>4 Bulan Terakhir</option><option>5 Bulan Terakhir</option><option>6 Bulan Terakhir</option></select>
             </div>
         </div>
         <div class="stat-item">
@@ -97,10 +79,7 @@
                 <select><option>JC 1</option><option>JC 2</option><option>JC 3</option><option>JC 4</option><option selected>JC 5</option></select>
             </div>
             <div class="input-box"><label>Periode</label>
-                <select>
-                    <option>1 Bulan Terakhir</option><option>2 Bulan Terakhir</option><option>3 Bulan Terakhir</option>
-                    <option>4 Bulan Terakhir</option><option>5 Bulan Terakhir</option><option>6 Bulan Terakhir</option>
-                </select>
+                <select><option>1 Bulan Terakhir</option><option>2 Bulan Terakhir</option><option>3 Bulan Terakhir</option><option>4 Bulan Terakhir</option><option>5 Bulan Terakhir</option><option>6 Bulan Terakhir</option></select>
             </div>
         </div>
         <div class="stat-item">
@@ -112,15 +91,89 @@
     <div class="card">
         <div class="card-header"><i class="fa-solid fa-droplet" style="color:black"></i> DATA GOLONGAN DARAH</div>
         <label>LIHAT DISTRIBUSI PER KOMSEL</label>
-        <select style="margin-bottom:15px;">
-            <option>Semua Komsel</option><option>JC 1</option><option>JC 2</option><option>JC 3</option><option>JC 4</option><option>JC 5</option>
+        <select id="filterKomselDarah" style="margin-bottom:15px;" onchange="updateBloodStats()">
+            <option value="Semua">Semua Komsel</option><option value="1">JC 1</option><option value="2">JC 2</option><option value="3">JC 3</option><option value="4">JC 4</option><option value="5" selected>JC 5</option>
         </select>
         
-        <div class="blood-item"><span>A</span><span class="btn-detail" onclick="openPopup('A')">0 Orang</span></div>
-        <div class="blood-item"><span>B</span><span class="btn-detail" onclick="openPopup('B')">0 Orang</span></div>
-        <div class="blood-item"><span>O</span><span class="btn-detail" onclick="openPopup('O')">0 Orang</span></div>
-        <div class="blood-item"><span>AB</span><span class="btn-detail" onclick="openPopup('AB')">1 Orang</span></div>
+        <div class="blood-item"><span>A</span><span class="btn-detail" id="countA" onclick="openPopup('A')">0 Orang</span></div>
+        <div class="blood-item"><span>B</span><span class="btn-detail" id="countB" onclick="openPopup('B')">0 Orang</span></div>
+        <div class="blood-item"><span>O</span><span class="btn-detail" id="countO" onclick="openPopup('O')">0 Orang</span></div>
+        <div class="blood-item"><span>AB</span><span class="btn-detail" id="countAB" onclick="openPopup('AB')">0 Orang</span></div>
     </div>
 
     <a href="menu.html" class="btn-back">← KEMBALI KE MENU UTAMA</a>
 </div>
+
+<div id="modalDetail" class="modal-overlay" onclick="closePopup()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span>Detail Golongan Darah <span id="bloodTypeTitle"></span></span>
+            <i class="fa-solid fa-times" style="cursor:pointer" onclick="closePopup()"></i>
+        </div>
+        <div class="modal-body" id="userList"></div>
+    </div>
+</div>
+
+<script type="module">
+    // Pastikan Firebase sudah diinisialisasi di sini atau di file global Anda
+    import { db } from './firebase-config.js'; // Sesuaikan path config Anda
+    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    window.updateBloodStats = async function() {
+        const komsel = document.getElementById('filterKomselDarah').value;
+        const types = ['A', 'B', 'O', 'AB'];
+        
+        for (const type of types) {
+            let q;
+            if (komsel === "Semua") {
+                q = query(collection(db, "users"), where("golongan_darah", "==", type));
+            } else {
+                q = query(collection(db, "users"), where("golongan_darah", "==", type), where("komsel", "==", komsel));
+            }
+            const querySnapshot = await getDocs(q);
+            document.getElementById(`count${type}`).innerText = `${querySnapshot.size} Orang`;
+        }
+    }
+
+    window.openPopup = async function(type) {
+        document.getElementById("bloodTypeTitle").innerText = type;
+        document.getElementById("modalDetail").style.display = "flex";
+        const userList = document.getElementById("userList");
+        userList.innerHTML = '<p style="text-align:center; font-size:12px; color:#999;">Memuat data...</p>';
+        
+        const komsel = document.getElementById('filterKomselDarah').value;
+        let q;
+        if (komsel === "Semua") {
+            q = query(collection(db, "users"), where("golongan_darah", "==", type));
+        } else {
+            q = query(collection(db, "users"), where("golongan_darah", "==", type), where("komsel", "==", komsel));
+        }
+
+        const querySnapshot = await getDocs(q);
+        userList.innerHTML = "";
+        
+        if (querySnapshot.empty) {
+            userList.innerHTML = '<p style="text-align:center; color:#999; font-size:12px; padding:20px;">Data tidak ditemukan.</p>';
+            return;
+        }
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            userList.innerHTML += `
+                <div class="user-list-item">
+                    <img src="${data.fotoUrl || 'https://via.placeholder.com/50'}" alt="Foto">
+                    <div class="user-info-text">
+                        <p class="user-name">${data.nama}</p>
+                        <p class="user-jc">Unit: JC ${data.komsel}</p>
+                    </div>
+                </div>`;
+        });
+    }
+
+    window.closePopup = function() { document.getElementById("modalDetail").style.display = "none"; }
+    
+    // Load awal
+    updateBloodStats();
+</script>
+</body>
+</html>
