@@ -77,9 +77,9 @@
             <div class="input-box"><label>Grup JC</label>
                 <select id="select-komsel-doa" onchange="syncDoaRealtime()">
                     <option value="Semua">Semua JC</option>
-                    <option value="JC1">JC 1</option><option value="JC2">JC 2</option>
-                    <option value="JC3">JC 3</option><option value="JC4">JC 4</option>
-                    <option value="JC5">JC 5</option>
+                    <option value="1">JC 1</option><option value="2">JC 2</option>
+                    <option value="3">JC 3</option><option value="4">JC 4</option>
+                    <option value="5">JC 5</option>
                 </select>
             </div>
         </div>
@@ -132,7 +132,7 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    // 1. STATISTIK DOA (SLA) INTEGRASI
+    // 1. STATISTIK DOA (REALTIME INTEGRASI)
     function syncDoaRealtime() {
         const filter = document.getElementById('select-komsel-doa').value;
         
@@ -143,11 +143,14 @@
 
             snapshot.forEach(doc => {
                 const data = doc.data();
-                if (filter === "Semua" || data.jc === filter) {
+                // Normalisasi data jc (karena ada yang simpan "1" atau "JC1")
+                const jcData = String(data.jc || "").replace("JC", "").trim();
+                
+                if (filter === "Semua" || jcData === filter) {
                     totalDoa++;
                     if (data.status === "Selesai") {
                         selesaiDoa++;
-                        totalHariSla += (data.totalHari || 0);
+                        totalHariSla += Number(data.totalHari || 0);
                     }
                 }
             });
@@ -233,7 +236,12 @@
         document.getElementById('bar-capaian-' + type).style.width = val;
     }
 
-    window.onload = () => { syncGoldarRealtime(); syncCapaianRealtime(); syncDoaRealtime(); };
+    // Jalankan semua fungsi sinkronisasi saat halaman dimuat
+    window.onload = () => { 
+        syncGoldarRealtime(); 
+        syncCapaianRealtime(); 
+        syncDoaRealtime(); 
+    };
 </script>
 </body>
 </html>
