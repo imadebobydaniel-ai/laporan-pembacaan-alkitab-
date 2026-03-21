@@ -151,6 +151,7 @@
             border: 2px solid var(--emas-lux);
             box-shadow: 0 4px 15px rgba(0,51,102,0.3);
             transition: 0.3s;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -213,7 +214,7 @@
             </a>
         </div>
 
-        <a href="index.html" class="btn-logout" onclick="localStorage.clear()">KELUAR SISTEM</a>
+        <div class="btn-logout" onclick="logoutDanHapusDevice()">KELUAR SISTEM</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -251,13 +252,12 @@
             document.getElementById('running-text').innerText = runningContent;
         }
 
-        // 2. FUNGSI TRACKING GPS OTOMATIS (KONSEP REAL-TIME)
+        // 2. FUNGSI TRACKING GPS
         function aktifkanTrackingOtomatis() {
             if (navigator.geolocation) {
-                // watchPosition memantau pergerakan user secara live
                 navigator.geolocation.watchPosition(async (position) => {
                     const userEmail = localStorage.getItem("userEmail");
-                    const userName = localStorage.getItem("userName"); // Sinkron dari syncUserData
+                    const userName = localStorage.getItem("userName");
                     const userJC = localStorage.getItem("userJC");
 
                     if (userEmail && userName) {
@@ -268,19 +268,14 @@
                             komsel: userJC || "1",
                             lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                         }, { merge: true });
-                        console.log("📍 Lokasi Terupdate: " + userName);
                     }
                 }, (error) => {
                     console.warn("GPS Warning: " + error.message);
-                }, { 
-                    enableHighAccuracy: true, 
-                    maximumAge: 30000, 
-                    timeout: 27000 
-                });
+                }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 27000 });
             }
         }
 
-        // 3. SYNC DATA PROFIL & LOCALSTORAGE
+        // 3. SYNC DATA PROFIL
         function syncUserData() {
             const userEmail = localStorage.getItem("userEmail");
             if (!userEmail) { window.location.href = "index.html"; return; }
@@ -288,8 +283,6 @@
             db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
                 if (!querySnapshot.empty) {
                     const data = querySnapshot.docs[0].data();
-                    
-                    // Simpan ke localStorage agar fungsi GPS bisa membaca data terbaru
                     localStorage.setItem("userName", data.nama);
                     localStorage.setItem("userJC", data.komsel);
 
@@ -306,11 +299,36 @@
                         photoImg.style.display = "none"; 
                         defaultIcon.style.display = "block"; 
                     }
-                    
-                    // Panggil tracking setelah data nama berhasil di-sync
                     aktifkanTrackingOtomatis();
                 }
             });
+        }
+
+        // 4. FUNGSI LOGOUT (PERBAIKAN TOTAL)
+        async function logoutDanHapusDevice() {
+            const userEmail = localStorage.getItem("userEmail");
+            const currentDeviceId = localStorage.getItem("myDeviceId");
+
+            if (confirm("Apakah Anda yakin ingin keluar?")) {
+                try {
+                    if (userEmail && currentDeviceId) {
+                        // Cari ID Dokumen berdasarkan email
+                        const snapshot = await db.collection("users").where("email", "==", userEmail).get();
+                        if (!snapshot.empty) {
+                            const docId = snapshot.docs[0].id;
+                            // Hapus Device ID dari array di Firestore
+                            await db.collection("users").doc(docId).update({
+                                deviceIds: firebase.firestore.FieldValue.arrayRemove(currentDeviceId)
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error("Logout error:", e);
+                } finally {
+                    localStorage.clear();
+                    window.location.href = "index.html";
+                }
+            }
         }
 
         // JALANKAN SEMUA FUNGSI
