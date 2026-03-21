@@ -422,15 +422,70 @@
         else txt.innerText = "Perhatian: Partisipasi rendah. Segera lakukan follow-up jemaat.";
     }
 
-    async function validateAndExport() {
-        const pass = document.getElementById("pks-password").value;
-        if(!pass) { alert("Masukkan password!"); return; }
-        if (pass === "rahasia123") {
-            alert("Laporan PDF sedang diproses...");
-        } else {
-            alert("Password salah!");
-        }
+   async function validateAndExport() {
+    const pass = document.getElementById("pks-password").value;
+    if(!pass) { 
+        alert("Masukkan password!"); 
+        return; 
     }
+
+    if (pass === "rahasia123") {
+        alert("Laporan PDF sedang diproses...");
+        
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Pengaturan Header PDF
+            doc.setFontSize(18);
+            doc.text("LAPORAN ANALISA KOMSEL - " + userJC, 20, 20);
+            doc.setFontSize(11);
+            doc.text("Periode: " + document.getElementById("filter-periode").value + " Bulan Terakhir", 20, 30);
+            doc.text("Tanggal Cetak: " + new Date().toLocaleDateString('id-ID'), 20, 35);
+            doc.line(20, 40, 190, 40); // Garis pembatas
+
+            // Ambil data dari Log Aktifitas yang ada di mutasi-list
+            let yPos = 50;
+            const items = document.querySelectorAll(".mutasi-item");
+            
+            doc.setFontSize(12);
+            doc.text("DETAIL AKTIFITAS JEMAAT:", 20, yPos);
+            yPos += 10;
+            doc.setFontSize(10);
+
+            items.forEach((item, index) => {
+                const tgl = item.querySelector(".mutasi-date").innerText;
+                const nama = item.querySelector(".mutasi-name").innerText;
+                const bacaan = item.querySelector(".mutasi-desc").innerText;
+                
+                doc.text(`${index + 1}. [${tgl}] ${nama} - ${bacaan}`, 20, yPos);
+                yPos += 7;
+
+                // Tambah halaman baru jika konten terlalu panjang
+                if (yPos > 280) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+            });
+
+            // Perintah Download Otomatis
+            doc.save(`Laporan_Komsel_${userJC}_${Date.now()}.pdf`);
+            
+        } catch (error) {
+            console.error("Gagal generate PDF:", error);
+            alert("Terjadi kesalahan saat membuat PDF.");
+        }
+    } else {
+        alert("Password salah!");
+    }
+       // Ganti bagian pengambilan data di fungsi export menjadi seperti ini:
+const items = document.querySelectorAll(".mutasi-item");
+
+if (items.length === 0) {
+    alert("Tidak ada data aktifitas untuk diekspor pada periode ini.");
+    return; // Berhenti jika tidak ada data
+}
+}
 
     window.onload = init;
 </script>
