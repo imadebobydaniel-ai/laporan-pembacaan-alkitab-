@@ -14,7 +14,7 @@
         label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #444; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
         
-        /* Area Garis Merah Bapak - Fitur Tambahan */
+        /* Area Fitur Tambahan */
         .fitur-tambahan { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #eee; }
         .flex-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
         
@@ -28,6 +28,10 @@
 
         .btn-save { background: var(--biru-utama); color: white; width: 100%; padding: 15px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 20px; }
         
+        /* Tombol WhatsApp Desktop */
+        .btn-wa { background: #25D366; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; font-size: 14px; transition: 0.3s; }
+        .btn-wa:active { transform: scale(0.98); background: #1ebe57; }
+
         #notif-block {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.95); color: white; padding: 30px; border-radius: 15px;
@@ -74,6 +78,10 @@
                 <option value="60">60 Menit</option>
             </select>
         </div>
+
+        <button class="btn-wa" onclick="kirimLinkDesktop()">
+            <i class="fab fa-whatsapp"></i> KIRIM LINK DESKTOP
+        </button>
     </div>
 
     <a href="menu.html" style="display: block; text-align: center; margin-top: 25px; text-decoration: none; color: var(--biru-utama); font-weight: bold;">← Kembali ke Menu</a>
@@ -96,16 +104,21 @@
     const db = firebase.firestore();
     const userEmail = localStorage.getItem("userEmail");
 
-    // Load settingan dari memory HP saat halaman dibuka
     window.onload = function() {
         document.getElementById("notifSound").checked = localStorage.getItem("setSuara") === "true";
         document.getElementById("timerLogout").value = localStorage.getItem("setTimer") || "0";
     };
 
-    // Fungsi menyimpan pilihan user ke memory HP
     function updateMemory() {
         localStorage.setItem("setSuara", document.getElementById("notifSound").checked);
         localStorage.setItem("setTimer", document.getElementById("timerLogout").value);
+    }
+
+    // Fungsi Kirim Link ke WhatsApp
+    function kirimLinkDesktop() {
+        const urlAplikasi = "https://imadebobydaniel-ai.github.io/laporan-pembacaan-alkitab-/";
+        const pesan = encodeURIComponent(`Shalom! Gunakan link ini untuk membuka aplikasi Laporan Alkitab di Laptop/Desktop Anda: ${urlAplikasi}`);
+        window.open(`https://wa.me/?text=${pesan}`, '_blank');
     }
 
     async function updateAkun() {
