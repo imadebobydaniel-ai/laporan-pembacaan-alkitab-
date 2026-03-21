@@ -432,91 +432,147 @@
         else txt.innerText = "Perhatian: Partisipasi rendah. Segera lakukan follow-up atau visitasi jemaat JC " + userJC;
     }
 
-    async function validateAndExport() {
-        const pass = document.getElementById("pks-password").value;
-        const items = document.querySelectorAll(".mutasi-item");
-
-        if(!pass || pass !== "rahasia123") { alert("Password Otoritas Salah!"); return; }
-        if (items.length === 0) { alert("Tidak ada data untuk laporan."); return; }
-
-        alert("Menghasilkan Laporan PDF Resmi...");
-        
-        try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.getWidth();
-
-            // --- 1. KOP SURAT ---
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(16);
-            doc.text("GBI PONDOK PEMULIHAN PAPUA", pageWidth / 2, 18, { align: "center" });
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.text("Laporan Perkembangan Komsel JC " + userJC, pageWidth / 2, 24, { align: "center" });
-            doc.setLineWidth(1.2);
-            doc.line(15, 28, pageWidth - 15, 28); // Garis tebal bawah kop
-
-            let y = 38;
-
-            // --- 2. ANALISA PEMBACAAN ALKITAB ---
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(11);
-            doc.text("I. ANALISA CAPAIAN PEMBACAAN ALKITAB", 15, y);
-            y += 7;
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-            
-            let daftarNama = "";
-            items.forEach(el => { daftarNama += el.getAttribute('data-nama') + " (" + el.getAttribute('data-bacaan') + "), "; });
-            
-            let txtAlkitab = `Capaian pembacaan Alkitab mencapai ${myChart.data.datasets[0].data[0]}%. Daftar jemaat yang menyelesaikan tugas: ` + daftarNama.slice(0, -2);
-            let splitAlkitab = doc.splitTextToSize(txtAlkitab, pageWidth - 30);
-            doc.text(splitAlkitab, 15, y);
-            y += (splitAlkitab.length * 5) + 8;
-
-            // --- 3. ANALISA KEHADIRAN ---
-            doc.setFont("helvetica", "bold");
-            doc.text("II. ANALISA KEHADIRAN KOMSEL", 15, y);
-            y += 7;
-            doc.setFont("helvetica", "normal");
-            doc.text(`Tingkat kehadiran jemaat JC ${userJC} mencapai ${myChart.data.datasets[0].data[1]}% dengan partisipasi aktif jemaat inti.`, 15, y);
-            y += 12;
-
-            // --- 4. ANALISA KETIDAKHADIRAN ---
-            doc.setFont("helvetica", "bold");
-            doc.text("III. ANALISA KETIDAKHADIRAN & KETERANGAN", 15, y);
-            y += 7;
-            doc.setFont("helvetica", "normal");
-            let txtAbsen = `Terdapat ${myChart.data.datasets[0].data[2]}% ketidakhadiran. Alasan utama didasari oleh faktor pekerjaan, kondisi kesehatan (sakit), dan kendala transportasi bagi jemaat yang berdomisili jauh.`;
-            let splitAbsen = doc.splitTextToSize(txtAbsen, pageWidth - 30);
-            doc.text(splitAbsen, 15, y);
-            y += (splitAbsen.length * 5) + 8;
-
-            // --- 5. MASUKAN AI ---
-            doc.setFont("helvetica", "bold");
-            doc.text("IV. ANALISA MASUKAN & REFERENSI AI", 15, y);
-            y += 7;
-            doc.setFont("helvetica", "italic");
-            let aiRef = document.getElementById("text-insight").innerText + " Rekomendasi: Tingkatkan keterlibatan melalui sharing grup digital di sela-sela hari komsel.";
-            let splitAI = doc.splitTextToSize(aiRef, pageWidth - 30);
-            doc.text(splitAI, 15, y);
-            y += (splitAI.length * 5) + 12;
-
-            // --- 6. DIAGRAM ---
-            doc.setFont("helvetica", "bold");
-            doc.text("V. DIAGRAM PERSENTASE CAPAIAN", 15, y);
-            const canvas = document.getElementById('performaChart');
-            const imgData = canvas.toDataURL('image/png');
-            doc.addImage(imgData, 'PNG', 15, y + 5, 85, 45);
-
-            // Save PDF
-            doc.save(`Laporan_JC${userJC}_${Date.now()}.pdf`);
-            
-        } catch (error) {
-            console.error(error);
-            alert("Gagal membuat PDF.");
-        }
+   // 1. Tambahkan fungsi ini untuk menangani logo (Ganti URL dengan URL logo asli kamu)
+async function getLogoBase64() {
+    // Tips: Gunakan logo versi monokrom/hitam putih agar ukuran PDF tetap kecil
+    const logoUrl = 'https://i.imgur.com/your-logo-here.png'; 
+    try {
+        const response = await fetch(logoUrl);
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+    } catch (e) {
+        console.warn("Logo gagal dimuat, menggunakan teks saja.");
+        return null;
     }
+}
+
+async function validateAndExport() {
+    const pass = document.getElementById("pks-password").value;
+    const items = document.querySelectorAll(".mutasi-item");
+
+    if(!pass || pass !== "rahasia123") { 
+        alert("Password Otoritas Salah!"); 
+        return; 
+    }
+    if (items.length === 0) { 
+        alert("Tidak ada data untuk laporan."); 
+        return; 
+    }
+
+    alert("Sedang memproses PDF... Mohon tunggu sebentar.");
+    
+    try {
+        const { jsPDF } = window.jspdf;
+        // Gunakan format A4 dengan kompresi aktif untuk HP
+        const doc = new jsPDF({
+            orientation: "p",
+            unit: "mm",
+            format: "a4",
+            compress: true 
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 15;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // --- LOAD LOGO ---
+        const logoData = await getLogoBase64();
+        let currentY = 15;
+
+        if (logoData) {
+            // Posisi Logo: Tengah Atas
+            doc.addImage(logoData, 'PNG', (pageWidth/2) - 10, currentY, 20, 20);
+            currentY += 25;
+        }
+
+        // --- KOP SURAT ---
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("GBI PONDOK PEMULIHAN PAPUA", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 6;
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(`LAPORAN PERKEMBANGAN KOMSEL JC ${userJC}`, pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 4;
+        doc.setFontSize(8);
+        doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, pageWidth / 2, currentY, { align: "center" });
+
+        currentY += 4;
+        doc.setLineWidth(0.5);
+        doc.line(margin, currentY, pageWidth - margin, currentY); 
+        
+        currentY += 10;
+
+        // --- FUNGSI HELPER UNTUK TEXT WRAPPING ---
+        const addSection = (title, content, isItalic = false) => {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.text(title, margin, currentY);
+            currentY += 6;
+            
+            doc.setFont("helvetica", isItalic ? "italic" : "normal");
+            doc.setFontSize(10);
+            let lines = doc.splitTextToSize(content, contentWidth);
+            doc.text(lines, margin, currentY);
+            currentY += (lines.length * 5) + 8;
+        };
+
+        // --- ISI LAPORAN ---
+        // I. Alkitab
+        let daftarNama = Array.from(items).map(el => 
+            `${el.getAttribute('data-nama')} (${el.getAttribute('data-bacaan')})`
+        ).join(", ");
+        
+        addSection("I. ANALISA CAPAIAN PEMBACAAN ALKITAB", 
+            `Capaian saat ini: ${myChart.data.datasets[0].data[0]}%. Jemaat: ${daftarNama}.`);
+
+        // II & III. Kehadiran
+        addSection("II. ANALISA KEHADIRAN", 
+            `Tingkat kehadiran mencapai ${myChart.data.datasets[0].data[1]}%.`);
+            
+        addSection("III. ANALISA KETIDAKHADIRAN", 
+            `Ketidakhadiran (${myChart.data.datasets[0].data[2]}%) disebabkan faktor pekerjaan, kesehatan, dan transportasi.`);
+
+        // IV. Insight AI
+        const aiRef = document.getElementById("text-insight").innerText;
+        addSection("IV. REKOMENDASI SISTEM (AI)", aiRef, true);
+
+        // V. DIAGRAM (Optimasi Gambar agar tidak pecah di HP)
+        doc.setFont("helvetica", "bold");
+        doc.text("V. VISUALISASI DATA", margin, currentY);
+        currentY += 5;
+        
+        const canvas = document.getElementById('performaChart');
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        // Menjaga aspek rasio diagram (lebar 100mm, tinggi menyesuaikan)
+        doc.addImage(imgData, 'PNG', margin, currentY, 100, 55);
+
+        // --- TANDA TANGAN ---
+        currentY += 70;
+        if(currentY > 250) { doc.addPage(); currentY = 20; } // Cek jika butuh halaman baru
+        
+        doc.setFont("helvetica", "normal");
+        doc.text("Mengetahui,", pageWidth - 60, currentY);
+        currentY += 20;
+        doc.setFont("helvetica", "bold");
+        doc.text("( ____________________ )", pageWidth - 65, currentY);
+        doc.setFontSize(8);
+        doc.text("Otoritas PKS / Admin", pageWidth - 55, currentY + 4);
+
+        // SAVE PDF
+        doc.save(`Laporan_JC${userJC}_${Date.now()}.pdf`);
+        
+    } catch (error) {
+        console.error(error);
+        alert("Gagal membuat PDF: " + error.message);
+    }
+}
 
     window.onload = init;
 </script>
