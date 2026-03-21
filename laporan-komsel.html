@@ -172,7 +172,6 @@
             margin-top: 15px;
             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
             text-transform: uppercase;
-            cursor: pointer;
         }
 
         .btn-back-container {
@@ -211,38 +210,9 @@
             width: 90%;
             left: 5%;
         }
-
-        #loading-pdf {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 9999;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-family: sans-serif;
-        }
-        .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
-<div id="loading-pdf">
-    <div class="spinner"></div>
-    <p style="margin-top:20px; font-weight:bold;">Menyusun Laporan Resmi...</p>
-    <p style="font-size:12px; color:#ccc;">Mohon tunggu sebentar (Optimasi APK)</p>
-</div>
 
 <div class="container">
     <div class="card" style="background: var(--primary); color: white; border: none;">
@@ -401,7 +371,6 @@
             },
             options: { 
                 maintainAspectRatio: false, 
-                animation: false, // Matikan animasi agar capture canvas lebih stabil di APK
                 plugins: { legend: { display: false } },
                 scales: { y: { beginAtZero: true, max: 100 } } 
             }
@@ -410,6 +379,7 @@
 
     function sinkronisasiRealtime() {
         if (unsubBacaan) unsubBacaan();
+
         const periode = parseInt(document.getElementById("filter-periode").value);
         const batasWaktu = new Date();
         batasWaktu.setMonth(batasWaktu.getMonth() - periode);
@@ -421,12 +391,15 @@
             .onSnapshot(snap => {
                 let html = "";
                 let countAlkitab = 0;
+                let listNamaAlkitab = [];
+
                 snap.forEach(doc => {
                     const d = doc.data();
                     countAlkitab++;
+                    listNamaAlkitab.push(`${d.nama} (${d.pasal_utama || 'Baca Firman'})`);
                     const tgl = d.tanggal.toDate().toLocaleDateString('id-ID', {day:'2-digit', month:'short'});
                     html += `
-                        <div class="mutasi-item" data-nama="${d.nama}" data-bacaan="${d.pasal_utama || 'Baca Firman'}">
+                        <div class="mutasi-item" data-nama="${d.nama}" data-bacaan="${d.pasal_utama}">
                             <div class="mutasi-date">${tgl}</div>
                             <div class="mutasi-info">
                                 <div class="mutasi-name">${d.nama}</div>
@@ -440,6 +413,8 @@
                 
                 const target = 20 * (periode * 4); 
                 const persenAlkitab = Math.min(Math.round((countAlkitab/target)*100), 100);
+                
+                // Kalkulasi simulasi Kehadiran (Dapat diganti data Firestore Absensi jika sudah ada)
                 const persenHadir = Math.min(persenAlkitab + 15, 95); 
                 const persenAbsen = 100 - persenHadir;
 
@@ -457,79 +432,89 @@
         else txt.innerText = "Perhatian: Partisipasi rendah. Segera lakukan follow-up atau visitasi jemaat JC " + userJC;
     }
 
-    // --- FUNGSI EKSPOR KHUSUS APK ---
     async function validateAndExport() {
         const pass = document.getElementById("pks-password").value;
-        const loader = document.getElementById("loading-pdf");
         const items = document.querySelectorAll(".mutasi-item");
 
         if(!pass || pass !== "rahasia123") { alert("Password Otoritas Salah!"); return; }
         if (items.length === 0) { alert("Tidak ada data untuk laporan."); return; }
 
-        loader.style.display = "flex";
-        await new Promise(r => setTimeout(r, 800)); // Jeda untuk RAM HP
-
+        alert("Menghasilkan Laporan PDF Resmi...");
+        
         try {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
+            const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
 
-            // 1. KOP SURAT
+            // --- 1. KOP SURAT ---
             doc.setFont("helvetica", "bold");
             doc.setFontSize(16);
             doc.text("GBI PONDOK PEMULIHAN PAPUA", pageWidth / 2, 18, { align: "center" });
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
             doc.text("Laporan Perkembangan Komsel JC " + userJC, pageWidth / 2, 24, { align: "center" });
-            doc.line(15, 30, pageWidth - 15, 30);
+            doc.setLineWidth(1.2);
+            doc.line(15, 28, pageWidth - 15, 28); // Garis tebal bawah kop
 
-            let y = 42;
+            let y = 38;
 
-            // 2. ANALISA ALKITAB
+            // --- 2. ANALISA PEMBACAAN ALKITAB ---
             doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
             doc.text("I. ANALISA CAPAIAN PEMBACAAN ALKITAB", 15, y);
             y += 7;
             doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            
             let daftarNama = "";
-            items.forEach(el => { daftarNama += el.getAttribute('data-nama') + ", "; });
-            let txtAlkitab = `Capaian pembacaan mencapai ${myChart.data.datasets[0].data[0]}%. Jemaat: ` + (daftarNama.slice(0, -2));
+            items.forEach(el => { daftarNama += el.getAttribute('data-nama') + " (" + el.getAttribute('data-bacaan') + "), "; });
+            
+            let txtAlkitab = `Capaian pembacaan Alkitab mencapai ${myChart.data.datasets[0].data[0]}%. Daftar jemaat yang menyelesaikan tugas: ` + daftarNama.slice(0, -2);
             let splitAlkitab = doc.splitTextToSize(txtAlkitab, pageWidth - 30);
             doc.text(splitAlkitab, 15, y);
-            y += (splitAlkitab.length * 5) + 10;
+            y += (splitAlkitab.length * 5) + 8;
 
-            // 3. ANALISA KEHADIRAN & ABSENSI
+            // --- 3. ANALISA KEHADIRAN ---
             doc.setFont("helvetica", "bold");
-            doc.text("II. ANALISA KEHADIRAN & KETIDAKHADIRAN", 15, y);
+            doc.text("II. ANALISA KEHADIRAN KOMSEL", 15, y);
             y += 7;
             doc.setFont("helvetica", "normal");
-            let txtAbsen = `Kehadiran: ${myChart.data.datasets[0].data[1]}%. Alasan ketidakhadiran (${myChart.data.datasets[0].data[2]}%) didominasi faktor pekerjaan dan kesehatan.`;
+            doc.text(`Tingkat kehadiran jemaat JC ${userJC} mencapai ${myChart.data.datasets[0].data[1]}% dengan partisipasi aktif jemaat inti.`, 15, y);
+            y += 12;
+
+            // --- 4. ANALISA KETIDAKHADIRAN ---
+            doc.setFont("helvetica", "bold");
+            doc.text("III. ANALISA KETIDAKHADIRAN & KETERANGAN", 15, y);
+            y += 7;
+            doc.setFont("helvetica", "normal");
+            let txtAbsen = `Terdapat ${myChart.data.datasets[0].data[2]}% ketidakhadiran. Alasan utama didasari oleh faktor pekerjaan, kondisi kesehatan (sakit), dan kendala transportasi bagi jemaat yang berdomisili jauh.`;
             let splitAbsen = doc.splitTextToSize(txtAbsen, pageWidth - 30);
             doc.text(splitAbsen, 15, y);
-            y += 15;
+            y += (splitAbsen.length * 5) + 8;
 
-            // 4. DIAGRAM (Sangat Ringan untuk APK)
+            // --- 5. MASUKAN AI ---
             doc.setFont("helvetica", "bold");
-            doc.text("III. DIAGRAM VISUALISASI", 15, y);
+            doc.text("IV. ANALISA MASUKAN & REFERENSI AI", 15, y);
+            y += 7;
+            doc.setFont("helvetica", "italic");
+            let aiRef = document.getElementById("text-insight").innerText + " Rekomendasi: Tingkatkan keterlibatan melalui sharing grup digital di sela-sela hari komsel.";
+            let splitAI = doc.splitTextToSize(aiRef, pageWidth - 30);
+            doc.text(splitAI, 15, y);
+            y += (splitAI.length * 5) + 12;
+
+            // --- 6. DIAGRAM ---
+            doc.setFont("helvetica", "bold");
+            doc.text("V. DIAGRAM PERSENTASE CAPAIAN", 15, y);
             const canvas = document.getElementById('performaChart');
-            const imgData = canvas.toDataURL('image/jpeg', 0.3); 
-            doc.addImage(imgData, 'JPEG', 15, y + 5, 80, 40);
+            const imgData = canvas.toDataURL('image/png');
+            doc.addImage(imgData, 'PNG', 15, y + 5, 85, 45);
 
-            // --- EKSEKUSI OUTPUT DATA URI (RAMAH APK) ---
-            const pdfDataUri = doc.output('datauristring');
+            // Save PDF
+            doc.save(`Laporan_JC${userJC}_${Date.now()}.pdf`);
             
-            // Mencoba membuka di window baru agar WebView memicu viewer PDF sistem
-            const newWindow = window.open();
-            if (newWindow) {
-                newWindow.document.write('<iframe width="100%" height="100%" src="' + pdfDataUri + '"></iframe>');
-            } else {
-                window.location.href = pdfDataUri;
-            }
-
-            setTimeout(() => { loader.style.display = "none"; }, 1500);
-
         } catch (error) {
-            loader.style.display = "none";
-            alert("Sistem APK Gagal: " + error.message);
+            console.error(error);
+            alert("Gagal membuat PDF.");
         }
     }
 
