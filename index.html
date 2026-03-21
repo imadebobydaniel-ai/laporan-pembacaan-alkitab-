@@ -6,19 +6,74 @@
     <title>Login - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        .logo { width: 80px; margin-bottom: 20px; }
-        h2 { margin: 10px 0; font-size: 20px; color: #333; }
-        h3 { color: #ffcc00; margin-bottom: 20px; font-size: 18px; text-shadow: 1px 1px 2px #000; }
-        form { text-align: left; }
-        .form-group { margin-bottom: 20px; position: relative; }
-        input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; outline: none; }
-        .toggle-password { position: absolute; right: 15px; top: 12px; cursor: pointer; color: #999; }
-        .btn-login { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        body { 
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        .login-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 90%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+        .logo { width: 80px; margin-bottom: 15px; }
+        h2 { margin: 5px 0; font-size: 20px; color: #333; font-weight: bold; }
+        h3 { 
+            color: #ffcc00; 
+            margin-bottom: 25px; 
+            font-size: 16px; 
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5); 
+            background: #2c3e50;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        .form-group { margin-bottom: 15px; position: relative; text-align: left; }
+        input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 14px; 
+            outline: none; 
+            transition: 0.3s;
+        }
+        input:focus { border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,0.2); }
+        .toggle-password { 
+            position: absolute; 
+            right: 15px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            cursor: pointer; 
+            color: #999; 
+        }
+        .btn-login { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            transition: 0.3s;
+        }
+        .btn-login:hover { background-color: #0056b3; }
         .footer-links { margin-top: 25px; font-size: 14px; color: #666; }
         .footer-links a { color: #007bff; text-decoration: none; font-weight: bold; }
-        .admin-link { display: block; margin-top: 15px; color: #666; text-decoration: none; font-size: 13px; }
+        .admin-link { display: block; margin-top: 15px; color: #888; text-decoration: none; font-size: 12px; }
+        .admin-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -27,7 +82,7 @@
         <img src="logo_pondok.png" alt="Logo" class="logo">
         <h2>PONDOK PEMULIHAN PAPUA</h2>
         <h3>Sistem Informasi Komsel JC</h3>
-        <p style="color: #666; margin-bottom: 20px;">Login Anggota Komsel</p>
+        <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Silahkan Login Anggota</p>
 
         <form id="loginForm">
             <div class="form-group">
@@ -50,6 +105,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
+        // Konfigurasi Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
             authDomain: "boby-apps-project.firebaseapp.com",
@@ -59,6 +115,7 @@
             appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
         };
         
+        // Inisialisasi Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -77,11 +134,10 @@
             }
         }
 
-        // --- SISTEM LOGIN STABIL (TANPA GPS) ---
+        // --- SISTEM LOGIN ---
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Menghilangkan spasi dan memaksa huruf kecil untuk email agar tidak error di HP
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('pass').value;
 
@@ -92,17 +148,21 @@
                     .get();
 
                 if (!snapshot.empty) {
-                    // Simpan data ke session
-                    localStorage.setItem("userEmail", email);
+                    // Ambil data user (opsional jika ingin simpan Nama di localstorage)
+                    const userData = snapshot.docs[0].data();
                     
-                    // Gunakan window.location.href agar redirect lebih lancar di browser HP (Chrome/Safari)
+                    // Simpan data ke session local
+                    localStorage.setItem("userEmail", email);
+                    localStorage.setItem("userName", userData.nama || "Anggota");
+                    
+                    // Redirect ke menu utama
                     window.location.href = "menu.html"; 
                 } else {
                     alert("Email atau Password Salah! Pastikan penulisan sudah benar.");
                 }
             } catch (err) {
-                // Menampilkan pesan error spesifik jika gagal koneksi database
-                alert("Gagal terhubung ke database: " + err.message);
+                console.error("Error Login: ", err);
+                alert("Gagal terhubung ke database. Periksa koneksi internet Anda.");
             }
         });
     </script>
