@@ -81,6 +81,60 @@
             font-weight: bold;
         }
 
+        /* MODAL LOG AKTIFITAS */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .modal-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .btn-open-log {
+            background: #fff;
+            border: 1.5px solid var(--primary);
+            color: var(--primary);
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
         .mutasi-item { 
             display: flex; 
             padding: 12px; 
@@ -212,9 +266,9 @@
 
     <div class="card">
         <h3><i class="fa-solid fa-list-check"></i> Log Aktifitas</h3>
-        <div id="mutasi-list">
-            <div style="text-align: center; color: #ccc; font-size: 11px; padding: 20px;">Menarik data...</div>
-        </div>
+        <button class="btn-open-log" onclick="toggleLogModal(true)">
+            <i class="fa-solid fa-clock-rotate-left"></i> LIHAT DETAIL LOG
+        </button>
     </div>
 
     <div class="card export-card">
@@ -234,6 +288,18 @@
         <a href="menu.html" class="btn-back">
             <i class="fa-solid fa-arrow-left"></i> KEMBALI KE PANEL UTAMA
         </a>
+    </div>
+</div>
+
+<div id="modal-log" class="modal-overlay" onclick="toggleLogModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span>LOG AKTIFITAS</span>
+            <i class="fa-solid fa-times" onclick="toggleLogModal(false)" style="cursor:pointer"></i>
+        </div>
+        <div id="mutasi-list" class="modal-body">
+            <div style="text-align: center; color: #ccc; font-size: 11px; padding: 20px;">Menarik data...</div>
+        </div>
     </div>
 </div>
 
@@ -270,6 +336,10 @@
                 sinkronisasiRealtime();
             }
         } catch (e) { console.error(e); }
+    }
+
+    function toggleLogModal(show) {
+        document.getElementById("modal-log").style.display = show ? "flex" : "none";
     }
 
     function toggleLogicPopup() {
@@ -336,7 +406,6 @@
                 });
                 document.getElementById("mutasi-list").innerHTML = html || '<p style="text-align:center;font-size:12px;color:#999;">Belum ada aktifitas.</p>';
                 
-                // Target statistik disesuaikan secara rincian bulan (periode)
                 const target = 20 * (periode * 4); 
                 const persen = Math.min(Math.round((count/target)*100), 100);
                 myChart.data.datasets[0].data[0] = persen;
