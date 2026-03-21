@@ -6,46 +6,56 @@
     <title>Lacak Domba - Komsel JC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --biru-tua: #003366;
-            --emas: #D4AF37;
-            --putih: #f4f7fa;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--putih); margin: 0; padding: 0; }
+        :root { --biru-tua: #003366; --biru-safir: #0056b3; --emas: #D4AF37; --putih-bg: #f4f7fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--putih-bg); margin: 0; padding: 0; color: #333; }
         
-        .header { background: var(--biru-tua); color: white; padding: 15px; text-align: center; border-bottom: 3px solid var(--emas); }
-        .btn-back { position: absolute; left: 15px; top: 15px; color: white; text-decoration: none; font-size: 18px; }
+        /* Header */
+        .header { background: var(--biru-tua); color: white; padding: 15px; text-align: center; border-bottom: 3px solid var(--emas); position: sticky; top: 0; z-index: 1000; }
+        .btn-back { position: absolute; left: 15px; top: 18px; color: white; text-decoration: none; font-size: 18px; }
+
+        /* Search Container (Logika dari file asli Bapak) */
+        .search-container { padding: 15px; background: white; margin: 10px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .search-box { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; font-size: 14px; }
+        .search-box:focus { border-color: var(--biru-safir); }
+
+        .container { padding: 5px 15px; }
         
-        .container { padding: 15px; }
-        
-        /* List Anggota */
+        /* Card Tampilan Anggota */
         .card-lacak {
-            background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-left: 5px solid var(--biru-tua);
+            background: white; border-radius: 15px; padding: 15px; margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 5px solid var(--biru-tua);
         }
-        .info-nama { font-weight: 800; color: var(--biru-tua); font-size: 16px; margin-bottom: 5px; }
-        .info-detail { font-size: 12px; color: #666; margin-bottom: 10px; }
+        .info-nama { font-weight: 800; color: var(--biru-tua); font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .status-online { color: #2ecc71; font-weight: bold; font-size: 11px; margin: 5px 0; }
+        .info-detail { font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.4; }
         
-        /* Tampilan Peta */
+        /* Peta */
         .map-container {
-            width: 100%; height: 200px; border-radius: 10px; overflow: hidden;
-            background: #ddd; position: relative; border: 1px solid #ccc;
+            width: 100%; height: 180px; border-radius: 12px; overflow: hidden;
+            background: #e5e3df; border: 1px solid #ddd; margin-top: 10px;
         }
         iframe { width: 100%; height: 100%; border: none; }
         
-        .status-online { color: #2ecc71; font-weight: bold; font-size: 11px; }
-        .loading-text { text-align: center; padding: 50px; color: #999; }
+        .btn-navigasi {
+            display: inline-block; margin-top: 10px; font-size: 12px; color: var(--biru-safir);
+            text-decoration: none; font-weight: bold;
+        }
+        .no-data { text-align: center; padding: 40px; color: #999; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <a href="menu.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
-        <h3 style="margin:0;">LOKASI LIVE ANGGOTA</h3>
+        <h3 style="margin:0; text-transform: uppercase; letter-spacing: 1px;">Lacak Domba JC 5</h3>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-box" placeholder="Cari nama domba/anggota..." onkeyup="filterNama()">
     </div>
 
     <div class="container" id="list-lacak">
-        <div class="loading-text">Mencari data lokasi anggota...</div>
+        <div class="no-data">Memuat data lokasi...</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -63,14 +73,28 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        function renderLacak() {
-            // Mengambil data dari koleksi live_tracking yang dibuat di menu.html
+        // Fungsi filter untuk mencari nama (Logika Search)
+        function filterNama() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.getElementsByClassName('card-lacak');
+            
+            for (let i = 0; i < cards.length; i++) {
+                let nama = cards[i].getAttribute('data-nama').toLowerCase();
+                if (nama.includes(input)) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+        }
+
+        function listenLocation() {
             db.collection("live_tracking").onSnapshot((querySnapshot) => {
                 const listContainer = document.getElementById('list-lacak');
                 listContainer.innerHTML = "";
 
                 if (querySnapshot.empty) {
-                    listContainer.innerHTML = "<div class='loading-text'>Belum ada anggota yang online.</div>";
+                    listContainer.innerHTML = "<div class='no-data'>Belum ada anggota yang aktif membagikan lokasi.</div>";
                     return;
                 }
 
@@ -78,36 +102,34 @@
                     const data = doc.data();
                     const lat = data.lat;
                     const lng = data.lng;
-                    const nama = data.nama;
+                    const nama = data.nama || "Tanpa Nama";
                     const lastSeen = data.lastSeen ? new Date(data.lastSeen.seconds * 1000).toLocaleString('id-ID') : "Baru saja";
 
-                    // Membuat tampilan kartu untuk setiap anggota
                     const card = `
-                        <div class="card-lacak">
-                            <div class="info-nama"><i class="fa-solid fa-user-location"></i> ${nama}</div>
-                            <div class="status-online"><i class="fa-solid fa-circle"></i> Terdeteksi: ${lastSeen}</div>
+                        <div class="card-lacak" data-nama="${nama}">
+                            <div class="info-nama"><i class="fa-solid fa-location-dot" style="color:red;"></i> ${nama}</div>
+                            <div class="status-online"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Terdeteksi: ${lastSeen}</div>
                             <div class="info-detail">Koordinat: ${lat}, ${lng}</div>
                             
                             <div class="map-container">
-                                <iframe 
-                                    src="https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed">
-                                </iframe>
+                                <iframe src="https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed"></iframe>
                             </div>
-                            <div style="margin-top:10px; text-align:right;">
-                                <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" 
-                                   style="font-size:12px; color:var(--biru-safir); text-decoration:none; font-weight:bold;">
-                                   <i class="fa-solid fa-up-right-from-square"></i> Buka Navigasi
+                            <div style="text-align:right;">
+                                <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="btn-navigasi">
+                                    <i class="fa-solid fa-route"></i> BUKA NAVIGASI
                                 </a>
                             </div>
                         </div>
                     `;
                     listContainer.innerHTML += card;
                 });
+                
+                // Re-filter setelah data baru masuk agar pencarian tetap aktif
+                filterNama();
             });
         }
 
-        // Jalankan fungsi
-        renderLacak();
+        listenLocation();
     </script>
 </body>
 </html>
