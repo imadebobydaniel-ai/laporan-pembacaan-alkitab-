@@ -66,7 +66,6 @@
 <body>
 
 <div class="container">
-    
     <div class="card">
         <div class="card-title"><i class="fa-solid fa-book-open-reader"></i> Capaian Baca Alkitab</div>
         <div class="filter-row">
@@ -78,7 +77,6 @@
                     <option value="JC 3">JC 3</option>
                     <option value="JC 4">JC 4</option>
                     <option value="JC 5" selected>JC 5</option>
-                   
                 </select>
             </div>
             <div class="filter-item">
@@ -106,7 +104,6 @@
                     <option value="JC 3">JC 3</option>
                     <option value="JC 4">JC 4</option>
                     <option value="JC 5" selected>JC 5</option>
-                    
                 </select>
             </div>
             <div class="filter-item">
@@ -132,7 +129,6 @@
                     <option value="JC 3">JC 3</option>
                     <option value="JC 4">JC 4</option>
                     <option value="JC 5" selected>JC 5</option>
-                    
                 </select>
             </div>
             <div class="filter-item">
@@ -185,34 +181,73 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    // LOGIKA DINAMIS UNTUK SETIAP KARTU
-    async function loadAlkitab() {
-        const jc = document.getElementById('jc-alkitab').value;
-        document.getElementById('label-jc-baca').innerText = jc;
-        // ... (Logika hitung Alkitab tetap ada di sini)
+    const getCleanId = (val) => val.replace("JC ", "").trim();
+
+    // 1. REALTIME ALKITAB
+    function loadAlkitab() {
+        const jcSelected = getCleanId(document.getElementById('jc-alkitab').value);
+        const periodeBulan = parseInt(document.getElementById('per-alkitab').value);
+        document.getElementById('label-jc-baca').innerText = "JC " + jcSelected;
+
+        db.collection("users").where("komsel", "==", jcSelected).onSnapshot(snapUser => {
+            const jumlahAnggota = snapUser.size || 0;
+            db.collection("laporan_bacaan").where("komsel", "==", jcSelected).onSnapshot(snapLap => {
+                const totalLaporan = snapLap.size;
+                const targetMaks = jumlahAnggota * (30 * periodeBulan);
+                let persen = targetMaks > 0 ? (totalLaporan / targetMaks) * 100 : 0;
+                if (persen > 100) persen = 100;
+
+                document.getElementById('txt-baca-jc').innerText = persen.toFixed(1) + "%";
+                document.getElementById('bar-baca-jc').style.width = persen + "%";
+                document.getElementById('rincian-alkitab').innerText = totalLaporan + " laporan dari " + jumlahAnggota + " anggota.";
+            });
+        });
     }
 
-    async function loadKehadiran() {
-        const jc = document.getElementById('jc-hadir').value;
-        document.getElementById('label-jc-hadir').innerText = jc;
-        // ... (Logika hitung Kehadiran)
+    // 2. REALTIME KEHADIRAN & ABSEN
+    function loadKehadiran() {
+        const jcId = getCleanId(document.getElementById('jc-hadir').value);
+        document.getElementById('label-jc-hadir').innerText = "JC " + jcId;
+        
+        db.collection("kehadiran").where("komsel", "==", jcId).onSnapshot(snap => {
+            let totalHadir = 0;
+            let totalData = snap.size;
+            snap.forEach(doc => { if(doc.data().status === "Hadir") totalHadir++; });
+
+            let persenHadir = totalData > 0 ? (totalHadir / totalData) * 100 : 0;
+            document.getElementById('txt-hadir-jc').innerText = persenHadir.toFixed(0) + "%";
+            document.getElementById('bar-hadir-jc').style.width = persenHadir + "%";
+            document.getElementById('rincian-hadir').innerText = "Dari " + totalData + " total absensi.";
+        });
     }
 
-    async function loadAbsen() {
-        const jc = document.getElementById('jc-absen').value;
-        document.getElementById('label-jc-absen').innerText = jc;
-        // ... (Logika hitung Ketidakhadiran)
+    function loadAbsen() {
+        const jcId = getCleanId(document.getElementById('jc-absen').value);
+        document.getElementById('label-jc-absen').innerText = "JC " + jcId;
+
+        db.collection("kehadiran").where("komsel", "==", jcId).onSnapshot(snap => {
+            let totalHadir = 0;
+            let totalData = snap.size;
+            snap.forEach(doc => { if(doc.data().status === "Hadir") totalHadir++; });
+
+            let persenHadir = totalData > 0 ? (totalHadir / totalData) * 100 : 0;
+            let persenAbsen = 100 - persenHadir;
+
+            document.getElementById('txt-absen-jc').innerText = persenAbsen.toFixed(1) + "%";
+            document.getElementById('bar-absen-jc').style.width = persenAbsen + "%";
+            document.getElementById('rincian-absen').innerText = (totalData - totalHadir) + " orang tidak hadir.";
+        });
     }
 
-    async function loadDarah() {
+    // 3. REALTIME GOLONGAN DARAH
+    function loadDarah() {
         const jcSelected = document.getElementById('jc-darah').value;
         const types = ['A', 'B', 'O', 'AB'];
-        for (const t of types) {
-            let q = db.collection("users").where("golDarah", "==", t);
-            if (jcSelected !== "Semua") q = q.where("komsel", "==", jcSelected.replace("JC ", ""));
-            const s = await q.get();
-            document.getElementById('count-' + t).innerText = s.size + " Orang";
-        }
+        types.forEach(tipe => {
+            let query = db.collection("users").where("golDarah", "==", tipe);
+            if (jcSelected !== "Semua") query = query.where("komsel", "==", getCleanId(jcSelected));
+            query.onSnapshot(snap => { document.getElementById('count-' + tipe).innerText = snap.size + " Orang"; });
+        });
     }
 
     window.onload = () => { loadAlkitab(); loadKehadiran(); loadAbsen(); loadDarah(); };
