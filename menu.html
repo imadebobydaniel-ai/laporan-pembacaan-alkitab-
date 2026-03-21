@@ -12,7 +12,7 @@
             --biru-safir: #0056b3;
             --biru-muda: #00e6e6;
             --hijau-zamrud: #2ecc71;
-            --emas: #D4AF37; /* Menggunakan --emas agar sinkron dengan script baru */
+            --emas: #D4AF37;
             --emas-lux: #D4AF37;
             --putih-bg: #f4f7fa;
         }
@@ -25,7 +25,6 @@
             color: #333;
         }
 
-        /* --- CSS BARU DISINI --- */
         /* Layar peringatan jika GPS ditolak */
         #gps-lock-screen {
             display: none;
@@ -41,7 +40,6 @@
             text-decoration: none; display: inline-block; margin-top: 20px;
             cursor: pointer; border: none;
         }
-        /* ----------------------- */
 
         /* Top Bar Info */
         .top-info-bar { 
@@ -176,11 +174,11 @@
 <body>
 
     <div id="gps-lock-screen">
-        <i class="fa-solid fa-location-dot" style="font-size: 50px; color: var(--emas); margin-bottom: 20px;"></i>
-        <h2>Akses GPS Diperlukan</h2>
-        <p>Sistem JC mewajibkan lokasi aktif untuk keamanan dan pelaporan real-time anggota.</p>
-        <p style="font-size: 12px; color: #ccc; margin-top: 10px;">Mohon izinkan akses lokasi di pengaturan browser Anda lalu tekan tombol di bawah:</p>
-        <button class="btn-reset" onclick="location.reload()">MUAT ULANG HALAMAN</button>
+        <i class="fa-solid fa-location-dot" style="font-size: 50px; color: #ff4d4d;"></i>
+        <h2>AKSES GPS DITOLAK</h2>
+        <p>Aplikasi Komsel JC mewajibkan akses lokasi agar tetap aktif.</p>
+        <p style="font-size: 13px; color: #ddd;">Silakan buka pengaturan browser, izinkan lokasi untuk situs ini, lalu login kembali.</p>
+        <a href="index.html" class="btn-reset" onclick="localStorage.clear()">LOGOUT & RESET LOGIN</a>
     </div>
 
     <div class="top-info-bar">
@@ -248,7 +246,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // CONFIG FIREBASE
         const firebaseConfig = { 
             apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
             authDomain: "boby-apps-project.firebaseapp.com", 
@@ -260,7 +257,6 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. FUNGSI UPDATE WAKTU
         function updateWaktuDanRunningText() {
             const now = new Date();
             const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -279,11 +275,9 @@
             document.getElementById('running-text').innerText = runningContent;
         }
 
-        // 2. FUNGSI TRACKING GPS (Update: Menampilkan Lock Screen jika GPS ditolak)
         function aktifkanTrackingOtomatis() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(async (position) => {
-                    // Sembunyikan lock screen jika koordinat berhasil didapat
                     document.getElementById('gps-lock-screen').style.display = "none";
 
                     const userEmail = localStorage.getItem("userEmail");
@@ -301,7 +295,6 @@
                     }
                 }, (error) => {
                     console.warn("GPS Warning: " + error.message);
-                    // Tampilkan lock screen jika user menolak GPS
                     if (error.code === error.PERMISSION_DENIED) {
                         document.getElementById('gps-lock-screen').style.display = "block";
                     }
@@ -309,7 +302,6 @@
             }
         }
 
-        // 3. SYNC DATA PROFIL
         function syncUserData() {
             const userEmail = localStorage.getItem("userEmail");
             if (!userEmail) { window.location.href = "index.html"; return; }
@@ -338,7 +330,6 @@
             });
         }
 
-        // 4. FUNGSI LOGOUT
         async function logoutDanHapusDevice() {
             const userEmail = localStorage.getItem("userEmail");
             const currentDeviceId = localStorage.getItem("myDeviceId");
@@ -363,7 +354,6 @@
             }
         }
 
-        // JALANKAN SEMUA FUNGSI
         setInterval(updateWaktuDanRunningText, 1000);
         updateWaktuDanRunningText();
         syncUserData();
