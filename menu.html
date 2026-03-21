@@ -24,22 +24,6 @@
             color: #333;
         }
 
-        #gps-lock-screen {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 51, 102, 0.95);
-            color: white; z-index: 9999;
-            text-align: center; padding: 50px 20px; box-sizing: border-box;
-        }
-
-        .btn-reset {
-            background: var(--emas); color: var(--biru-tua);
-            padding: 12px 20px; border-radius: 10px; font-weight: bold;
-            text-decoration: none; display: inline-block; margin-top: 20px;
-            cursor: pointer; border: none;
-        }
-
         .top-info-bar { 
             background: var(--biru-tua); 
             display: flex; 
@@ -166,12 +150,11 @@
             box-shadow: 0 4px 15px rgba(0,51,102,0.3);
             transition: 0.3s;
             cursor: pointer;
+            margin-bottom: 40px;
         }
     </style>
 </head>
 <body>
-
-   
 
     <div class="top-info-bar">
         <div id="display-tanggal">Memuat Tanggal...</div>
@@ -217,11 +200,9 @@
             <a href="lacak-domba.html" class="menu-box lacak-box">
                 <i class="fa-solid fa-map-location-dot"></i>Lacak Domba
             </a>
-
             <a href="capaian-doa.html" class="menu-box">
                 <i class="fa-solid fa-hands-praying icon-special"></i>Capaian DOA
             </a>
-
             <a href="javascript:location.reload()" class="menu-box" style="color: #28a745;">
                 <i class="fa-solid fa-arrows-rotate"></i>Refresh
             </a>
@@ -248,13 +229,22 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // --- 1. INISIALISASI HALAMAN ---
         window.onload = function() {
+            // Cek Login
+            const email = localStorage.getItem("userEmail");
+            if (!email) {
+                window.location.href = "index.html"; 
+                return;
+            }
+
+            // Jalankan Fungsi
             updateWaktuDanRunningText();
             setInterval(updateWaktuDanRunningText, 1000);
-            checkGPSPermission();
             syncUserData();
         };
 
+        // --- 2. FUNGSI WAKTU & RUNNING TEXT ---
         function updateWaktuDanRunningText() {
             const now = new Date();
             const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -262,45 +252,56 @@
             const dayName = days[now.getDay()], date = now.getDate(), monthName = months[now.getMonth()], year = now.getFullYear();
             const time = now.toLocaleTimeString('id-ID', { hour12: false });
             
-            document.getElementById('display-tanggal').innerText = `${dayName}, ${date} ${monthName} ${year}`;
-            document.getElementById('digital-clock').innerText = `${time} WIT`;
-            document.getElementById('running-text').innerText = `Shalom! ${dayName}, ${date} ${monthName} ${year} | ${time} WIT | SISTEM INFORMASI KOMSEL JC | TETAP SEMANGAT!`;
+            const displayTgl = document.getElementById('display-tanggal');
+            const displayJam = document.getElementById('digital-clock');
+            const runText = document.getElementById('running-text');
+
+            if(displayTgl) displayTgl.innerText = `${dayName}, ${date} ${monthName} ${year}`;
+            if(displayJam) displayJam.innerText = `${time} WIT`;
+            if(runText) runText.innerText = `Shalom! ${dayName}, ${date} ${monthName} ${year} | ${time} WIT | SISTEM INFORMASI KOMSEL JC | TETAP SEMANGAT!`;
         }
 
-       
-        }
-
-        async function updateLokasiKeFirebase(lat, lng) {
-            const email = localStorage.getItem("userEmail");
-            if (email) {
-                await db.collection("live_tracking").doc(email).set({
-                    lat: lat, lng: lng, lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            }
-        }
-
+        // --- 3. SINKRONISASI DATA USER DARI FIREBASE ---
         function syncUserData() {
             const email = localStorage.getItem("userEmail");
-            if (!email) { window.location.href = "index.html"; return; }
+            if (!email) return;
+
             db.collection("users").where("email", "==", email).onSnapshot((snap) => {
                 if (!snap.empty) {
                     const d = snap.docs[0].data();
-                    document.getElementById('disp_nama').innerText = d.nama || "User";
-                    document.getElementById('disp_komsel').innerText = d.komsel ? "JC " + d.komsel : "KOMSEL JC";
+                    
+                    // Update Nama & Komsel
+                    const elNama = document.getElementById('disp_nama');
+                    const elKomsel = document.getElementById('disp_komsel');
+                    
+                    if(elNama) elNama.innerText = d.nama || "User";
+                    if(elKomsel) elKomsel.innerText = d.komsel ? "JC " + d.komsel : "KOMSEL JC";
+                    
+                    // Update Foto
                     if (d.fotoUrl) {
-                        document.getElementById('user-photo').src = d.fotoUrl;
-                        document.getElementById('user-photo').style.display = "block";
-                        document.getElementById('default-icon').style.display = "none";
+                        const userPhoto = document.getElementById('user-photo');
+                        const defIcon = document.getElementById('default-icon');
+                        if(userPhoto) {
+                            userPhoto.src = d.fotoUrl;
+                            userPhoto.style.display = "block";
+                        }
+                        if(defIcon) defIcon.style.display = "none";
                     }
                 }
             });
         }
 
-        async function logoutDanHapusDevice() {
-            if (confirm("Keluar sistem?")) {
+        // --- 4. FUNGSI LOGOUT ---
+        function logoutDanHapusDevice() {
+            if (confirm("Apakah Anda yakin ingin keluar sistem?")) {
                 localStorage.clear();
                 window.location.href = "index.html";
             }
+        }
+
+        // --- 5. FUNGSI REFRESH (Opsional) ---
+        function refreshPage() {
+            window.location.reload();
         }
     </script>
 </body>
