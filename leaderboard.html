@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Peringkat Komsel - Pondok Pemulihan</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         :root {
             --biru-tua: #003366;
@@ -28,7 +32,6 @@
 
         .container { max-width: 500px; margin: auto; }
         
-        /* Card Styles */
         .card { 
             background: white; 
             padding: 25px; 
@@ -37,6 +40,8 @@
             margin-bottom: 20px; 
             text-align: center;
             border-top: 5px solid var(--biru-safir);
+            position: relative;
+            overflow: hidden;
         }
 
         h2 { color: var(--biru-tua); font-size: 20px; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; }
@@ -49,6 +54,7 @@
             align-items: flex-end;
             margin-bottom: 30px;
             gap: 10px;
+            position: relative;
         }
         .podium-item { 
             flex: 1; 
@@ -68,8 +74,14 @@
             font-size: 24px;
             margin-bottom: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
         }
-        .rank-1 .trophy-box { background: linear-gradient(135deg, #FFD700, #FDB931); color: white; width: 65px; height: 65px; font-size: 32px; }
+        .rank-1 .trophy-box { 
+            background: linear-gradient(135deg, #FFD700, #FDB931); 
+            color: white; width: 65px; height: 65px; font-size: 32px; 
+            border: 3px solid white;
+        }
         .rank-2 .trophy-box { background: linear-gradient(135deg, #E0E0E0, #BDBDBD); color: white; }
         .rank-3 .trophy-box { background: linear-gradient(135deg, #f0a26d, #CD7F32); color: white; }
 
@@ -84,9 +96,8 @@
             font-weight: 700;
         }
         
-        /* Chart Box */
         .chart-box { 
-            height: 220px; 
+            height: 200px; 
             width: 100%; 
             margin-top: 15px; 
             padding: 10px;
@@ -94,7 +105,6 @@
             border-radius: 15px;
         }
 
-        /* List Peringkat */
         .rank-list { text-align: left; margin-top: 10px; }
         .rank-item {
             display: flex;
@@ -105,7 +115,6 @@
             border-radius: 18px;
             margin-bottom: 10px;
             border: 1.5px solid #f0f0f0;
-            transition: 0.3s;
         }
         .rank-item.top-three { 
             border-left: 5px solid var(--emas-lux); 
@@ -119,35 +128,18 @@
             border-radius: 50px; 
             font-size: 12px; 
             font-weight: 900; 
-            box-shadow: 0 4px 10px rgba(0,86,179,0.2);
         }
 
-        /* Bottom Menu */
         .btn-back-container {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-            background: white;
-            border-top: 1px solid #eee;
-            z-index: 1000;
+            bottom: 0; left: 0; width: 100%;
+            padding: 20px; box-sizing: border-box;
+            background: white; border-top: 1px solid #eee; z-index: 1000;
         }
         .btn-back { 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: var(--biru-tua); 
-            color: white; 
-            padding: 18px; 
-            border-radius: 50px; 
-            text-decoration: none; 
-            font-weight: 800; 
-            font-size: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: var(--biru-tua); color: white; padding: 18px; 
+            border-radius: 50px; text-decoration: none; font-weight: 800; 
             box-shadow: 0 8px 25px rgba(0,51,102,0.3);
         }
     </style>
@@ -165,7 +157,7 @@
                 <div class="podium-name" id="top2-name">JC -</div>
                 <div class="podium-score" id="top2-val">0</div>
             </div>
-            <div class="podium-item rank-1" style="order: 2;">
+            <div class="podium-item rank-1" style="order: 2;" id="winner-zone">
                 <div class="trophy-box"><i class="fas fa-crown"></i></div>
                 <div class="podium-name" id="top1-name">JC -</div>
                 <div class="podium-score" id="top1-val">0</div>
@@ -182,19 +174,12 @@
         </div>
     </div>
 
-    <div style="padding: 0 5px;">
-        <h3 style="font-size: 14px; font-weight: 800; color: #777; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">
-            <i class="fas fa-list-ol"></i> Peringkat Keaktifan
-        </h3>
-        <div id="rank-list" class="rank-list">
-            <p style="text-align:center; color:#ccc; padding: 20px;">Menghitung skor surgawi...</p>
-        </div>
+    <div id="rank-list" class="rank-list">
+        <p style="text-align:center; color:#ccc; padding: 20px;">Menghitung skor...</p>
     </div>
 
     <div class="btn-back-container">
-        <a href="menu.html" class="btn-back">
-            <i class="fas fa-home"></i> KEMBALI KE MENU
-        </a>
+        <a href="menu.html" class="btn-back"><i class="fas fa-home"></i> KEMBALI KE MENU</a>
     </div>
 </div>
 
@@ -211,6 +196,46 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // FUNGSI EFEK PERAYAAN (Kembang api, Bunga, Bintang)
+    function selebrasiJuara() {
+        const durasi = 3 * 1000;
+        const akhir = Date.now() + durasi;
+
+        const frame = () => {
+            // Efek Kembang Api & Bintang
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0, y: 0.6 },
+                colors: ['#FFD700', '#FFFFFF', '#FF8C00'], // Emas & Putih
+                shapes: ['star']
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1, y: 0.6 },
+                colors: ['#FFD700', '#FFFFFF', '#FF8C00'],
+                shapes: ['star']
+            });
+
+            // Efek Bunga (Lingkaran warna warni lembut)
+            confetti({
+                particleCount: 2,
+                origin: { x: 0.5, y: 0.3 },
+                colors: ['#FFC0CB', '#BA55D3', '#87CEEB'], // Pink, Ungu, Biru Muda
+                shapes: ['circle'],
+                scalar: 1.5
+            });
+
+            if (Date.now() < akhir) {
+                requestAnimationFrame(frame);
+            }
+        };
+        frame();
+    }
+
     async function muatStatistik() {
         const sekarang = new Date();
         const namaBulan = sekarang.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
@@ -221,19 +246,15 @@
 
         try {
             const snap = await db.collection("laporan_bacaan")
-                .where("tanggal", ">=", tsAwalBulan)
-                .get();
+                .where("tanggal", ">=", tsAwalBulan).get();
 
             let rekapJC = {};
-            // Inisialisasi JC 1-5 (atau sesuaikan jumlah JC Bapak)
             for(let i=1; i<=5; i++) { rekapJC[`JC ${i}`] = 0; }
 
             snap.forEach(doc => {
                 const d = doc.data();
                 const namaJC = d.komsel.startsWith("JC") ? d.komsel : `JC ${d.komsel}`;
-                if (rekapJC.hasOwnProperty(namaJC)) {
-                    rekapJC[namaJC]++;
-                }
+                if (rekapJC.hasOwnProperty(namaJC)) rekapJC[namaJC]++;
             });
 
             const sortedJC = Object.entries(rekapJC).sort(([,a], [,b]) => b - a);
@@ -242,10 +263,12 @@
             tampilkanGrafik(rekapJC);
             tampilkanList(sortedJC);
 
-        } catch (e) { 
-            console.error(e); 
-            document.getElementById('rank-list').innerHTML = "Gagal memuat peringkat.";
-        }
+            // JALANKAN SELEBRASI JIKA DATA SUDAH ADA
+            if (sortedJC[0][1] > 0) {
+                setTimeout(selebrasiJuara, 1000);
+            }
+
+        } catch (e) { console.error(e); }
     }
 
     function updatePodium(sortedData) {
@@ -286,7 +309,6 @@
                     data: Object.values(dataLaporan),
                     backgroundColor: '#0056b3',
                     borderRadius: 10,
-                    barPercentage: 0.6
                 }]
             },
             options: {
@@ -294,7 +316,7 @@
                 plugins: { legend: { display: false } },
                 scales: { 
                     y: { display: false },
-                    x: { grid: { display: false }, ticks: { font: { weight: 'bold', size: 11 } } }
+                    x: { grid: { display: false } }
                 }
             }
         });
