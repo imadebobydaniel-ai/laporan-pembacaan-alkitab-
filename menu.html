@@ -267,16 +267,7 @@
             document.getElementById('running-text').innerText = `Shalom! ${dayName}, ${date} ${monthName} ${year} | ${time} WIT | SISTEM INFORMASI KOMSEL JC | TETAP SEMANGAT!`;
         }
 
-        function checkGPSPermission() {
-            if (!navigator.geolocation) return;
-            navigator.geolocation.getCurrentPosition(
-                (pos) => { 
-                    document.getElementById('gps-lock-screen').style.display = 'none';
-                    updateLokasiKeFirebase(pos.coords.latitude, pos.coords.longitude);
-                },
-                (err) => { if (err.code === 1) document.getElementById('gps-lock-screen').style.display = 'block'; },
-                { enableHighAccuracy: true }
-            );
+       
         }
 
         async function updateLokasiKeFirebase(lat, lng) {
