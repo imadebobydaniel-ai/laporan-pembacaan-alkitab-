@@ -167,15 +167,18 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    // SINKRONISASI DOA REALTIME DENGAN LOGIKA SLA
+    // SINKRONISASI DOA REALTIME DENGAN LOGIKA NALAR OTOMATIS
     function syncDoaRealtime() {
-        const grupTerpilih = document.getElementById('select-komsel-doa').value;
+        const komselRaw = document.getElementById('select-komsel-doa').value;
         let query = db.collection("laporan_doa");
         
-        // Sesuaikan nama field 'jc' sesuai database kamu
-        if (grupTerpilih !== "Semua") {
-            query = query.where("jc", "==", grupTerpilih);
+        // --- LOGIKA NALAR BARU ---
+        if (komselRaw !== "Semua") {
+            // Hapus semua spasi (misal "JC 5" jadi "JC5") agar sinkron dengan Firestore
+            const komselFix = komselRaw.replace(/\s+/g, '');
+            query = query.where("jc", "==", komselFix);
         }
+        // -------------------------
 
         query.onSnapshot(snap => {
             let total = snap.size;
@@ -213,7 +216,7 @@
         });
     }
 
-    // Fungsi-fungsi lainnya tetap dipertahankan
+    // Fungsi-fungsi lainnya dipertahankan
     function syncKehadiranRealtime() {
         const selKomselHadir = document.getElementById('select-komsel-hadir').value;
         const perHadir = parseInt(document.getElementById('select-periode-hadir').value);
