@@ -197,50 +197,74 @@
     let userNama = "I Made Boby"; 
     let selectedIDs = [];
 
-    // Fungsi menampilkan list doa dengan detail tambahan
+    // Tampilkan data dari koleksi laporan_doa
     function loadDoa() {
-        db.collection("saran_masukan").orderBy("timestamp", "desc").onSnapshot(snap => {
+        db.collection("laporan_doa").orderBy("tglInput", "desc").onSnapshot(snap => {
             let h = "";
             snap.forEach(doc => {
                 const d = doc.data();
-                const ts = d.timestamp ? d.timestamp.toDate() : new Date();
+                const ts = d.tglInput ? d.tglInput.toDate() : new Date();
                 
-                // Format Tanggal
-                const tglInput = ts.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                const tglTampil = ts.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
                 
-                // Hitung Durasi (SLA)
                 const sekarang = new Date();
                 const diffTime = Math.abs(sekarang - ts);
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                 
-                // Generate Nomor Tiket Otomatis
-                const ticketNo = `TKT-${ts.getFullYear()}${String(ts.getMonth() + 1).padStart(2, '0')}-${doc.id.substring(0, 4).toUpperCase()}`;
-
                 h += `
                 <div class="doa-card">
                     <input type="checkbox" class="doa-checkbox item-check" value="${doc.id}" onchange="cekStatus()">
                     <div class="doa-info">
                         <div class="card-header-detail">
-                            <span class="ticket-no">${ticketNo}</span>
-                            <span class="status-tag">On Progress</span>
+                            <span class="ticket-no">${d.ticketID || 'NO-TICKET'}</span>
+                            <span class="status-tag">${d.status || 'On Progress'}</span>
                         </div>
                         
                         <span class="user-label">${d.nama}</span>
-                        <div class="text-label" id="t-${doc.id}">${d.isi_saran}</div>
+                        <div class="text-label" id="t-${doc.id}">${d.pokokDoa}</div>
                         
-                        <span class="date-label"><i class="fa-regular fa-calendar-check"></i> Diinput: ${tglInput}</span>
+                        <span class="date-label"><i class="fa-regular fa-calendar-check"></i> Diinput: ${tglTampil}</span>
                         <div class="duration-label">
                             <i class="fa-regular fa-clock"></i> SLA: ${diffDays} Hari berjalan
                         </div>
                     </div>
                 </div>`;
             });
-            document.getElementById("list-doa").innerHTML = h || "<p style='text-align:center; color:#999'>Belum ada data.</p>";
+            document.getElementById("list-doa").innerHTML = h || "<p style='text-align:center; color:#999'>Belum ada data di database.</p>";
             cekStatus(); 
         });
     }
 
-    // Fungsi modal, checkbox, dan proses data (tetap sama)
+    // Fungsi Simpan Baru yang sudah digabung
+    async function simpanBaru() {
+        const txt = document.getElementById("add-doa").value;
+        if(!txt) {
+            tampilModal({ title: "Peringatan", text: "Isi doa tidak boleh kosong!", type: "error" });
+            return;
+        }
+
+        const dataDoa = {
+            jc: "JC5", 
+            nama: userNama, 
+            pokokDoa: txt,
+            status: "Proses",
+            terjawab: false,
+            tglInput: firebase.firestore.Timestamp.now(),
+            ticketID: "NK-DOA-" + Math.floor(Math.random() * 1000) + "-2026"
+        };
+
+        try {
+            await db.collection("laporan_doa").add(dataDoa);
+            tutupPop();
+            document.getElementById("add-doa").value = "";
+            tampilModal({ title: "Berhasil", text: "Doa Anda telah dikirim ke database.", type: "success" });
+        } catch (error) {
+            console.error("Gagal simpan:", error);
+            tampilModal({ title: "Error", text: "Gagal menyimpan: " + error.message, type: "error" });
+        }
+    }
+
+    // Modal & Control Functions
     function tampilModal({title, text, type, onConfirm}) {
         const modal = document.getElementById('custom-modal');
         const mTitle = document.getElementById('modal-title');
@@ -266,11 +290,10 @@
     function toggleCheckAll(source) { const checkboxes = document.querySelectorAll('.item-check'); checkboxes.forEach(cb => cb.checked = source.checked); cekStatus(); }
     function cekStatus() { const checked = document.querySelectorAll('.item-check:checked'); selectedIDs = Array.from(checked).map(cb => cb.value); document.getElementById('act-terjawab').classList.toggle('active', selectedIDs.length > 0); document.getElementById('act-hapus').classList.toggle('active', selectedIDs.length > 0); document.getElementById('act-edit').classList.toggle('active', selectedIDs.length === 1); }
     function bukaAdd() { document.getElementById("pop-add").style.display = "flex"; document.getElementById("add-nama").value = userNama; }
-    async function simpanBaru() { const txt = document.getElementById("add-doa").value; if(!txt) { tampilModal({ title: "Peringatan", text: "Isi doa tidak boleh kosong!", type: "error" }); return; } await db.collection("saran_masukan").add({ nama: userNama, isi_saran: txt, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); tutupPop(); document.getElementById("add-doa").value = ""; tampilModal({ title: "Berhasil", text: "Doa Anda telah dikirim.", type: "success" }); }
     function prosesEdit() { if(selectedIDs.length !== 1) return; document.getElementById("pop-edit").style.display = "flex"; document.getElementById("ed-doa").value = document.getElementById(`t-${selectedIDs[0]}`).innerText; }
-    async function simpanEdit() { await db.collection("saran_masukan").doc(selectedIDs[0]).update({ isi_saran: document.getElementById("ed-doa").value }); tutupPop(); tampilModal({ title: "Berhasil", text: "Perubahan telah disimpan.", type: "success" }); }
-    async function prosesHapus() { if(selectedIDs.length === 0) return; tampilModal({ title: "Hapus Doa", text: `Apakah Anda yakin ingin menghapus ${selectedIDs.length} doa terpilih?`, type: "confirm", onConfirm: async () => { for(let id of selectedIDs) { await db.collection("saran_masukan").doc(id).delete(); } tampilModal({ title: "Berhasil", text: "Data telah dihapus.", type: "success" }); } }); }
-    async function prosesTerjawab() { if(selectedIDs.length === 0) return; for(let id of selectedIDs) { await db.collection("saran_masukan").doc(id).update({ status: "Terjawab" }); } tampilModal({ title: "Puji Tuhan!", text: `${selectedIDs.length} Doa telah ditandai sebagai terjawab.`, type: "success" }); }
+    async function simpanEdit() { await db.collection("laporan_doa").doc(selectedIDs[0]).update({ pokokDoa: document.getElementById("ed-doa").value }); tutupPop(); tampilModal({ title: "Berhasil", text: "Perubahan telah disimpan.", type: "success" }); }
+    async function prosesHapus() { if(selectedIDs.length === 0) return; tampilModal({ title: "Hapus Doa", text: `Apakah Anda yakin ingin menghapus ${selectedIDs.length} doa terpilih?`, type: "confirm", onConfirm: async () => { for(let id of selectedIDs) { await db.collection("laporan_doa").doc(id).delete(); } tampilModal({ title: "Berhasil", text: "Data telah dihapus.", type: "success" }); } }); }
+    async function prosesTerjawab() { if(selectedIDs.length === 0) return; for(let id of selectedIDs) { await db.collection("laporan_doa").doc(id).update({ status: "Terjawab", terjawab: true }); } tampilModal({ title: "Puji Tuhan!", text: `${selectedIDs.length} Doa telah ditandai sebagai terjawab.`, type: "success" }); }
     function tutupPop() { document.querySelectorAll(".overlay").forEach(o => o.style.display="none"); }
     window.onload = loadDoa;
 </script>
