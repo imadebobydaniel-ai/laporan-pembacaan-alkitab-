@@ -6,7 +6,7 @@
     <title>Pengaturan Akun - Pondok Pemulihan</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --biru-utama: #0056b3; --putih-bg: #f4f7fa; }
+        :root { --biru-utama: #0056b3; --putih-bg: #f4f7fa; --merah-bahaya: #dc3545; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--putih-bg); margin: 0; padding: 20px; display: flex; justify-content: center; }
         .setting-container { background: white; width: 100%; max-width: 400px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 25px; border-top: 5px solid var(--biru-utama); }
         .header { text-align: center; margin-bottom: 25px; color: var(--biru-utama); font-weight: bold; font-size: 1.2rem; }
@@ -32,6 +32,11 @@
         .btn-wa { background: #25D366; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; font-size: 14px; transition: 0.3s; }
         .btn-wa:active { transform: scale(0.98); background: #1ebe57; }
 
+        /* Tombol Hapus Akun */
+        .btn-delete { background: none; color: var(--merah-bahaya); width: 100%; padding: 12px; border: 1px solid var(--merah-bahaya); border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13px; transition: 0.3s; }
+        .btn-delete:hover { background: #fff5f5; }
+        .btn-delete:active { background: var(--merah-bahaya); color: white; }
+
         #notif-block {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.95); color: white; padding: 30px; border-radius: 15px;
@@ -42,9 +47,9 @@
 <body>
 
 <div id="notif-block">
-    <i class="fa-solid fa-circle-check" style="font-size: 40px; color: #2ecc71; margin-bottom: 15px;"></i>
-    <p style="margin: 0; font-weight: bold;">Password dan Email Berhasil diupdate</p>
-    <p style="font-size: 12px; margin-top: 10px; color: #ccc;">Silakan login ulang...</p>
+    <i id="notif-icon" class="fa-solid fa-circle-check" style="font-size: 40px; color: #2ecc71; margin-bottom: 15px;"></i>
+    <p id="notif-text" style="margin: 0; font-weight: bold;">Password dan Email Berhasil diupdate</p>
+    <p id="notif-subtext" style="font-size: 12px; margin-top: 10px; color: #ccc;">Silakan login ulang...</p>
 </div>
 
 <div class="setting-container">
@@ -82,6 +87,10 @@
         <button class="btn-wa" onclick="kirimLinkDesktop()">
             <i class="fab fa-whatsapp"></i> KIRIM LINK DESKTOP
         </button>
+
+        <button class="btn-delete" onclick="hapusAkunPermanen()">
+            <i class="fa-solid fa-trash-can"></i> HAPUS AKUN PERMANEN
+        </button>
     </div>
 
     <a href="menu.html" style="display: block; text-align: center; margin-top: 25px; text-decoration: none; color: var(--biru-utama); font-weight: bold;">← Kembali ke Menu</a>
@@ -114,11 +123,46 @@
         localStorage.setItem("setTimer", document.getElementById("timerLogout").value);
     }
 
-    // Fungsi Kirim Link ke WhatsApp
     function kirimLinkDesktop() {
         const urlAplikasi = "https://imadebobydaniel-ai.github.io/laporan-pembacaan-alkitab-/";
         const pesan = encodeURIComponent(`Shalom! Gunakan link ini untuk membuka aplikasi Laporan Alkitab di Laptop/Desktop Anda: ${urlAplikasi}`);
         window.open(`https://wa.me/?text=${pesan}`, '_blank');
+    }
+
+    // FUNGSI HAPUS AKUN PERMANEN
+    async function hapusAkunPermanen() {
+        const konfirmasi1 = confirm("⚠️ PERINGATAN: Menghapus akun akan menghilangkan seluruh data laporan Anda secara permanen. Apakah Anda yakin?");
+        
+        if (konfirmasi1) {
+            const konfirmasi2 = prompt("Untuk memverifikasi, ketik kata 'HAPUS' di bawah ini:");
+            
+            if (konfirmasi2 === "HAPUS") {
+                try {
+                    const snap = await db.collection("users").where("email", "==", userEmail).get();
+                    if (!snap.empty) {
+                        await db.collection("users").doc(snap.docs[0].id).delete();
+                        
+                        // Tampilkan Notifikasi Sukses Hapus
+                        document.getElementById("notif-icon").className = "fa-solid fa-trash-check";
+                        document.getElementById("notif-icon").style.color = "#dc3545";
+                        document.getElementById("notif-text").innerText = "Akun Telah Dihapus";
+                        document.getElementById("notif-subtext").innerText = "Data Anda telah dibersihkan dari server.";
+                        document.getElementById("notif-block").style.display = "block";
+
+                        setTimeout(() => {
+                            localStorage.clear();
+                            window.location.replace("index.html");
+                        }, 3000);
+                    } else {
+                        alert("Data akun tidak ditemukan.");
+                    }
+                } catch (e) {
+                    alert("Gagal menghapus akun: " + e.message);
+                }
+            } else if (konfirmasi2 !== null) {
+                alert("Kata verifikasi salah. Penghapusan dibatalkan.");
+            }
+        }
     }
 
     async function updateAkun() {
