@@ -19,6 +19,7 @@
         .form-group input:focus { border-color: #28a745; background: #fff; }
         .time-info { font-size: 11px; color: #dc3545; text-align: right; margin-bottom: 15px; font-weight: bold; }
         .btn-submit { width: 100%; padding: 15px; background-color: #28a745; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
+        .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
         .btn-back-login { display: block; text-align: center; text-decoration: none; color: #666; font-size: 14px; font-weight: bold; padding: 10px; border: 1px solid #ddd; border-radius: 10px; }
         #blocking-message { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-box { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 320px; width: 100%; }
@@ -27,42 +28,11 @@
         .password-container { position: relative; }
         .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; }
         #nk-display { background: #fff3cd !important; border: 2px solid #ffc107 !important; color: #856404; font-weight: bold; }
-        /* Perbaikan untuk input file */
-        .form-group input[type="file"] {
-            position: relative;
-            z-index: 1; /* Pastikan z-index lebih tinggi */
-            opacity: 0; /* Sembunyikan input asli */
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            display: block; /* Pastikan display block */
-        }
-        .form-group label[for="foto"] {
-            position: relative; /* Agar bisa menampung input file yang absolute */
-            z-index: 2; /* Pastikan label di atas input file yang disembunyikan */
-            display: flex; /* Gunakan flexbox untuk penataan */
-            align-items: center;
-            justify-content: center;
-            background-color: #28a745; /* Warna tombol yang sama */
-            color: white;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .form-group label[for="foto"]:hover {
-            background-color: #218838; /* Warna hover */
-        }
-        .form-group label[for="foto"]::before {
-            content: "\f030"; /* Font Awesome camera icon */
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            margin-right: 10px;
-        }
+
+        /* Custom Style for File Input */
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .btn-file { border: 2px dashed #28a745; color: #28a745; background: #fff; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
+        .file-input-wrapper input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -87,7 +57,7 @@
                 <i class="fa-solid fa-eye toggle-password" id="eyeIcon"></i>
             </div>
         </div>
-        <div class="form-group"><label>Alamat Lengkap</label><textarea id="alamat" rows="3" required></textarea></div>
+        <div class="form-group"><label>Alamat Lengkap</label><textarea id="alamat" rows="2" required></textarea></div>
         <div class="form-group">
             <label>Golongan Darah</label>
             <select id="darah" required>
@@ -121,8 +91,13 @@
         </div>
 
         <div class="form-group">
-            <label for="foto">Pilih Foto Profil</label>
-            <input type="file" id="foto" accept="image/jpeg,image/png,image/jpg" required>
+            <label>Foto Profil (Wajib)</label>
+            <div class="file-input-wrapper">
+                <div class="btn-file" id="label-foto">
+                    <i class="fa-solid fa-camera"></i> <span id="text-foto">Ambil / Pilih Foto</span>
+                </div>
+                <input type="file" id="foto" accept="image/*" required onchange="previewFileName()">
+            </div>
         </div>
 
         <button type="button" id="btnSubmit" onclick="handleRegistrasi()" class="btn-submit">DAFTAR SEKARANG</button>
@@ -142,6 +117,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -153,83 +129,78 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+    // --- UI FUNCTIONS ---
     function updateClock() {
         const now = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
         document.getElementById('current-time').innerText = now.toLocaleDateString('id-ID', options) + " WIT";
     }
     setInterval(updateClock, 1000);
     updateClock();
 
+    function previewFileName() {
+        const file = document.getElementById('foto').files[0];
+        if(file) { document.getElementById('text-foto').innerText = "Foto Terpilih: " + file.name.substring(0,15) + "..."; }
+    }
+
     document.getElementById('eyeIcon').addEventListener('click', function() {
-        const passwordInput = document.getElementById('pass');
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
+        const passInput = document.getElementById('pass');
+        const type = passInput.type === 'password' ? 'text' : 'password';
+        passInput.type = type;
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
     });
 
     async function updateNKPreview() {
-        const jcValue = document.getElementById("komsel").value;
+        const jc = document.getElementById("komsel").value;
         const nkInput = document.getElementById("nk-display");
-        const loadingText = document.getElementById("nk-loading-text");
-
-        if (jcValue) {
-            loadingText.style.display = "block";
-            nkInput.value = "Generating...";
-
-            try {
-                const snapshot = await db.collection("users").get();
-                const urutanNext = snapshot.size + 1;
-                const formatUrutan = String(urutanNext).padStart(3, '0');
-                const tahun = new Date().getFullYear();
-                
-                const nkBaru = `NK-PPP-${formatUrutan}-JC${jcValue}-${tahun}`;
-                nkInput.value = nkBaru;
-                loadingText.style.display = "none";
-            } catch (error) {
-                nkInput.value = "Error Koneksi";
-            }
-        }
+        if (!jc) return;
+        nkInput.value = "Generating...";
+        try {
+            const snap = await db.collection("users").get();
+            const formatUrutan = String(snap.size + 1).padStart(3, '0');
+            nkInput.value = `NK-PPP-${formatUrutan}-JC${jc}-${new Date().getFullYear()}`;
+        } catch (e) { nkInput.value = "Error koneksi"; }
     }
 
+    // --- LOGIKA REGISTRASI ---
     async function handleRegistrasi() {
         const btn = document.getElementById("btnSubmit");
-        const namaRaw = document.getElementById("nama").value.trim();
-        const emailRaw = document.getElementById("email").value.trim().toLowerCase();
-        const jcValue = document.getElementById("komsel").value;
-        const nkBaru = document.getElementById("nk-display").value;
         const fotoInput = document.getElementById("foto");
-        const fotoFile = fotoInput.files[0];
+        const file = fotoInput.files[0];
 
-        if(!namaRaw || !emailRaw || !jcValue || !nkBaru || nkBaru === "Generating..." || !fotoFile) {
-            alert("Harap lengkapi semua data dan pilih Foto Profil!");
+        // Validasi Dasar
+        if(!document.getElementById("nama").value || !file) {
+            alert("Harap lengkapi Nama dan Foto Profil!");
             return;
         }
 
-        btn.innerText = "Memproses... (Mohon Tunggu)";
+        // Proteksi Ukuran File (>15MB)
+        if (file.size > 15 * 1024 * 1024) {
+            alert("File terlalu besar (Maks 15MB). Coba gunakan foto lain.");
+            return;
+        }
+
+        btn.innerText = "Mengompres Foto... (Sabar ya)";
         btn.disabled = true;
 
         try {
-            const namaNormal = namaRaw.split(' ').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            ).join(' ');
+            const namaRaw = document.getElementById("nama").value.trim();
+            const namaNormal = namaRaw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
-            // Proses Kompresi dengan Error Handling lebih ket
-            const base64Foto = await imageToResizedBase64(fotoFile, 400).catch(e => {
-                throw new Error("Gagal memproses gambar. Coba foto lain.");
-            });
+            // Proses Kompresi
+            const base64Foto = await imageToResizedBase64(file, 400);
 
             const userData = {
                 nama: namaNormal,
-                email: emailRaw,
+                email: document.getElementById("email").value.trim().toLowerCase(),
                 whatsapp: document.getElementById("hp").value,
                 password: document.getElementById("pass").value,
                 alamat: document.getElementById("alamat").value,
                 goldarah: document.getElementById("darah").value,
                 jabatan: document.getElementById("jabatan").value,
-                komsel: jcValue,
-                nomor_komsel: nkBaru,
+                komsel: document.getElementById("komsel").value,
+                nomor_komsel: document.getElementById("nk-display").value,
                 foto_profil: base64Foto, 
                 status: "Aktif",
                 tanggalDaftar: new Date().toLocaleString('id-ID')
@@ -237,12 +208,12 @@
 
             await db.collection("users").add(userData);
             
-            document.getElementById('pesan-sukses').innerHTML = `Berhasil!<br>Selamat Datang, <b>${namaNormal}</b><br>Nomor Komsel:<br><b>${nkBaru}</b>`;
+            document.getElementById('pesan-sukses').innerHTML = `Berhasil!<br>Selamat Datang, <b>${namaNormal}</b>`;
             document.getElementById('blocking-message').style.display = 'flex';
 
         } catch (error) { 
-            console.error("Detail Error:", error);
-            alert(error.message); 
+            console.error(error);
+            alert("Gagal menyimpan: " + error.message); 
             btn.innerText = "DAFTAR SEKARANG";
             btn.disabled = false;
         }
@@ -252,12 +223,29 @@
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = (event) => {
+            reader.onload = (e) => {
                 const img = new Image();
-                img.src = event.target.result;
-                
+                img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const scaleFactor = maxWidth / img.width;
+                    const scale = maxWidth / img.width;
+                    const finalScale = scale > 1 ? 1 : scale;
                     
-                    // Pastikan scaleFactor tidak membuat gambar jadi lebih
+                    canvas.width = Math.floor(img.width * finalScale);
+                    canvas.height = Math.floor(img.height * finalScale);
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    resolve(canvas.toDataURL('image/jpeg', 0.6));
+                };
+                img.onerror = () => reject(new Error("File rusak"));
+            };
+            reader.onerror = () => reject(new Error("Gagal baca file"));
+        });
+    }
+</script>
+</body>
+</html>
