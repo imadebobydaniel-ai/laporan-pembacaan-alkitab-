@@ -173,6 +173,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+    <script>
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -189,6 +190,7 @@
     let userJC = "";
 
     async function init() {
+        // Mengambil email dari localStorage atau default untuk testing
         let emailRaw = localStorage.getItem("userEmail") || "imade.bobydaniel@gmail.com";
         const email = emailRaw.trim().toLowerCase();
         
@@ -200,27 +202,31 @@
                 
                 initChart();
                 sinkronisasiRealtime();
-                // Panggil fungsi Capaian Doa
-                loadCapaianDoa(userJC);
+                
+                // MENGAKTIFKAN LISTENER REALTIME UNTUK CAPAIAN DOA
+                listenCapaianDoaRealtime(userJC);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Error saat inisialisasi:", e); }
     }
 
-    // --- FUNGSI CAPAIAN DOA (SLA) ---
-    async function loadCapaianDoa(namaKomsel) {
-        const doaRef = db.collection("laporan_doa");
-
-        try {
-            const snapshot = await doaRef.where("jc", "==", namaKomsel).get();
+    // --- FUNGSI CAPAIAN DOA REALTIME (ONSNAPSHOT) ---
+    function listenCapaianDoaRealtime(namaKomsel) {
+        // Menjalankan listener otomatis setiap ada perubahan data
+        db.collection("laporan_doa")
+          .where("jc", "==", namaKomsel)
+          .onSnapshot((snapshot) => {
             
-            let totalDoa = snapshot.size;
+            let totalDoa = snapshot.size; // Total dokumen yang ditemukan
             let doaTerjawab = 0;
             let totalSLADays = 0;
 
             snapshot.forEach(doc => {
                 const data = doc.data();
+                // Menghitung jumlah doa yang field 'terjawab' nya true
                 if (data.terjawab === true) {
                     doaTerjawab++;
+                    
+                    // Logika perhitungan SLA (Selisih Hari)
                     if (data.tglInput && data.tglTerjawab) {
                         const tglMasuk = data.tglInput.toDate();
                         const tglSelesai = data.tglTerjawab.toDate();
@@ -230,20 +236,28 @@
                 }
             });
 
+            // Menghitung Persentase & Rata-rata
             let persentase = totalDoa > 0 ? (doaTerjawab / totalDoa) * 100 : 0;
             let rataRataSLA = doaTerjawab > 0 ? Math.round(totalSLADays / doaTerjawab) : 0;
 
+            // UPDATE UI SECARA OTOMATIS
             document.getElementById("komsel-total-doa").innerText = totalDoa;
             document.getElementById("komsel-persen-doa").innerText = persentase.toFixed(1) + "%";
             document.getElementById("komsel-sla-days").innerText = rataRataSLA + " Hari";
-            document.getElementById("komsel-progress-doa").style.width = persentase + "%";
+            
+            // Update Progress Bar (Elemen visual berwarna kuning)
+            const progressBar = document.getElementById("komsel-progress-doa");
+            if(progressBar) {
+                progressBar.style.width = persentase + "%";
+            }
 
-        } catch (error) {
-            console.error("Gagal mengambil data doa:", error);
-        }
+            console.log("Update Realtime: Total Doa " + totalDoa + " untuk " + namaKomsel);
+        }, (error) => {
+            console.error("Gagal mendengarkan perubahan data doa:", error);
+        });
     }
 
-    // Fungsi Chart & Realtime lainnya
+    // --- FUNGSI CHART & LAINNYA ---
     function initChart() {
         const ctx = document.getElementById('performaChart').getContext('2d');
         myChart = new Chart(ctx, {
@@ -257,18 +271,25 @@
                     barThickness: 40
                 }]
             },
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: { 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, max: 100 } }
+            }
         });
     }
 
     function sinkronisasiRealtime() {
         const periode = parseInt(document.getElementById("filter-periode").value);
-        db.collection("laporan_bacaan").where("komsel", "==", userJC).onSnapshot(snap => {
+        db.collection("laporan_bacaan")
+          .where("komsel", "==", userJC)
+          .onSnapshot(snap => {
             let count = snap.size;
             let target = 20 * (periode * 4);
             let persenAlkitab = Math.min(Math.round((count/target)*100), 100);
             
-            myChart.data.datasets[0].data = [persenAlkitab, 85, 15]; // Simulasi sementara
+            // Update data grafik
+            myChart.data.datasets[0].data = [persenAlkitab, 85, 15]; 
             myChart.update();
             
             document.getElementById("card-insight").style.display = "block";
@@ -278,6 +299,7 @@
 
     function toggleLogModal(show) { document.getElementById("modal-log").style.display = show ? "flex" : "none"; }
 
+    // Jalankan inisialisasi saat halaman selesai dimuat
     window.onload = init;
 </script>
 
