@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Administrator - PPP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -41,7 +45,6 @@
             outline: none;
         }
         
-        /* Simbol Mata */
         .toggle-password {
             position: absolute;
             right: 15px;
@@ -65,7 +68,7 @@
 
         .back-link { display: block; margin-top: 20px; color: #888; text-decoration: none; font-size: 13px; }
 
-        /* --- STYLE MODAL NOTIFIKASI --- */
+        /* STYLE MODAL NOTIFIKASI */
         .modal-overlay {
             display: none; 
             position: fixed;
@@ -112,7 +115,7 @@
                 <input type="password" id="adminPass" placeholder="Masukkan password" required>
                 <i class="fa-solid fa-eye toggle-password" id="toggleEye" onclick="toggleAdminPass()"></i>
             </div>
-            <button type="submit" class="btn-admin">MASUK SISTEM</button>
+            <button type="submit" class="btn-admin" id="btnSubmit">MASUK SISTEM</button>
         </form>
 
         <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Kembali ke Login User</a>
@@ -128,6 +131,22 @@
     </div>
 
     <script>
+        // === KONFIGURASI FIREBASE ===
+        const firebaseConfig = {
+            apiKey: "AIzaSy...", 
+            authDomain: "laporan-pembacaan-alkitab.firebaseapp.com",
+            projectId: "laporan-pembacaan-alkitab",
+            storageBucket: "laporan-pembacaan-alkitab.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
+
+        // Inisialisasi Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
         // 1. Fungsi Lihat Password
         function toggleAdminPass() {
             const passInput = document.getElementById('adminPass');
@@ -141,7 +160,7 @@
             }
         }
 
-        // 2. Fungsi Modal Notifikasi (Universal)
+        // 2. Fungsi Modal Notifikasi
         const modal = document.getElementById('statusModal');
         const modalIcon = document.getElementById('modalIcon');
         const modalTitle = document.getElementById('modalTitle');
@@ -161,27 +180,47 @@
                 modalIcon.style.color = "#e74c3c";
                 modalBtn.style.backgroundColor = "#e74c3c";
             }
-            
             modal.style.display = 'flex';
         }
 
         modalBtn.onclick = () => modal.style.display = 'none';
 
-        // 3. Handle Login
+        // 3. Handle Login Utama (Firestore)
         document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const user = document.getElementById('adminUser').value;
-            const pass = document.getElementById('adminPass').value;
+            
+            const btnSubmit = document.getElementById('btnSubmit');
+            const userValue = document.getElementById('adminUser').value.trim();
+            const passValue = document.getElementById('adminPass').value.trim();
 
-            // Contoh Logika Pengecekan
-            if (user === "admin" && pass === "12345") {
-                showNotification('success', 'Berhasil!', 'Selamat datang, Administrator.');
-                setTimeout(() => {
-                    window.location.href = "dashboard_admin.html"; 
-                }, 2000);
-            } else {
-                showNotification('error', 'Gagal Login', 'Username atau Password Admin salah!');
-            }
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Memverifikasi...";
+
+            // Mencari dokumen di koleksi "admins" yang field-nya cocok
+            db.collection("admins")
+                .where("username", "==", userValue)
+                .where("password", "==", passValue)
+                .get()
+                .then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        // Login Berhasil
+                        showNotification('success', 'Berhasil!', 'Selamat datang, Admin.');
+                        setTimeout(() => {
+                            window.location.href = "dashboard_admin.html";
+                        }, 1500);
+                    } else {
+                        // Gagal karena data tidak cocok
+                        showNotification('error', 'Gagal Login', 'Username atau Password salah sesuai database.');
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerText = "MASUK SISTEM";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error Firestore:", error);
+                    showNotification('error', 'Sistem Error', 'Gagal terhubung ke database. Cek Firebase Rules Anda.');
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = "MASUK SISTEM";
+                });
         });
     </script>
 </body>
