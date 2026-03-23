@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesan Informasi - Komsel JC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --biru-tua: #003366;
+            --emas-lux: #D4AF37;
+            --putih-bg: #f4f7fa;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--putih-bg); display: flex; justify-content: center; padding: 20px; }
+        .card-pesan { background: white; width: 100%; max-width: 400px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; border-top: 5px solid var(--emas-lux); }
+        .header { background: var(--biru-tua); color: white; padding: 20px; text-align: center; }
+        .isi-pesan { padding: 25px; color: #333; line-height: 1.6; }
+        .footer { padding: 15px; text-align: center; background: #eee; }
+        .btn-kembali { background: var(--biru-tua); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="card-pesan">
+        <div class="header">
+            <i class="fa-solid fa-envelope-open-text" style="font-size: 40px;"></i>
+            <h3>Pengumuman Baru</h3>
+        </div>
+        <div id="konten-pengumuman" class="isi-pesan">
+            <p><strong>Shalom Boby!</strong></p>
+            <p>Sedang memuat informasi terbaru...</p>
+        </div>
+        <div class="footer">
+            <a href="menu.html" class="btn-kembali">Kembali ke Menu</a>
+        </div>
+    </div>
+
+    <script>
+        // Konfigurasi Firebase Anda (Gunakan data yang sama dengan input-kegiatan.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSy...",
+            authDomain: "komsel-jc.firebaseapp.com",
+            databaseURL: "https://komsel-jc-default-rtdb.firebaseio.com",
+            projectId: "komsel-jc",
+            storageBucket: "komsel-jc.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Fungsi untuk mengambil informasi kegiatan terbaru
+        function ambilInformasiTerbaru() {
+            const kontenDiv = document.getElementById('konten-pengumuman');
+            
+            // Mengambil data terakhir dari tabel 'kegiatan'
+            database.ref('kegiatan').limitToLast(1).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const id = Object.keys(data)[0];
+                    const info = data[id];
+
+                    kontenDiv.innerHTML = `
+                        <p style="color: var(--emas-lux); font-weight: bold; font-size: 1.2em;">
+                            [${info.kategori}] ${info.judul}
+                        </p>
+                        <hr style="border: 0.5px solid #eee; margin: 15px 0;">
+                        <p><strong><i class="fa-solid fa-location-dot"></i> Lokasi:</strong> ${info.lokasi || '-'}</p>
+                        <p><strong><i class="fa-solid fa-file-lines"></i> Detail:</strong><br>${info.detail}</p>
+                        <p style="font-size: 0.8em; color: gray; margin-top: 20px;">
+                            <i class="fa-regular fa-clock"></i> Dikirim pada: ${info.timestamp || 'Baru saja'}
+                        </p>
+                    `;
+                } else {
+                    kontenDiv.innerHTML = "<p>Belum ada pengumuman terbaru.</p>";
+                }
+            }, (error) => {
+                console.error("Gagal mengambil data:", error);
+                kontenDiv.innerHTML = "<p>Gagal memuat informasi. Periksa koneksi atau database.</p>";
+            });
+        }
+
+        // Jalankan fungsi
+        ambilInformasiTerbaru();
+    </script>
+</body>
+</html>
