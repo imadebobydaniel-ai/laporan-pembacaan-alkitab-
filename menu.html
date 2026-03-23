@@ -20,14 +20,15 @@
             margin: 0; padding: 0; overflow-x: hidden;
         }
 
-        /* --- FIX: STICKY HEADER --- */
+        /* --- STICKY HEADER FIXED --- */
         .header-sticky-container {
-            position: -webkit-sticky; /* Support Safari */
+            position: -webkit-sticky;
             position: sticky;
             top: 0;
             z-index: 1000;
             background-color: var(--putih-bg);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
         }
 
         .top-info-bar { 
@@ -39,58 +40,67 @@
 
         header { 
             background: white; border-bottom: 3px solid var(--hijau-zamrud); 
-            padding: 10px 0; overflow: hidden; white-space: nowrap; 
+            padding: 12px 0; overflow: hidden; white-space: nowrap; 
         }
 
         .running-content { 
             display: inline-block; animation: marquee 20s linear infinite; 
             font-weight: 900; font-size: 13px; color: var(--biru-tua);
+            text-transform: uppercase; letter-spacing: 1px;
         }
 
-        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        @keyframes marquee { 
+            0% { transform: translateX(100%); } 
+            100% { transform: translateX(-100%); } 
+        }
 
-        /* Container & Profile */
-        .container { padding: 15px; max-width: 450px; margin: auto; }
-        
+        .container { padding: 20px; max-width: 450px; margin: auto; text-align: center; }
+
         .profile-section { 
             background: linear-gradient(145deg, #ffffff, #e6e6e6);
-            padding: 20px; border-radius: 25px; 
-            margin: 10px 0 20px 0; position: relative;
+            padding: 25px; border-radius: 25px; 
+            box-shadow: 10px 10px 20px #d1d1d1, -10px -10px 20px #ffffff;
+            margin-bottom: 15px; position: relative;
             border-top: 4px solid var(--biru-safir);
-            box-shadow: 5px 5px 15px #d1d1d1;
-            text-align: center;
         }
 
+        .setting-icon-profile { position: absolute; top: 18px; right: 18px; color: var(--biru-tua); font-size: 22px; }
+
         .profile-img-container { 
-            width: 80px; height: 80px; border-radius: 50%; 
-            margin: 0 auto 10px auto; overflow: hidden; 
+            width: 90px; height: 90px; border-radius: 50%; 
+            margin: 0 auto 12px auto; overflow: hidden; 
+            display: flex; align-items: center; justify-content: center; 
             background: white; border: 3px solid var(--emas-lux);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-section h2 { margin: 5px 0; font-size: 20px; color: var(--biru-tua); }
-        .profile-section p { margin: 0; color: var(--hijau-zamrud); font-weight: bold; font-size: 12px; }
+        .profile-img-container i { font-size: 85px; color: var(--biru-safir); }
+
+        .profile-section h2 { margin: 8px 0 2px 0; font-size: 24px; color: var(--biru-tua); font-weight: 800; }
+        .profile-section p { margin: 0; color: var(--hijau-zamrud); font-weight: bold; font-size: 14px; text-transform: uppercase; }
 
         /* Menu Grid */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 30px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 0 20px 20px 20px; max-width: 450px; margin: auto; }
         .menu-box { 
-            background: white; padding: 20px 10px; border-radius: 20px; 
+            background: white; padding: 22px 10px; border-radius: 20px; 
             display: flex; flex-direction: column; align-items: center; 
             text-decoration: none; color: var(--biru-tua); font-weight: 800; font-size: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05); transition: 0.3s;
         }
-        .menu-box i { font-size: 28px; margin-bottom: 10px; color: var(--biru-safir); }
-        .menu-box:active { transform: scale(0.95); }
+        .menu-box i { font-size: 30px; margin-bottom: 12px; color: var(--biru-safir); }
+        .menu-box:active { transform: scale(0.92); }
 
         .btn-logout { 
-            background: var(--biru-tua); color: #fff; padding: 14px; 
-            border-radius: 50px; text-align: center; font-weight: bold; 
-            margin: 20px 0 40px 0; border: 2px solid var(--emas-lux); cursor: pointer;
+            background: var(--biru-tua); color: #fff; padding: 14px 40px; 
+            border-radius: 50px; text-decoration: none; font-size: 14px; font-weight: bold; 
+            display: inline-block; margin: 20px 0 40px 0; border: 2px solid var(--emas-lux);
+            box-shadow: 0 4px 15px rgba(0,51,102,0.3); cursor: pointer;
         }
 
-        /* Modal styling tetap sama... */
-        .modal-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; text-align: center; width: 80%; max-width: 300px; }
+        /* --- MODAL LOGOUT --- */
+        .modal-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 85%; max-width: 320px; }
     </style>
 </head>
 <body>
@@ -105,52 +115,20 @@
             <div id="running-text" class="running-content"></div>
         </header>
 
-        <div class="container" style="padding-bottom: 0;">
+        <div class="container" style="padding-bottom: 10px;">
+            <h3 style="margin: 0 0 15px 0; color: var(--biru-tua); text-transform: uppercase; font-size: 18px;">Portal Komsel JC</h3>
+            
             <div class="profile-section">
-                <a href="setting.html" style="position: absolute; top: 15px; right: 15px; color: var(--biru-tua);"><i class="fa-solid fa-gear"></i></a>
-                <div class="profile-img-container">
-                    <i class="fa-solid fa-circle-user" id="default-icon" style="font-size: 70px; color: var(--biru-safir);"></i>
+                <a href="setting.html" class="setting-icon-profile"><i class="fa-solid fa-gear"></i></a>
+                <div class="profile-img-container" id="photo-area">
+                    <i class="fa-solid fa-circle-user" id="default-icon"></i>
                     <img id="user-photo" src="" style="display: none;">
                 </div>
-                <h2 id="disp_nama">User</h2>
+                <h2 id="disp_nama">Memuat...</h2>
                 <p id="disp_komsel">KOMSEL JC</p>
             </div>
         </div>
     </div>
 
-    <div class="container">
-        <div class="menu-grid">
-            <a href="profil.html" class="menu-box"><i class="fa-solid fa-user-shield"></i>Profil Saya</a>
-            <a href="kehadiran.html" class="menu-box"><i class="fa-solid fa-calendar-check"></i>Kehadiran</a>
-            <a href="baca-alkitab.html" class="menu-box"><i class="fa-solid fa-book-bible"></i>Laporan Baca</a>
-            <a href="statistik.html" class="menu-box"><i class="fa-solid fa-chart-pie"></i>Statistik</a>
-            <a href="leaderboard.html" class="menu-box"><i class="fa-solid fa-crown"></i>Peringkat JC</a>
-            <a href="laporan-komsel.html" class="menu-box"><i class="fa-solid fa-file-signature"></i>Laporan Komsel</a>
-            <a href="lacak-domba.html" class="menu-box"><i class="fa-solid fa-map-location-dot"></i>Lacak Domba</a>
-            <a href="capaian-doa.html" class="menu-box"><i class="fa-solid fa-hands-praying"></i>Capaian DOA</a>
-            <a href="javascript:location.reload()" class="menu-box" style="color: #28a745;"><i class="fa-solid fa-arrows-rotate"></i>Refresh</a>
-            <a href="saran.html" class="menu-box"><i class="fa-solid fa-comment-dots"></i>Saran</a>
-        </div>
-
-        <div class="btn-logout" onclick="logoutDanHapusDevice()">KELUAR SISTEM</div>
-    </div>
-
-    <div id="logoutModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Konfirmasi Keluar</h3>
-            <p>Apakah Anda yakin ingin keluar?</p>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button id="cancelLogout" style="flex:1; padding: 10px;">Batal</button>
-                <button id="confirmLogout" style="flex:1; padding: 10px; background: #e11d48; color: white; border: none;">Keluar</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script>
-        // Masukkan config dan script Firebase Anda di sini (sama seperti sebelumnya)
-        // ... (Fungsi updateWaktuDanRunningText & syncUserData tetap sama)
-    </script>
-</body>
-</html>
+    <div class="menu-grid">
+        <a href="profil.html" class="menu-box"><i class="fa-solid fa-user
