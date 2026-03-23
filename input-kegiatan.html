@@ -12,6 +12,7 @@
             --merah-notif: #e11d48;
             --hijau-zamrud: #2ecc71;
             --putih-bg: #f4f7fa;
+            --emas-lux: #d4af37;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background: var(--putih-bg); margin: 0; padding: 20px; color: #333; }
@@ -20,23 +21,52 @@
         h2 { color: var(--biru-tua); text-align: center; margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
         
-        .btn-send { background: var(--merah-notif); color: white; border: none; padding: 15px; width: 100%; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-send { background: var(--merah-notif); color: white; border: none; padding: 15px; width: 100%; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-send:active { transform: scale(0.95); }
         .btn-back { display: block; text-align: center; margin-top: 15px; color: var(--biru-tua); text-decoration: none; font-weight: bold; }
 
         .history-section { margin-top: 30px; border-top: 2px dashed #ddd; padding-top: 20px; }
         .info-card { background: #fff5f5; border-left: 5px solid var(--merah-notif); padding: 15px; border-radius: 10px; margin-bottom: 15px; position: relative; }
-        .info-card h4 { margin: 0; color: var(--merah-notif); }
+        .info-card h4 { margin: 0; color: var(--merah-notif); padding-right: 50px; }
         .info-card p { margin: 5px 0; font-size: 13px; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; color: #ccc; cursor: pointer; }
+        .timestamp { font-size: 11px; color: #999; font-style: italic; display: block; margin-top: 8px; }
+        
+        /* Tombol Aksi di Card */
+        .card-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 12px; }
+        .action-btn { cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .edit-btn { color: var(--biru-safir); }
+        .delete-btn { color: #ccc; }
         .delete-btn:hover { color: var(--merah-notif); }
+
+        /* Notification Overlay */
+        .notification-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0, 51, 102, 0.8);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        .notification-block {
+            background: white; padding: 30px; border-radius: 20px; text-align: center;
+            max-width: 320px; border-top: 5px solid var(--emas-lux); animation: slideIn 0.3s ease;
+        }
+        .notification-block i { font-size: 50px; color: var(--hijau-zamrud); margin-bottom: 15px; display: block; }
+        .notification-block p { font-weight: 800; color: var(--biru-tua); margin: 0; }
+
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
+<div id="notif-container" class="notification-overlay">
+    <div class="notification-block">
+        <i id="notif-icon" class="fa-solid fa-circle-check"></i>
+        <p id="notif-msg">Terimakasih Informasi Anda telah dikirim</p>
+    </div>
+</div>
+
 <div class="container">
-    <h2><i class="fa-solid fa-bullhorn"></i> Info Kegiatan Baru</h2>
+    <h2 id="form-title"><i class="fa-solid fa-bullhorn"></i> Info Kegiatan Baru</h2>
     
     <div class="form-group">
         <label>Kategori Kegiatan</label>
@@ -60,19 +90,22 @@
 
     <div class="form-group">
         <label>Detail Informasi</label>
-        <textarea id="detail" placeholder="Tuliskan detail pengumuman di sini..."></textarea>
+        <textarea id="detail" rows="3" placeholder="Tuliskan detail pengumuman di sini..."></textarea>
     </div>
 
-    <button class="btn-send" onclick="kirimPengumuman()">
-        <i class="fa-solid fa-paper-plane"></i> KIRIM & NOTIFIKASI
+    <button class="btn-send" id="btn-submit" onclick="prosesData()">
+        <i class="fa-solid fa-paper-plane"></i> <span id="btn-text">KIRIM & NOTIFIKASI</span>
     </button>
     
+    <button id="btn-cancel-edit" style="display:none; background:#666; margin-top:10px;" class="btn-send" onclick="resetForm()">
+        BATAL EDIT
+    </button>
+
     <a href="menu.html" class="btn-back"><i class="fa-solid fa-circle-arrow-left"></i> Kembali ke Menu</a>
 
     <div class="history-section">
         <h3>Riwayat Informasi</h3>
-        <div id="list-pengumuman">
-            </div>
+        <div id="list-pengumuman"></div>
     </div>
 </div>
 
@@ -91,8 +124,10 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // FUNGSI KIRIM PENGUMUMAN
-    async function kirimPengumuman() {
+    let editID = null; // Menyimpan ID dokumen saat mode edit
+
+    // FUNGSI UTAMA (HANDLE TAMBAH & EDIT)
+    async function prosesData() {
         const kategori = document.getElementById('kategori').value;
         const judul = document.getElementById('judul').value;
         const lokasi = document.getElementById('lokasi').value;
@@ -101,49 +136,99 @@
         if(!judul || !detail) { alert("Harap isi Judul dan Detail!"); return; }
 
         try {
-            await db.collection("pengumuman_komsel").add({
+            const dataObj = {
                 kategori: kategori,
                 judul: judul,
                 lokasi: lokasi,
                 detail: detail,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                pemicuNotif: Date.now() // Ini yang akan memicu suara di HP anggota
-            });
-            
-            alert("Pengumuman Terkirim! Notifikasi akan berbunyi di HP anggota.");
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                pemicuNotif: Date.now() 
+            };
+
+            if (editID) {
+                // Update Data Lama
+                await db.collection("pengumuman_komsel").doc(editID).update(dataObj);
+                showCustomNotif("Data Berhasil Diperbarui", "fa-pen-to-square");
+            } else {
+                // Tambah Data Baru
+                dataObj.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                await db.collection("pengumuman_komsel").add(dataObj);
+                showCustomNotif("Informasi Anda telah dikirim", "fa-circle-check");
+            }
+
             resetForm();
-        } catch (e) { console.error(e); }
+        } catch (e) { alert("Error: " + e.message); }
     }
 
-    // LOAD RIWAYAT
+    // MODAL NOTIFIKASI
+    function showCustomNotif(msg, icon) {
+        document.getElementById('notif-msg').innerText = msg;
+        document.getElementById('notif-icon').className = "fa-solid " + icon;
+        const notif = document.getElementById('notif-container');
+        notif.style.display = 'flex';
+        setTimeout(() => { notif.style.display = 'none'; }, 2500);
+    }
+
+    // LOAD DATA DENGAN FORMAT TANGGAL
     function loadHistory() {
-        db.collection("pengumuman_komsel").orderBy("createdAt", "desc").limit(5).onSnapshot((querySnapshot) => {
+        db.collection("pengumuman_komsel").orderBy("lastUpdate", "desc").limit(10).onSnapshot((querySnapshot) => {
             const listDiv = document.getElementById('list-pengumuman');
             listDiv.innerHTML = "";
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
+                // Format Waktu Indonesia
+                const waktu = data.lastUpdate ? data.lastUpdate.toDate().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : 'Menunggu...';
+                
                 listDiv.innerHTML += `
                     <div class="info-card">
-                        <i class="fa-solid fa-trash delete-btn" onclick="hapusInfo('${doc.id}')"></i>
+                        <div class="card-actions">
+                            <i class="fa-solid fa-pen-to-square action-btn edit-btn" onclick="isiDataEdit('${doc.id}', '${data.kategori}', '${data.judul}', '${data.lokasi}', \`${data.detail}\`)"></i>
+                            <i class="fa-solid fa-trash action-btn delete-btn" onclick="hapusInfo('${doc.id}')"></i>
+                        </div>
                         <h4>[${data.kategori}] ${data.judul}</h4>
                         <p><strong>Lokasi:</strong> ${data.lokasi || '-'}</p>
                         <p>${data.detail}</p>
+                        <span class="timestamp"><i class="fa-regular fa-clock"></i> Terakhir: ${waktu} WIB</span>
                     </div>
                 `;
             });
         });
     }
 
-    async function hapusInfo(id) {
-        if(confirm("Hapus pengumuman ini?")) {
-            await db.collection("pengumuman_komsel").doc(id).delete();
-        }
+    // MASUKKAN DATA KE FORM UNTUK EDIT
+    function isiDataEdit(id, kat, jud, lok, det) {
+        editID = id;
+        document.getElementById('kategori').value = kat;
+        document.getElementById('judul').value = jud;
+        document.getElementById('lokasi').value = lok;
+        document.getElementById('detail').value = det;
+        
+        // Ubah UI Form
+        document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Edit Informasi`;
+        document.getElementById('btn-text').innerText = "SIMPAN PERUBAHAN";
+        document.getElementById('btn-submit').style.background = "var(--biru-safir)";
+        document.getElementById('btn-cancel-edit').style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // RESET FORM
     function resetForm() {
+        editID = null;
         document.getElementById('judul').value = "";
         document.getElementById('lokasi').value = "";
         document.getElementById('detail').value = "";
+        document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-bullhorn"></i> Info Kegiatan Baru`;
+        document.getElementById('btn-text').innerText = "KIRIM & NOTIFIKASI";
+        document.getElementById('btn-submit').style.background = "var(--merah-notif)";
+        document.getElementById('btn-cancel-edit').style.display = "none";
+    }
+
+    // HAPUS DATA
+    async function hapusInfo(id) {
+        if(confirm("Apakah Anda yakin ingin menghapus pengumuman ini secara permanen?")) {
+            await db.collection("pengumuman_komsel").doc(id).delete();
+            showCustomNotif("Data telah dihapus", "fa-trash-can");
+        }
     }
 
     loadHistory();
