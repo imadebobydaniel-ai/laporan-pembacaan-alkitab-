@@ -553,27 +553,16 @@
         const doc = new jsPDF('p', 'mm', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth();
 
-        // 1. KOP SURAT
-        const logoUrl = "logo_pondok.png"; 
-        try {
-            doc.addImage(logoUrl, 'PNG', 15, 12, 18, 18); 
-        } catch (e) {
-            doc.setFillColor(0, 86, 179);
-            doc.rect(15, 12, 15, 15, 'F');
-        }
-
+        // Header & Kop
         doc.setFontSize(16);
         doc.setFont("helvetica", "bold");
-        doc.text("GBI PONDOK PEMULIHAN PAPUA", pageWidth / 2 + 10, 20, { align: "center" });
-
+        doc.text("GBI PONDOK PEMULIHAN PAPUA", pageWidth / 2, 20, { align: "center" });
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text("Laporan Analisis Perkembangan Komsel - Official Report", pageWidth / 2 + 10, 26, { align: "center" });
+        doc.text("Laporan Analisis Perkembangan Komsel - Official Report", pageWidth / 2, 26, { align: "center" });
         doc.line(15, 32, pageWidth - 15, 32); 
 
         let yPos = 40;
-
-        // 2. INFORMASI KOMSEL
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.text("I. INFORMASI UNIT & ANALISIS AI", 15, yPos);
@@ -588,9 +577,8 @@
         doc.setFont("helvetica", "italic");
         const splitInsight = doc.splitTextToSize("Analisis AI: " + insightText, pageWidth - 30);
         doc.text(splitInsight, 15, yPos);
-        yPos += (splitInsight.length * 5) + 5;
+        yPos += (splitInsight.length * 5) + 10;
 
-        // 3. GRAFIK
         doc.setFont("helvetica", "bold");
         doc.text("II. VISUALISASI CAPAIAN (GRAFIK)", 15, yPos);
         const chartCanvas = document.getElementById("performaChart");
@@ -598,7 +586,6 @@
         doc.addImage(chartImg, 'PNG', 15, yPos + 5, 80, 50);
         yPos += 65;
 
-        // 4. RINCIAN AKTIVITAS
         doc.setFont("helvetica", "bold");
         doc.text("III. RINCIAN AKTIVITAS JEMAAT", 15, yPos);
         yPos += 7;
@@ -610,30 +597,20 @@
         doc.setFont("helvetica", "normal");
         const jemaatAlkitab = Array.from(document.querySelectorAll("#daftar-nama-alkitab li")).map(li => "- " + li.innerText);
         const jemaatHadir = Array.from(document.querySelectorAll("#daftar-nama-hadir li")).map(li => "- " + li.innerText);
-        
         doc.text(jemaatAlkitab, 15, yPos);
         doc.text(jemaatHadir, 110, yPos);
         
-        const maxList = Math.max(jemaatAlkitab.length, jemaatHadir.length);
-        yPos += (maxList * 5) + 15;
-
-        // 5. CAPAIAN DOA
-        if (yPos > 240) { doc.addPage(); yPos = 20; }
+        yPos += 40;
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.text("IV. LAPORAN CAPAIAN DOA (SLA)", 15, yPos);
         yPos += 7;
         doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
         doc.text(`Total Doa Masuk: ${document.getElementById("total-doa-masuk").innerText}`, 15, yPos);
         doc.text(`Persentase Dijawab: ${document.getElementById("persentase-dijawab").innerText}`, 15, yPos + 5);
 
-        // 6. FOOTER
-        doc.setFontSize(9);
-        doc.text(`Dicetak secara sistem pada: ${new Date().toLocaleString('id-ID')}`, 15, 280);
-        doc.text("Otoritas PKS / Admin Komsel", pageWidth - 60, 270);
-        doc.line(pageWidth - 65, 272, pageWidth - 15, 272);
-
+        doc.setFontSize(8);
+        doc.text(`Dicetak secara sistem pada: ${new Date().toLocaleString('id-ID')}`, 15, 285);
         doc.save(`Laporan_JC${userJC}_${new Date().getTime()}.pdf`);
     }
 
