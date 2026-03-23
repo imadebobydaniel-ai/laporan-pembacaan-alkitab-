@@ -22,50 +22,12 @@
         .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
         .btn-back-login { display: block; text-align: center; text-decoration: none; color: #666; font-size: 14px; font-weight: bold; padding: 10px; border: 1px solid #ddd; border-radius: 10px; }
         
-        /* Modal & UI Feedback */
         #blocking-message { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-box { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 320px; width: 100%; }
         .modal-box i { font-size: 50px; color: #28a745; margin-bottom: 15px; }
         .password-container { position: relative; }
         .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; }
         #nk-display { background: #fff3cd !important; border: 2px solid #ffc107 !important; color: #856404; font-weight: bold; }
-
-        /* Tombol Upload & Preview (Optimasi Galeri HP) */
-        .custom-upload-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 25px 20px;
-            background-color: #fff;
-            color: #28a745;
-            border: 2px dashed #28a745;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            box-sizing: border-box;
-            transition: 0.3s;
-            text-align: center;
-            touch-action: manipulation;
-        }
-        .custom-upload-label:active { background-color: #e8f5e9; transform: scale(0.98); }
-        #foto { display: none; } 
-
-        #preview-container {
-            display: none;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        #img-preview {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 3px solid #28a745;
-            background-color: #eee;
-        }
     </style>
 </head>
 <body>
@@ -125,22 +87,6 @@
             <input type="text" id="nk-display" readonly placeholder="Pilih Komsel Dahulu">
         </div>
 
-        <div class="form-group">
-            <label>Foto Profil (Wajib - Ambil dari Galeri)</label>
-            
-            <div id="preview-container">
-                <img id="img-preview" src="" alt="Preview">
-                <p style="font-size: 11px; color: #28a745; margin-top: 5px;">Foto terpilih!</p>
-            </div>
-
-            <label for="foto" class="custom-upload-label" id="label-foto">
-                <i class="fa-solid fa-image fa-2x"></i>
-                <span id="text-foto">KLIK UNTUK KE GALERI</span>
-                <small style="font-weight: normal; color: #666;">Pilih foto terbaik dari HP kamu</small>
-            </label>
-            <input type="file" id="foto" accept="image/jpeg, image/png, image/jpg" required onchange="handleFileSelect(this)">
-        </div>
-
         <button type="button" id="btnSubmit" onclick="handleRegistrasi()" class="btn-submit">DAFTAR SEKARANG</button>
         <a href="login.html" class="btn-back-login"><i class="fa-solid fa-arrow-left"></i> Kembali ke Login Page</a>
     </form>
@@ -177,28 +123,6 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Fungsi Handle Galeri & Preview
-    function handleFileSelect(input) {
-        const textDisplay = document.getElementById('text-foto');
-        const previewContainer = document.getElementById('preview-container');
-        const imgPreview = document.getElementById('img-preview');
-        const label = document.getElementById('label-foto');
-
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            textDisplay.innerText = "Terpilih: " + file.name.substring(0, 15) + "...";
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imgPreview.src = e.target.result;
-                previewContainer.style.display = 'block';
-                label.style.borderColor = "#28a745";
-                label.style.background = "#e8f5e9";
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
     document.getElementById('eyeIcon').addEventListener('click', function() {
         const passInput = document.getElementById('pass');
         passInput.type = passInput.type === 'password' ? 'text' : 'password';
@@ -220,10 +144,10 @@
 
     async function handleRegistrasi() {
         const btn = document.getElementById("btnSubmit");
-        const file = document.getElementById("foto").files[0];
+        const nama = document.getElementById("nama").value;
 
-        if(!document.getElementById("nama").value || !file) {
-            alert("Harap lengkapi Nama dan Foto Profil!");
+        if(!nama || !document.getElementById("email").value || !document.getElementById("hp").value) {
+            alert("Harap lengkapi semua data!");
             return;
         }
 
@@ -231,9 +155,8 @@
         btn.disabled = true;
 
         try {
-            const base64Foto = await imageToResizedBase64(file, 400);
             const userData = {
-                nama: document.getElementById("nama").value,
+                nama: nama,
                 email: document.getElementById("email").value.trim().toLowerCase(),
                 whatsapp: document.getElementById("hp").value,
                 password: document.getElementById("pass").value,
@@ -242,7 +165,7 @@
                 jabatan: document.getElementById("jabatan").value,
                 komsel: document.getElementById("komsel").value,
                 nomor_komsel: document.getElementById("nk-display").value,
-                foto_profil: base64Foto, 
+                foto_profil: "", // Kosongkan karena fitur upload dihapus
                 status: "Aktif",
                 tanggalDaftar: new Date().toLocaleString('id-ID')
             };
@@ -254,27 +177,6 @@
             btn.innerText = "DAFTAR SEKARANG";
             btn.disabled = false;
         }
-    }
-
-    function imageToResizedBase64(file, maxWidth) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const scale = maxWidth / img.width;
-                    const finalScale = scale > 1 ? 1 : scale;
-                    canvas.width = Math.floor(img.width * finalScale);
-                    canvas.height = Math.floor(img.height * finalScale);
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.6));
-                };
-            };
-        });
     }
 </script>
 </body>
