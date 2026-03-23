@@ -2,162 +2,340 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lacak Domba - Komsel JC</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --biru-tua: #003366; --biru-safir: #0056b3; --emas: #D4AF37; --putih-bg: #f4f7fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--putih-bg); margin: 0; padding: 0; color: #333; }
-        
+        /* Reset & Base Style */
+        :root {
+            --biru-tua: #1a2a6c;
+            --biru-safir: #0056b3;
+            --hijau-online: #27ae60;
+            --putih-bg: #f0f2f5;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--putih-bg);
+            color: var(--biru-tua);
+            overflow-x: hidden;
+        }
+
+        .mobile-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            position: relative;
+            padding-bottom: 80px; /* Ruang untuk bottom bar */
+        }
+
         /* Header */
-        .header { background: var(--biru-tua); color: white; padding: 15px; text-align: center; border-bottom: 3px solid var(--emas); position: sticky; top: 0; z-index: 1000; }
-        .btn-back { position: absolute; left: 15px; top: 18px; color: white; text-decoration: none; font-size: 18px; }
+        .page-header {
+            background: var(--biru-tua);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-        /* Search Container */
-        .search-container { padding: 15px; background: white; margin: 10px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .search-box { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; font-size: 14px; }
-        .search-box:focus { border-color: var(--biru-safir); }
+        .page-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
 
-        .container { padding: 5px 15px; }
-        
-        /* Card Tampilan Anggota */
+        /* Search Box Modern */
+        .search-wrapper {
+            padding: 15px;
+            background: #fff;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 50px;
+            padding: 8px 20px;
+            border: 1px solid #ddd;
+            transition: 0.3s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--biru-tua);
+            box-shadow: 0 0 12px rgba(26,42,108,0.15);
+        }
+
+        .search-icon {
+            color: var(--biru-tua);
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 10px 15px;
+            flex: 1;
+        }
+
+        /* Card Tampilan Anggota (Glass Card) */
         .card-lacak {
-            background: white; border-radius: 15px; padding: 15px; margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 5px solid var(--biru-tua);
+            background: white;
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.03);
+            transition: transform 0.2s;
         }
-        .info-nama { font-weight: 800; color: var(--biru-tua); font-size: 16px; display: flex; align-items: center; gap: 8px; }
-        .status-online { color: #2ecc71; font-weight: bold; font-size: 11px; margin: 5px 0; }
-        .info-detail { font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.4; }
-        
-        /* Peta */
-        .map-container {
-            width: 100%; height: 180px; border-radius: 12px; overflow: hidden;
-            background: #e5e3df; border: 1px solid #ddd; margin-top: 10px;
+
+        .info-nama {
+            font-weight: 800;
+            color: var(--biru-tua);
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        iframe { width: 100%; height: 100%; border: none; }
-        
+
+        .status-online {
+            color: var(--hijau-online);
+            font-size: 12px;
+            font-weight: 700;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .coords {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 15px;
+            font-family: monospace;
+        }
+
+        /* Frame Peta */
+        .map-frame {
+            width: 100%;
+            height: 220px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Tombol Navigasi */
         .btn-navigasi {
-            display: inline-block; margin-top: 10px; font-size: 12px; color: var(--biru-safir);
-            text-decoration: none; font-weight: bold; padding: 8px; border: 1px solid var(--biru-safir); border-radius: 8px;
+            width: 100%;
+            background: var(--biru-tua);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 13px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            text-transform: uppercase;
         }
-        .no-data { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+
+        /* Bottom Navigation Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 12px 0;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .btn-back {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--biru-tua);
+            font-weight: 800;
+            font-size: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-back i {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+            font-size: 14px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <a href="menu.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
-        <h3 style="margin:0; text-transform: uppercase; letter-spacing: 1px;">Lacak Domba JC 5</h3>
+<div class="mobile-container">
+    <header class="page-header">
+        <h2>LACAK DOMBA JC 5</h2>
+    </header>
+
+    <div class="search-wrapper">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="memberSearch" placeholder="Cari nama domba/anggota..." onkeyup="filterMembers()">
+        </div>
     </div>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-box" placeholder="Cari nama domba/anggota..." onkeyup="filterNama()">
-    </div>
+    <main class="content-area" id="list-lacak">
+        <div class="no-data"><i class="fas fa-spinner fa-spin"></i> Memuat data lokasi...</div>
+    </main>
 
-    <div class="container" id="list-lacak">
-        <div class="no-data">Memuat data lokasi...</div>
-    </div>
+    <footer class="bottom-bar">
+        <a href="menu.html" class="btn-back">
+            <i class="fas fa-th-large"></i>
+            <span>KEMBALI KE MENU</span>
+        </a>
+    </footer>
+</div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-    <script>
-        // --- 1. CONFIG FIREBASE ---
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
-            authDomain: "boby-apps-project.firebaseapp.com", 
-            projectId: "boby-apps-project", 
-            storageBucket: "boby-apps-project.appspot.com", 
-            messagingSenderId: "125984859692", 
-            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389" 
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.firestore();
+<script>
+    // --- 1. CONFIG FIREBASE ---
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
+        authDomain: "boby-apps-project.firebaseapp.com", 
+        projectId: "boby-apps-project", 
+        storageBucket: "boby-apps-project.appspot.com", 
+        messagingSenderId: "125984859692", 
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389" 
+    };
 
-        // --- 2. FUNGSI FILTER NAMA (VERSI TERBARU) ---
-        function filterNama() {
-            let input = document.getElementById('searchInput').value.trim().toLowerCase();
-            let cards = document.getElementsByClassName('card-lacak');
-            let found = false;
+    if (!firebase.apps.length) { 
+        firebase.initializeApp(firebaseConfig); 
+    }
+    const db = firebase.firestore();
 
-            for (let i = 0; i < cards.length; i++) {
-                // Mengambil teks dari elemen nama di dalam kartu
-                let namaElemen = cards[i].querySelector('.info-nama').innerText.toLowerCase();
-                
-                if (namaElemen.includes(input)) {
-                    cards[i].style.display = "";
-                    found = true;
-                } else {
-                    cards[i].style.display = "none";
-                }
-            }
+    // --- 2. FUNGSI SEARCH (REAL-TIME) ---
+    function filterMembers() {
+        let input = document.getElementById('memberSearch').value.toLowerCase();
+        let cards = document.getElementsByClassName('card-lacak');
+        let found = false;
 
-            // Menampilkan pesan jika tidak ditemukan
-            const listContainer = document.getElementById('list-lacak');
-            const existingNoMatch = document.getElementById('no-match');
+        for (let i = 0; i < cards.length; i++) {
+            let name = cards[i].getAttribute('data-name').toLowerCase();
             
-            if (!found && input !== "") {
-                if (!existingNoMatch) {
-                    const noMatchDiv = document.createElement('div');
-                    noMatchDiv.id = "no-match";
-                    noMatchDiv.className = "no-data";
-                    noMatchDiv.innerHTML = `Nama "${input}" tidak sedang online/aktif.`;
-                    listContainer.appendChild(noMatchDiv);
-                } else {
-                    existingNoMatch.innerHTML = `Nama "${input}" tidak sedang online/aktif.`;
-                }
+            if (name.includes(input)) {
+                cards[i].style.display = "block";
+                cards[i].style.opacity = "1";
+                found = true;
             } else {
-                if (existingNoMatch) existingNoMatch.remove();
+                cards[i].style.display = "none";
             }
         }
-
-        // --- 3. LISTEN DATA REAL-TIME ---
-        function listenLocation() {
-            db.collection("live_tracking").onSnapshot((querySnapshot) => {
-                const listContainer = document.getElementById('list-lacak');
-                
-                // Simpan nilai pencarian saat ini agar tidak hilang saat data update
-                const currentSearch = document.getElementById('searchInput').value;
-
-                if (querySnapshot.empty) {
-                    listContainer.innerHTML = "<div class='no-data'>Belum ada anggota yang aktif membagikan lokasi.</div>";
-                    return;
-                }
-
-                let htmlContent = "";
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const lat = data.lat;
-                    const lng = data.lng;
-                    const nama = data.nama || "Tanpa Nama";
-                    const lastSeen = data.lastSeen ? new Date(data.lastSeen.seconds * 1000).toLocaleString('id-ID') : "Baru saja";
-
-                    htmlContent += `
-                        <div class="card-lacak">
-                            <div class="info-nama"><i class="fa-solid fa-location-dot" style="color:red;"></i> ${nama}</div>
-                            <div class="status-online"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Terdeteksi: ${lastSeen}</div>
-                            <div class="info-detail">Koordinat: ${lat}, ${lng}</div>
-                            
-                            <div class="map-container">
-                                <iframe src="https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed"></iframe>
-                            </div>
-                            <div style="text-align:right;">
-                                <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="btn-navigasi">
-                                    <i class="fa-solid fa-route"></i> BUKA NAVIGASI
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                listContainer.innerHTML = htmlContent;
-                
-                // Jalankan filter kembali setelah data di-render ulang
-                filterNama();
-            });
+        
+        // Handle pesan jika tidak ada data
+        const listContainer = document.getElementById('list-lacak');
+        const existingMsg = document.getElementById('no-match-msg');
+        
+        if (!found && input !== "") {
+            if (!existingMsg) {
+                const msg = document.createElement('div');
+                msg.id = "no-match-msg";
+                msg.className = "no-data";
+                msg.innerHTML = "Anggota tersebut tidak sedang aktif.";
+                listContainer.appendChild(msg);
+            }
+        } else if (existingMsg) {
+            existingMsg.remove();
         }
+    }
 
-        listenLocation();
-    </script>
+    // --- 3. LISTEN DATA FIREBASE ---
+    function listenLocation() {
+        db.collection("live_tracking").onSnapshot((querySnapshot) => {
+            const listContainer = document.getElementById('list-lacak');
+            
+            if (querySnapshot.empty) {
+                listContainer.innerHTML = "<div class='no-data'>Belum ada anggota yang membagikan lokasi.</div>";
+                return;
+            }
+
+            let htmlContent = "";
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const lat = data.lat;
+                const lng = data.lng;
+                const nama = data.nama || "Jemaat JC 5";
+                const lastSeen = data.lastSeen ? new Date(data.lastSeen.seconds * 1000).toLocaleString('id-ID') : "Baru saja";
+
+                htmlContent += `
+                    <div class="card-lacak" data-name="${nama}">
+                        <div class="info-nama"><i class="fas fa-user-circle"></i> ${nama}</div>
+                        <div class="status-online"><i class="fas fa-circle" style="font-size:8px;"></i> Terdeteksi: ${lastSeen}</div>
+                        <div class="coords">Koordinat: ${lat}, ${lng}</div>
+                        
+                        <div class="map-frame">
+                            <iframe src="https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed"></iframe>
+                        </div>
+
+                        <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="btn-navigasi">
+                            <i class="fas fa-directions"></i> BUKA NAVIGASI
+                        </a>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = htmlContent;
+            
+            // Re-apply filter jika user sedang mengetik saat data update
+            filterMembers();
+        });
+    }
+
+    // Jalankan Tracking
+    listenLocation();
+</script>
+
 </body>
 </html>
