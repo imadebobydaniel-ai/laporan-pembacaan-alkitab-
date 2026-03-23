@@ -35,7 +35,7 @@
         <div class="photo-circle" onclick="document.getElementById('inputFoto').click()">
             <img id="view-foto" src="https://via.placeholder.com/150" alt="Foto Profil">
         </div>
-        <div class="edit-badge">
+        <div class="edit-badge" onclick="document.getElementById('inputFoto').click()">
             <i class="fa-solid fa-camera icon-kamera"></i>
         </div>
         
@@ -74,20 +74,17 @@
     const userEmail = localStorage.getItem("userEmail");
     const debug = document.getElementById("debug-msg");
 
-    // FUNGSI ANDA: Klik ikon kamera memicu input file
-    document.querySelector('.icon-kamera').onclick = function() {
-        document.getElementById('inputFoto').click();
-    };
-
     if (!userEmail) {
         debug.innerText = "⚠️ ERROR: Silakan login ulang.";
     } else {
+        // Mendengarkan perubahan data secara real-time
         db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
             if (!querySnapshot.empty) {
                 const d = querySnapshot.docs[0].data();
                 
-                if (d.foto_profil) { 
-                    document.getElementById('view-foto').src = d.foto_profil; 
+                // Sinkronisasi Foto Profil (Mengecek dua kemungkinan nama field di Firebase)
+                if (d.foto_profil || d.fotoUrl) { 
+                    document.getElementById('view-foto').src = d.foto_profil || d.fotoUrl; 
                 }
                 
                 document.getElementById("no_komsel").innerText = d.nomor_komsel || d.nk || "-";
@@ -97,8 +94,10 @@
                 document.getElementById("no_hp").innerText = d.whatsapp || d.nomor_hp || "-";
                 document.getElementById("lokasi_komsel").innerText = d.komsel ? "JC " + d.komsel : "-";
                 
-                const gd = d.goldarah || d.golongan_darah || d.gol_darah || "-";
+                // PERBAIKAN: Menggunakan golDarah (D besar) sesuai data Firebase Console
+                const gd = d.golDarah || d.golongan_darah || d.goldarah || "-";
                 document.getElementById("gol_darah").innerText = gd;
+                
                 document.getElementById("alamat").innerText = d.alamat || "-";
                 
                 debug.innerText = "";
@@ -108,6 +107,7 @@
         });
     }
 
+    // Fungsi Upload dengan Kompresi Canvas
     async function uploadFoto(input) {
         const file = input.files[0];
         if (!file || !userEmail) return;
@@ -132,7 +132,11 @@
                 try {
                     const snap = await db.collection("users").where("email", "==", userEmail).get();
                     if (!snap.empty) {
-                        await db.collection("users").doc(snap.docs[0].id).update({ foto_profil: base64 });
+                        // Mengupdate foto_profil dan fotoUrl sekaligus agar database konsisten
+                        await db.collection("users").doc(snap.docs[0].id).update({ 
+                            foto_profil: base64,
+                            fotoUrl: base64 
+                        });
                         debug.style.color = "green";
                         debug.innerText = "✅ Foto berhasil diperbarui!";
                         setTimeout(() => { debug.innerText = ""; }, 3000);
