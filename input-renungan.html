@@ -2,351 +2,243 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Menu Utama - Pondok Pemulihan Papua</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Renungan - Komsel JC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
-        /* Variabel Warna Khas Logo */
         :root {
-           --biru-tua: #003366;
-           --biru-safir: #0056b3;
-           --biru-muda: #00e6e6;
-           --hijau-zamrud: #2ecc71;
-           --emas-lux: #D4AF37;
-           --putih-bg: #f4f7fa;
+            --biru-tua: #003366;
+            --biru-safir: #0056b3;
+            --hijau-zamrud: #2ecc71;
+            --emas-lux: #D4AF37;
+            --putih-bg: #f4f7fa;
         }
 
-        body { 
-           font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-           background-color: var(--putih-bg); 
-           margin: 0;
-           padding: 0; 
-           color: #333; 
-        }
-
-        /* --- FITUR FREEZE (STICKY) --- */
-        .sticky-wrapper {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background-color: var(--putih-bg);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        /* Top Bar Info */
-        .top-info-bar { 
-           background: var(--biru-tua); 
-           display: flex; 
-           justify-content: space-between; 
-           align-items: center; 
-           padding: 8px 15px; 
-           font-weight: bold; 
-           font-size: 11px; 
-           border-bottom: 2px solid var(--emas-lux);
-           color: white;
-        }
-        #display-tanggal { color: var(--emas-lux); }
-        #digital-clock { color: var(--biru-muda); }
-
-        /* Running Text Header */
-        header { 
-           background: white; 
-           border-bottom: 3px solid var(--hijau-zamrud); 
-           padding: 12px 0; 
-           overflow: hidden; 
-           white-space: nowrap; 
-           position: relative; 
-           display: flex; 
-           align-items: center; 
-        }
-        .running-content { 
-           display: inline-block; 
-           padding-left: 100%; 
-           animation: marquee 30s linear infinite; 
-           font-weight: 900; 
-           font-size: 13px; 
-           color: var(--biru-tua);
-           text-transform: uppercase;
-           letter-spacing: 1px;
-        }
-        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-
-        .container { padding: 20px; max-width: 450px; margin: auto; text-align: center; }
-        .org-title { 
-           margin: 10px 0 15px 0; 
-           font-weight: 900; 
-           color: var(--biru-tua); 
-           text-transform: uppercase;
-           font-size: 18px;
-           letter-spacing: 1px;
-        }
-
-        /* Profile Section */
-        .profile-section { 
-           background: linear-gradient(145deg, #ffffff, #e6e6e6);
-           padding: 25px; 
-           border-radius: 25px; 
-           box-shadow: 10px 10px 20px #d1d1d1, -10px -10px 20px #ffffff;
-           margin-bottom: 10px;
-           position: relative;
-           border-top: 4px solid var(--biru-safir);
-        }
-        .setting-icon-profile { position: absolute; top: 18px; right: 18px; color: var(--biru-tua); font-size: 22px; transition: 0.3s; }
-        .setting-icon-profile:hover { transform: rotate(90deg); color: var(--emas-lux); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--putih-bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 5px solid var(--biru-safir); }
         
-        .profile-img-container { 
-           width: 90px; height: 90px; border-radius: 50%; 
-           margin: 0 auto 12px auto; overflow: hidden; 
-           display: flex; align-items: center; justify-content: center; 
-           background: white; border: 3px solid var(--emas-lux);
-           box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-section i.fa-circle-user { font-size: 85px; color: var(--biru-safir); }
+        h2 { color: var(--biru-tua); text-align: center; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
         
-        .profile-section h2 { margin: 8px 0 2px 0; font-size: 24px; color: var(--biru-tua); font-weight: 800; }
-        .profile-section p { margin: 0; color: var(--hijau-zamrud); font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: var(--biru-tua); }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
+        textarea { height: 120px; resize: vertical; }
 
-        /* --- GRID MENU DENGAN ICON 3D --- */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 15px; }
-        .menu-box { 
-           background: white; 
-           padding: 22px 10px; 
-           border-radius: 20px; 
-           display: flex; 
-           flex-direction: column; 
-           align-items: center; 
-           text-decoration: none; 
-           color: var(--biru-tua); 
-           font-weight: 800; 
-           font-size: 12px; 
-           box-shadow: 0 6px 15px rgba(0,0,0,0.08); 
-           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-           border: 1px solid rgba(0,0,0,0.03);
-        }
-        
-        .menu-box:active { 
-            transform: scale(0.95); 
-            box-shadow: inset 4px 4px 8px rgba(0,0,0,0.1);
-        }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; color: white; text-align: center; text-decoration: none; }
+        .btn-save { background: var(--hijau-zamrud); }
+        .btn-update { background: var(--biru-safir); display: none; }
+        .btn-back { background: var(--biru-tua); }
 
-        .menu-box i { 
-           font-size: 32px; 
-           margin-bottom: 12px; 
-           background: linear-gradient(135deg, var(--biru-safir), var(--hijau-zamrud));
-           -webkit-background-clip: text;
-           -webkit-text-fill-color: transparent;
-           filter: drop-shadow(2px 4px 3px rgba(0,0,0,0.2)); 
-           transition: 0.3s;
-        }
+        hr { border: 0; border-top: 2px solid #eee; margin: 30px 0; }
 
-        /* Ikon Khusus */
-        .icon-special { 
-           background: linear-gradient(135deg, var(--emas-lux), #fff3a0) !important;
-           -webkit-background-clip: text !important;
-           -webkit-text-fill-color: transparent !important;
-           filter: drop-shadow(2px 4px 3px rgba(212, 175, 55, 0.4)) !important;
-        }
-        
-        .lacak-box i {
-           color: #e11d48 !important;
-           background: none !important;
-           -webkit-text-fill-color: initial !important;
-           filter: drop-shadow(2px 4px 3px rgba(225, 29, 72, 0.3)) !important;
-        }
+        /* Style List Renungan */
+        .list-container { margin-top: 20px; }
+        .renungan-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid var(--emas-lux); position: relative; }
+        .renungan-item h4 { margin: 0 0 5px 0; color: var(--biru-tua); }
+        .renungan-item p { margin: 0; font-size: 12px; color: #666; }
+        .action-icons { margin-top: 10px; display: flex; gap: 15px; }
+        .action-icons i { cursor: pointer; font-size: 18px; transition: 0.2s; }
+        .fa-edit { color: var(--biru-safir); }
+        .fa-trash { color: #e11d48; }
+        .fa-file-pdf { color: #f43f5e; }
 
-        .btn-logout { 
-           background: var(--biru-tua); 
-           color: #fff; 
-           padding: 14px 40px; 
-           border-radius: 50px; 
-           text-decoration: none; 
-           font-size: 14px; 
-           font-weight: bold; 
-           display: inline-block; 
-           margin-top: 40px; 
-           border: 2px solid var(--emas-lux);
-           box-shadow: 0 4px 15px rgba(0,51,102,0.3);
-           transition: 0.3s;
-           cursor: pointer;
-           margin-bottom: 30px;
-        }
-
-        /* Tombol Admin Hidden */
-        #admin-input-renungan { display: none; margin-top: 15px; }
+        /* Area tersembunyi untuk proses cetak PDF */
+        #pdf-template { position: absolute; left: -9999px; width: 500px; padding: 40px; background: white; }
     </style>
 </head>
 <body>
+
+<div class="container">
+    <h2 id="form-title"><i class="fa-solid fa-pen-to-square"></i> Input Renungan</h2>
     
-    <div class="sticky-wrapper">
-        <div class="top-info-bar">
-            <div id="display-tanggal">Memuat Tanggal...</div>
-            <div id="digital-clock">00:00:00 WIT</div>
+    <div id="form-input">
+        <input type="hidden" id="edit-id">
+        <div class="form-group">
+            <label>Tanggal Renungan</label>
+            <input type="date" id="tgl-renungan">
         </div>
-
-        <header>
-            <div id="running-text" class="running-content">Memuat data sistem...</div>
-        </header>
-
-        <div class="container" style="padding-bottom: 5px;">
-            <h3 class="org-title">Portal Komsel JC</h3>
-
-            <div class="profile-section">
-                <a href="setting.html" class="setting-icon-profile"><i class="fa-solid fa-gear"></i></a>
-                <div class="profile-img-container" id="photo-area">
-                    <i class="fa-solid fa-circle-user" id="default-icon"></i>
-                   <img id="user-photo" src="" style="display: none;">
-               </div>
-                <h2 id="disp_nama">User</h2>
-                <p id="disp_komsel">KOMSEL JC</p>
-                
-                <a href="input-renungan.html" id="admin-input-renungan" class="btn-logout" style="padding: 8px 20px; font-size: 11px; margin-top: 10px;">
-                    <i class="fa-solid fa-pen-to-square"></i> INPUT RENUNGAN
-                </a>
-            </div>
+        <div class="form-group">
+            <label>Judul Renungan</label>
+            <input type="text" id="judul" placeholder="Contoh: Kasih Kristus">
+        </div>
+        <div class="form-group">
+            <label>Nas Alkitab</label>
+            <input type="text" id="ayat" placeholder="Contoh: Yohanes 3:16">
+        </div>
+        <div class="form-group">
+            <label>Isi Renungan</label>
+            <textarea id="isi" placeholder="Tuliskan isi renungan di sini..."></textarea>
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="simpanRenungan()" id="btn-save" class="btn btn-save">SIMPAN</button>
+            <button onclick="updateRenungan()" id="btn-update" class="btn btn-update">UPDATE DATA</button>
+            <a href="menu.html" class="btn btn-back">KEMBALI</a>
         </div>
     </div>
 
-    <div class="container" style="padding-top: 5px;">
-        <div class="menu-grid">
-            <a href="profil.html" class="menu-box">
-                <i class="fa-solid fa-user-shield"></i>Profil Saya
-            </a>
-            <a href="kehadiran.html" class="menu-box">
-                <i class="fa-solid fa-calendar-check"></i>Kehadiran
-            </a>
-
-            <a href="renungan.html" class="menu-box">
-                <i class="fa-solid fa-book-open-reader"></i>Renungan
-            </a>
-
-            <a href="baca-alkitab.html" class="menu-box">
-                <i class="fa-solid fa-book-bible"></i>Laporan Baca
-            </a>
-
-            <a href="capaian-doa.html" class="menu-box">
-                <i class="fa-solid fa-hands-praying"></i>Capaian DOA
-            </a>
-
-            <a href="statistik.html" class="menu-box">
-                <i class="fa-solid fa-chart-pie"></i>Statistik
-            </a>
-            <a href="leaderboard.html" class="menu-box">
-                <i class="fa-solid fa-crown icon-special"></i>Peringkat JC
-            </a>
-            <a href="laporan-komsel.html" class="menu-box">
-                <i class="fa-solid fa-file-signature"></i>Laporan Komsel
-            </a>
-            
-            <a href="lacak-domba.html" class="menu-box lacak-box">
-                <i class="fa-solid fa-map-location-dot"></i>Lacak Domba
-            </a>
-
-            <a href="kegiatan.html" class="menu-box">
-                <i class="fa-solid fa-calendar-days" style="color: #1976d2; filter: drop-shadow(2px 4px 3px rgba(25,118,210,0.3));"></i>Kegiatan
-            </a>
-
-            <a href="javascript:location.reload()" class="menu-box" style="color: #28a745;">
-                <i class="fa-solid fa-arrows-rotate"></i>Refresh
-            </a>
-            <a href="saran.html" class="menu-box">
-                <i class="fa-solid fa-comment-dots"></i>Saran
-            </a>
-        </div>
-
-        <div class="btn-logout" onclick="logoutDanHapusDevice()">KELUAR SISTEM</div>
+    <hr>
+    <h3><i class="fa-solid fa-list-check"></i> Daftar Renungan</h3>
+    <div id="list-renungan" class="list-container">
+        <p style="color: #999;">Memuat data...</p>
     </div>
+</div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<div id="pdf-template">
+    <div style="text-align:center; border-bottom: 2px solid #003366; padding-bottom: 10px;">
+        <h1 style="color:#003366; margin:0;">E-BOOK RENUNGAN</h1>
+        <p style="color:#D4AF37; font-weight:bold; margin:5px 0;">KOMSEL JC - PONDOK PEMULIHAN PAPUA</p>
+    </div>
+    <div style="margin-top:20px;">
+        <h2 id="pdf-judul" style="color:#003366;"></h2>
+        <p><strong id="pdf-tgl"></strong></p>
+        <p><em id="pdf-ayat" style="color:#2ecc71;"></em></p>
+        <div id="pdf-isi" style="line-height:1.6; text-align:justify; margin-top:20px;"></div>
+    </div>
+    <div style="margin-top:40px; border-top:1px solid #eee; padding-top:10px; font-size:12px; text-align:center; color:#999;">
+        Dibuat secara otomatis melalui Sistem Informasi Komsel JC
+    </div>
+</div>
 
-    <script>
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
-            authDomain: "boby-apps-project.firebaseapp.com", 
-            projectId: "boby-apps-project", 
-            storageBucket: "boby-apps-project.appspot.com", 
-            messagingSenderId: "125984859692", 
-            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389" 
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-        function updateWaktuDanRunningText() {
-            const now = new Date();
-            const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            
-            const dayName = days[now.getDay()];
-            const date = now.getDate();
-            const monthName = months[now.getMonth()];
-            const year = now.getFullYear();
-            const time = now.toLocaleTimeString('id-ID', { hour12: false });
-            
-            document.getElementById('display-tanggal').innerText = `${dayName}, ${date} ${monthName} ${year}`;
-            document.getElementById('digital-clock').innerText = `${time} WIT`;
-            
-            const runningContent = `Shalom! ${dayName}, ${date} ${monthName} ${year} | ${time} WIT | SISTEM INFORMASI KOMSEL JC - PONDOK PEMULIHAN PAPUA | TETAP SEMANGAT MELAYANI TUHAN!`;
-            document.getElementById('running-text').innerText = runningContent;
-        }
+<script>
+    // Konfigurasi Firebase kamu
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
+        authDomain: "boby-apps-project.firebaseapp.com", 
+        projectId: "boby-apps-project", 
+        storageBucket: "boby-apps-project.appspot.com", 
+        messagingSenderId: "125984859692", 
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389" 
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        function syncUserData() {
-            const userEmail = localStorage.getItem("userEmail");
-            if (!userEmail) { window.location.href = "index.html"; return; }
+    // 1. FUNGSI SIMPAN DATA
+    async function simpanRenungan() {
+        const tgl = document.getElementById('tgl-renungan').value;
+        const judul = document.getElementById('judul').value;
+        const ayat = document.getElementById('ayat').value;
+        const isi = document.getElementById('isi').value;
 
-            db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    const data = querySnapshot.docs[0].data();
-                    localStorage.setItem("userName", data.nama);
-                    localStorage.setItem("userJC", data.komsel);
+        if(!tgl || !judul || !isi) { alert("Mohon lengkapi data!"); return; }
 
-                    document.getElementById('disp_nama').innerText = data.nama || "User";
-                    document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
-                    
-                    // CEK JABATAN UNTUK TOMBOL INPUT RENUNGAN (Hanya PKS/Ketua)
-                    if (data.jabatan === "PKS" || data.jabatan === "Ketua Komsel") {
-                        document.getElementById('admin-input-renungan').style.display = "inline-block";
-                    }
-
-                    const photoImg = document.getElementById('user-photo');
-                    const defaultIcon = document.getElementById('default-icon');
-                    if (data.fotoUrl) { 
-                        photoImg.src = data.fotoUrl; 
-                        photoImg.style.display = "block"; 
-                        defaultIcon.style.display = "none"; 
-                    } else { 
-                        photoImg.style.display = "none"; 
-                        defaultIcon.style.display = "block"; 
-                    }
-                }
+        try {
+            await db.collection("renungan_harian").add({
+                tanggal: tgl,
+                judul: judul,
+                ayat: ayat,
+                isi: isi,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-        }
+            alert("Renungan berhasil diposting!");
+            resetForm();
+        } catch (e) { console.error(e); }
+    }
 
-        async function logoutDanHapusDevice() {
-            const userEmail = localStorage.getItem("userEmail");
-            const currentDeviceId = localStorage.getItem("myDeviceId");
-            if (confirm("Apakah Anda yakin ingin keluar?")) {
-                try {
-                    if (userEmail && currentDeviceId) {
-                        const snapshot = await db.collection("users").where("email", "==", userEmail).get();
-                        if (!snapshot.empty) {
-                            const docId = snapshot.docs[0].id;
-                            await db.collection("users").doc(docId).update({
-                                 deviceIds: firebase.firestore.FieldValue.arrayRemove(currentDeviceId)
-                            });
-                        }
-                    }
-                } catch (e) { console.error(e); } finally {
-                    localStorage.clear();
-                    window.location.href = "index.html";
-                }
-            }
-        }
+    // 2. FUNGSI TAMPILKAN LIST DATA (REALTIME)
+    function loadRenungan() {
+        db.collection("renungan_harian").orderBy("tanggal", "desc").onSnapshot((querySnapshot) => {
+            const listDiv = document.getElementById('list-renungan');
+            listDiv.innerHTML = "";
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                listDiv.innerHTML += `
+                    <div class="renungan-item">
+                        <h4>${data.judul}</h4>
+                        <p><i class="fa-regular fa-calendar"></i> ${data.tanggal} | <i class="fa-solid fa-book-bible"></i> ${data.ayat}</p>
+                        <div class="action-icons">
+                            <i class="fa-solid fa-pen-to-square" onclick="prepareEdit('${doc.id}', '${data.tanggal}', '${data.judul}', '${data.ayat}', \`${data.isi}\`)"></i>
+                            <i class="fa-solid fa-trash" onclick="hapusRenungan('${doc.id}')"></i>
+                            <i class="fa-solid fa-file-pdf" title="Download E-book PDF" onclick="downloadEbook(\`${data.judul}\`, '${data.tanggal}', '${data.ayat}', \`${data.isi}\`)"></i>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    }
 
-        setInterval(updateWaktuDanRunningText, 1000);
-        updateWaktuDanRunningText();
-        syncUserData();
-    </script>
+    // 3. FUNGSI PREPARE EDIT
+    function prepareEdit(id, tgl, judul, ayat, isi) {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('tgl-renungan').value = tgl;
+        document.getElementById('judul').value = judul;
+        document.getElementById('ayat').value = ayat;
+        document.getElementById('isi').value = isi;
+
+        document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-edit"></i> Edit Renungan';
+        document.getElementById('btn-save').style.display = "none";
+        document.getElementById('btn-update').style.display = "inline-block";
+        window.scrollTo(0,0);
+    }
+
+    // 4. FUNGSI UPDATE
+    async function updateRenungan() {
+        const id = document.getElementById('edit-id').value;
+        const dataUpdate = {
+            tanggal: document.getElementById('tgl-renungan').value,
+            judul: document.getElementById('judul').value,
+            ayat: document.getElementById('ayat').value,
+            isi: document.getElementById('isi').value
+        };
+
+        try {
+            await db.collection("renungan_harian").doc(id).update(dataUpdate);
+            alert("Data berhasil diperbarui!");
+            resetForm();
+        } catch (e) { alert("Gagal update!"); }
+    }
+
+    // 5. FUNGSI HAPUS
+    async function hapusRenungan(id) {
+        if(confirm("Hapus renungan ini?")) {
+            await db.collection("renungan_harian").doc(id).delete();
+        }
+    }
+
+    // 6. FUNGSI DOWNLOAD E-BOOK PDF
+    async function downloadEbook(judul, tgl, ayat, isi) {
+        // Isi template tersembunyi
+        document.getElementById('pdf-judul').innerText = judul;
+        document.getElementById('pdf-tgl').innerText = "Tanggal: " + tgl;
+        document.getElementById('pdf-ayat').innerText = "Nas: " + ayat;
+        document.getElementById('pdf-isi').innerText = isi;
+
+        const element = document.getElementById('pdf-template');
+        const canvas = await html2canvas(element, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Renungan_${tgl}.pdf`);
+        alert("E-book PDF sedang diunduh!");
+    }
+
+    function resetForm() {
+        document.getElementById('edit-id').value = "";
+        document.getElementById('tgl-renungan').value = "";
+        document.getElementById('judul').value = "";
+        document.getElementById('ayat').value = "";
+        document.getElementById('isi').value = "";
+        document.getElementById('btn-save').style.display = "inline-block";
+        document.getElementById('btn-update').style.display = "none";
+        document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Input Renungan';
+    }
+
+    // Jalankan load data saat halaman dibuka
+    loadRenungan();
+</script>
+
 </body>
 </html>
