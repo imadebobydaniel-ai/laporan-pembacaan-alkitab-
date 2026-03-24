@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Media - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         :root {
             --primary: #007bff;
@@ -66,6 +67,30 @@
             padding-bottom: 10px;
         }
 
+        /* --- Style Baru untuk Playlist --- */
+        .playlist-config {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+            border: 1px solid #ffeeba;
+        }
+
+        .btn-nav {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-nav:hover { background: #e2e6ea; }
+
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
         
@@ -75,10 +100,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             box-sizing: border-box;
-            font-family: inherit;
         }
-
-        textarea { height: 100px; resize: vertical; }
 
         .btn-submit {
             background: var(--primary);
@@ -89,26 +111,21 @@
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
 
-        .btn-submit:hover { background: #0056b3; }
-        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
-
         .table-responsive {
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
         table { width: 100%; border-collapse: collapse; }
-        th { background: var(--primary); color: white; padding: 15px; text-align: left; font-size: 14px; }
-        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: var(--primary); color: white; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #eee; }
 
         .badge {
             padding: 5px 10px;
@@ -117,24 +134,12 @@
             font-weight: bold;
             text-transform: uppercase;
         }
-
         .badge-gambar { background: #e3f2fd; color: #1976d2; }
         .badge-video_youtube { background: #fff3e0; color: #f57c00; }
-        .badge-video_player { background: #e8f5e9; color: #2e7d32; }
-        .badge-audio_player { background: #f3e5f5; color: #7b1fa2; }
         .badge-teks { background: #eeeeee; color: #333333; }
-
-        .btn-action {
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 5px;
-            transition: 0.2s;
-        }
-
+        
+        .btn-action { border: none; background: none; cursor: pointer; font-size: 16px; }
         .btn-delete { color: var(--danger); }
-        .btn-delete:hover { transform: scale(1.2); }
     </style>
 </head>
 <body>
@@ -163,14 +168,12 @@
                 <select id="tipeMedia" onchange="updateInputMedia()">
                     <option value="gambar">Gambar (Poster/Upload)</option>
                     <option value="video_youtube">Video (YouTube/Link URL)</option>
-                    <option value="video_player">Video Player (Upload MP4/AVI/AVSEC)</option>
-                    <option value="audio_player">Audio Player (Upload MP3/WAV)</option>
                     <option value="teks">Text World (Artikel/Berita)</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label id="labelMedia">Upload File Gambar (.jpg, .png)</label>
+                <label id="labelMedia">Upload File Gambar</label>
                 <div id="inputMediaWrapper">
                     <input type="file" id="inputMedia" accept="image/*" required>
                 </div>
@@ -187,26 +190,39 @@
         </form>
     </div>
 
-    <div class="card" style="padding: 0;">
-        <div style="padding: 20px 25px;">
-            <h2 style="border:none; margin:0;"><i class="fas fa-list-ul" style="color: var(--primary);"></i> Daftar Konten Terbit</h2>
+    <div class="card">
+        <h2><i class="fas fa-list-ul" style="color: var(--primary);"></i> Daftar Konten Terbit</h2>
+        
+        <div class="playlist-config">
+            <div>
+                <label>Mode Putar:</label>
+                <select id="modePutar" style="width: auto; padding: 5px;">
+                    <option value="berurutan">Berurutan (Normal)</option>
+                    <option value="acak">Acak (Shuffle)</option>
+                    <option value="loop">Loop (Ulangi Terus)</option>
+                </select>
+            </div>
+            <div>
+                <label>Default Durasi (Menit):</label>
+                <input type="number" id="defaultDurasi" value="10" style="width: 60px; padding: 5px;">
+            </div>
+            <button onclick="saveGlobalConfig()" class="btn-submit" style="width: auto; padding: 8px 15px;">Simpan Mode</button>
         </div>
+
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>Tgl Terbit</th>
-                        <th>Judul</th>
+                        <th>Urutan</th>
+                        <th>Judul Konten</th>
                         <th>Tipe</th>
-                        <th>Status</th>
+                        <th>Durasi (Min)</th>
                         <th style="text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="mediaList">
                     <tr>
-                        <td colspan="5" style="text-align:center; color:#999; padding: 40px;">
-                            <i class="fas fa-spinner fa-spin"></i> Memuat data...
-                        </td>
+                        <td colspan="5" style="text-align:center; padding: 30px;">Memuat data...</td>
                     </tr>
                 </tbody>
             </table>
@@ -219,6 +235,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script>
+    // Konfigurasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -232,55 +249,83 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
 
+    // Fungsi Update Input Berdasarkan Tipe
     function updateInputMedia() {
         const tipe = document.getElementById('tipeMedia').value;
         const wrapper = document.getElementById('inputMediaWrapper');
         const label = document.getElementById('labelMedia');
-
         wrapper.innerHTML = ''; 
 
-        switch (tipe) {
-            case 'video_youtube':
-                label.innerText = "Link URL YouTube";
-                wrapper.innerHTML = `<input type="text" id="inputMedia" placeholder="https://www.youtube.com/watch?v=..." required>`;
-                break;
-            case 'gambar':
-                label.innerText = "Upload File Poster/Gambar (.jpg, .png, .webp)";
-                wrapper.innerHTML = `<input type="file" id="inputMedia" accept="image/*" required>`;
-                break;
-            case 'video_player':
-                label.innerText = "Upload File Video (MP4, AVI, AVSEC)";
-                wrapper.innerHTML = `<input type="file" id="inputMedia" accept="video/mp4, video/x-msvideo, video/*" required>`;
-                break;
-            case 'audio_player':
-                label.innerText = "Upload File Audio (MP3, WAV)";
-                wrapper.innerHTML = `<input type="file" id="inputMedia" accept="audio/mpeg, audio/wav" required>`;
-                break;
-            case 'teks':
-                label.innerText = "Isi Artikel Lengkap";
-                wrapper.innerHTML = `<textarea id="inputMedia" rows="5" placeholder="Tulis artikel lengkap di sini..." required></textarea>`;
-                break;
+        if (tipe === 'video_youtube') {
+            label.innerText = "Link URL YouTube";
+            wrapper.innerHTML = `<input type="text" id="inputMedia" placeholder="https://www.youtube.com/watch?v=..." required>`;
+        } else if (tipe === 'teks') {
+            label.innerText = "Isi Artikel Lengkap";
+            wrapper.innerHTML = `<textarea id="inputMedia" rows="5" placeholder="Tulis artikel..." required></textarea>`;
+        } else {
+            label.innerText = "Upload File Media";
+            wrapper.innerHTML = `<input type="file" id="inputMedia" required>`;
         }
     }
 
+    // Fungsi Load Data
+    async function loadMedia() {
+        const list = document.getElementById('mediaList');
+        try {
+            const snapshot = await db.collection("portal_media").orderBy("urutan", "asc").get();
+            list.innerHTML = "";
+            
+            if(snapshot.empty) {
+                list.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada konten.</td></tr>';
+                return;
+            }
+
+            snapshot.forEach((doc, index) => {
+                const data = doc.data();
+                const id = doc.id;
+                const badgeClass = "badge-" + data.tipe;
+                
+                list.innerHTML += `
+                    <tr>
+                        <td>
+                            <button class="btn-nav" onclick="pindahUrutan('${id}', -1)"><i class="fas fa-chevron-up"></i></button>
+                            <span style="margin: 0 10px; font-weight: bold;">${data.urutan || index + 1}</span>
+                            <button class="btn-nav" onclick="pindahUrutan('${id}', 1)"><i class="fas fa-chevron-down"></i></button>
+                        </td>
+                        <td><strong>${data.judul}</strong></td>
+                        <td><span class="badge ${badgeClass}">${data.tipe}</span></td>
+                        <td>
+                            <input type="number" value="${data.durasi || 10}" 
+                                   onchange="updateDurasi('${id}', this.value)" 
+                                   style="width: 50px; padding: 2px;">
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="btn-action btn-delete" onclick="deleteMedia('${id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    // Fungsi Simpan Konten Baru
     document.getElementById('mediaForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sedang Mengunggah...';
-
+        
         const judul = document.getElementById('judul').value;
         const tipe = document.getElementById('tipeMedia').value;
-        const deskripsi = document.getElementById('deskripsi').value;
         const inputElement = document.getElementById('inputMedia');
+        const snapshot = await db.collection("portal_media").get();
+        
         let finalUrl = "";
-
         try {
             if (inputElement.files && inputElement.files[0]) {
                 const file = inputElement.files[0];
-                const fileName = Date.now() + "_" + file.name;
-                const storageRef = storage.ref('portal_media/' + fileName);
-                
+                const storageRef = storage.ref('portal_media/' + Date.now() + "_" + file.name);
                 await storageRef.put(file);
                 finalUrl = await storageRef.getDownloadURL();
             } else {
@@ -291,70 +336,55 @@
                 judul: judul,
                 tipe: tipe,
                 url: finalUrl,
-                deskripsi: deskripsi,
-                tanggal: new Date().toLocaleDateString('id-ID'),
+                urutan: snapshot.size + 1,
+                durasi: parseInt(document.getElementById('defaultDurasi').value),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            alert("Konten berhasil dipublikasikan!");
+            alert("Berhasil!");
             e.target.reset();
-            updateInputMedia();
             loadMedia();
-        } catch (error) {
-            alert("Gagal mengunggah: " + error.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publikasikan ke Portal';
-        }
+        } catch (err) { alert(err.message); }
+        btn.disabled = false;
     });
 
-    async function loadMedia() {
-        const list = document.getElementById('mediaList');
-        try {
-            const snapshot = await db.collection("portal_media").orderBy("timestamp", "desc").get();
-            list.innerHTML = "";
-            
-            if(snapshot.empty) {
-                list.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada konten.</td></tr>';
-                return;
-            }
+    // Fungsi Tambahan (Urutan, Durasi, Config)
+    async function pindahUrutan(id, arah) {
+        const ref = db.collection("portal_media");
+        const doc = await ref.doc(id).get();
+        const urutanSekarang = doc.data().urutan;
+        const urutanBaru = urutanSekarang + arah;
+        if (urutanBaru < 1) return;
 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const id = doc.id;
-                const badgeClass = "badge-" + data.tipe;
-
-                list.innerHTML += `
-                    <tr>
-                        <td>${data.tanggal}</td>
-                        <td><strong>${data.judul}</strong></td>
-                        <td><span class="badge ${badgeClass}">${data.tipe.replace('_', ' ')}</span></td>
-                        <td><span style="color:var(--success); font-weight:bold;">● Aktif</span></td>
-                        <td style="text-align: center;">
-                            <button class="btn-action btn-delete" onclick="deleteMedia('${id}')">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        } catch (e) { 
-            list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data.</td></tr>';
+        const swapQuery = await ref.where("urutan", "==", urutanBaru).get();
+        const batch = db.batch();
+        if (!swapQuery.empty) {
+            batch.update(ref.doc(swapQuery.docs[0].id), { urutan: urutanSekarang });
         }
+        batch.update(ref.doc(id), { urutan: urutanBaru });
+        await batch.commit();
+        loadMedia();
+    }
+
+    async function updateDurasi(id, menit) {
+        await db.collection("portal_media").doc(id).update({ durasi: parseInt(menit) });
+    }
+
+    async function saveGlobalConfig() {
+        const mode = document.getElementById('modePutar').value;
+        await db.collection("config").doc("playlist").set({ mode: mode });
+        alert("Mode Putar Disimpan!");
     }
 
     async function deleteMedia(id) {
-        if(confirm("Hapus konten ini?")) {
-            try {
-                await db.collection("portal_media").doc(id).delete();
-                loadMedia();
-            } catch (error) {
-                alert("Gagal menghapus data");
-            }
+        if(confirm("Hapus?")) {
+            await db.collection("portal_media").doc(id).delete();
+            loadMedia();
         }
     }
 
     window.onload = loadMedia;
 </script>
+
 </body>
 </html>
