@@ -59,14 +59,15 @@
 
         .timestamp { font-size: 11px; color: #999; font-style: italic; display: block; margin-top: 8px; }
         
+        /* NEW CUSTOM MODAL STYLES */
         .notification-overlay {
             display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0, 51, 102, 0.8);
+            width: 100%; height: 100%; background: rgba(0, 51, 102, 0.85);
             z-index: 9999; align-items: center; justify-content: center;
         }
         .notification-block {
             background: white; padding: 30px; border-radius: 20px; text-align: center;
-            max-width: 280px; border-top: 5px solid var(--emas-lux); animation: slideIn 0.3s ease;
+            max-width: 320px; width: 90%; animation: slideIn 0.3s ease;
         }
 
         @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -85,10 +86,13 @@
     </div>
 </div>
 
-<div id="notif-container" class="notification-overlay">
+<div id="custom-modal" class="notification-overlay">
     <div class="notification-block">
-        <i id="notif-icon" class="fa-solid fa-circle-check" style="font-size: 40px; color: var(--hijau-zamrud); margin-bottom: 15px; display: block;"></i>
-        <p id="notif-msg">Memproses...</p>
+        <i id="modal-icon" class="fa-solid fa-circle-info" style="font-size: 45px; color: var(--biru-tua); margin-bottom: 15px; display: block;"></i>
+        <h3 id="modal-title" style="margin: 0 0 10px 0; color: var(--biru-tua); font-size: 18px;">Notifikasi</h3>
+        <p id="modal-msg" style="font-size: 14px; color: #555; margin-bottom: 20px; line-height: 1.5;">Pesan di sini...</p>
+        <div id="modal-buttons" style="display: flex; gap: 10px; justify-content: center;">
+            </div>
     </div>
 </div>
 
@@ -152,20 +156,55 @@
         measurementId: "G-X14300RJL4"
     };
 
-    // Inisialisasi Firebase
-    try {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        var db = firebase.firestore();
-    } catch (e) {
-        console.error("Gagal Inisialisasi Firebase:", e);
-        document.getElementById('list-pengumuman').innerHTML = "Kesalahan Koneksi Database!";
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
     }
-
+    var db = firebase.firestore();
     let editID = null;
 
-    // FUNGSI CEK AKSES
+    // --- FUNGSI UTAMA MODAL CUSTOM (PENGGANTI ALERT & CONFIRM) ---
+    function tampilkanModal({ judul, pesan, ikon, warnaIkon, tipe, aksiYa }) {
+        const modal = document.getElementById('custom-modal');
+        const mTitle = document.getElementById('modal-title');
+        const mMsg = document.getElementById('modal-msg');
+        const mIcon = document.getElementById('modal-icon');
+        const mButtons = document.getElementById('modal-buttons');
+
+        mTitle.innerText = judul;
+        mMsg.innerText = pesan;
+        mIcon.className = "fa-solid " + (ikon || "fa-circle-info");
+        mIcon.style.color = warnaIkon || "var(--biru-tua)";
+        mButtons.innerHTML = "";
+
+        if (tipe === "konfirmasi") {
+            mButtons.innerHTML += `<button onclick="tutupModal()" style="background:#eee; color:#333; border:none; padding:12px 20px; border-radius:10px; font-weight:bold; flex:1;">BATAL</button>`;
+            const btnYa = document.createElement("button");
+            btnYa.innerText = "YA, LANJUTKAN";
+            btnYa.style = "background:var(--merah-notif); color:white; border:none; padding:12px 20px; border-radius:10px; font-weight:bold; flex:1;";
+            btnYa.onclick = () => { aksiYa(); tutupModal(); };
+            mButtons.appendChild(btnYa);
+        } else {
+            mButtons.innerHTML += `<button onclick="tutupModal()" style="background:var(--biru-tua); color:white; border:none; padding:12px 25px; border-radius:10px; font-weight:bold; width:100%;">OKE</button>`;
+            if(tipe === "toast") setTimeout(tutupModal, 2500);
+        }
+        modal.style.display = 'flex';
+    }
+
+    function tutupModal() {
+        document.getElementById('custom-modal').style.display = 'none';
+    }
+
+    function showCustomNotif(m, i) {
+        tampilkanModal({
+            judul: "Selesai",
+            pesan: m,
+            ikon: i || "fa-circle-check",
+            warnaIkon: "var(--hijau-zamrud)",
+            tipe: "toast"
+        });
+    }
+
+    // --- FUNGSI SISTEM ---
     function cekAkses() {
         const pass = document.getElementById('pass-input').value;
         const pksPass = "PKS"; 
@@ -175,7 +214,7 @@
             document.getElementById('login-overlay').style.display = 'none';
             sessionStorage.setItem("akses_komsel", "true");
         } else {
-            alert("Password Salah! Akses ditolak.");
+            tampilkanModal({ judul: "Akses Ditolak", pesan: "Password Salah!", ikon: "fa-circle-xmark", warnaIkon: "var(--merah-notif)" });
         }
     }
 
@@ -183,14 +222,16 @@
         document.getElementById('login-overlay').style.display = 'none';
     }
 
-    // FUNGSI PROSES DATA (TAMBAH/UPDATE)
     async function prosesData() {
         const kategori = document.getElementById('kategori').value;
         const judul = document.getElementById('judul').value;
         const lokasi = document.getElementById('lokasi').value;
         const detail = document.getElementById('detail').value;
 
-        if(!judul || !detail) { alert("Harap isi Judul dan Detail!"); return; }
+        if(!judul || !detail) { 
+            tampilkanModal({ judul: "Peringatan", pesan: "Harap isi Judul dan Detail!", ikon: "fa-triangle-exclamation", warnaIkon: "#f39c12" });
+            return; 
+        }
 
         const btn = document.getElementById('btn-submit');
         btn.disabled = true;
@@ -211,13 +252,12 @@
             }
             resetForm();
         } catch (e) {
-            alert("Terjadi kesalahan: " + e.message);
+            tampilkanModal({ judul: "Error", pesan: e.message, ikon: "fa-bug", warnaIkon: "red" });
         } finally {
             btn.disabled = false;
         }
     }
 
-    // FUNGSI LOAD HISTORY (DROPDOWN MODE)
     function loadHistory() {
         db.collection("pengumuman_komsel").orderBy("lastUpdate", "desc").limit(15).onSnapshot((snap) => {
             const listDiv = document.getElementById('list-pengumuman');
@@ -253,8 +293,6 @@
                         </div>
                     </div>`;
             });
-        }, (err) => {
-            document.getElementById('list-pengumuman').innerHTML = "Gagal memuat data.";
         });
     }
 
@@ -289,20 +327,23 @@
         document.getElementById('btn-cancel-edit').style.display = "none";
     }
 
+    // --- FUNGSI HAPUS DENGAN MODAL CUSTOM ---
     async function hapusInfo(id) {
-        if(confirm("Apakah Anda yakin ingin menghapus pengumuman ini?")) {
-            try {
-                await db.collection("pengumuman_komsel").doc(id).delete();
-                showCustomNotif("Data telah dihapus", "fa-trash-can");
-            } catch (e) { alert("Gagal menghapus: " + e.message); }
-        }
-    }
-
-    function showCustomNotif(m, i) {
-        document.getElementById('notif-msg').innerText = m;
-        document.getElementById('notif-icon').className = "fa-solid " + i;
-        document.getElementById('notif-container').style.display = 'flex';
-        setTimeout(() => { document.getElementById('notif-container').style.display = 'none'; }, 2000);
+        tampilkanModal({
+            judul: "Konfirmasi Hapus",
+            pesan: "Apakah Anda yakin ingin menghapus pengumuman ini? Data yang dihapus tidak bisa dikembalikan.",
+            ikon: "fa-trash-can",
+            warnaIkon: "#e11d48",
+            tipe: "konfirmasi",
+            aksiYa: async () => {
+                try {
+                    await db.collection("pengumuman_komsel").doc(id).delete();
+                    showCustomNotif("Data telah dihapus", "fa-trash-can");
+                } catch (e) { 
+                    tampilkanModal({ judul: "Gagal", pesan: e.message, ikon: "fa-circle-xmark", warnaIkon: "red" });
+                }
+            }
+        });
     }
 
     loadHistory();
