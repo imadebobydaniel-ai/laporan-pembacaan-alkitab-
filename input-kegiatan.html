@@ -6,10 +6,7 @@
     <title>Input Kegiatan - Komsel JC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --biru-tua: #003366; --biru-safir: #0056b3; --merah-notif: #e11d48;
-            --hijau-zamrud: #2ecc71; --putih-bg: #f4f7fa;
-        }
+        :root { --biru-tua: #003366; --merah-notif: #e11d48; --putih-bg: #f4f7fa; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--putih-bg); margin: 0; padding: 20px; }
         .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 5px solid var(--merah-notif); }
         .form-group { margin-bottom: 15px; }
@@ -17,59 +14,14 @@
         input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .btn-send { background: var(--merah-notif); color: white; border: none; padding: 15px; width: 100%; border-radius: 50px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
-        /* Proteksi Overlay */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--biru-tua); z-index: 10000;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .login-box { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 85%; max-width: 350px; }
-
-        /* Notification Modal */
-        .notification-overlay {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0, 51, 102, 0.85);
-            z-index: 9999; align-items: center; justify-content: center;
-        }
-        .notification-block { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 320px; width: 90%; }
-        
-        /* History Accordion */
+        /* Accordion Style */
         .accordion-item { background: white; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
         .accordion-header { padding: 15px; background: #fff5f5; cursor: pointer; display: flex; justify-content: space-between; border-left: 5px solid var(--merah-notif); }
         .accordion-content { padding: 15px; display: none; background: #fff; border-top: 1px solid #eee; font-size: 13px; }
         .accordion-content.active { display: block; }
-
-        /* Styling Mata Password */
-        .pass-container { position: relative; margin-bottom: 15px; }
-        .pass-container i { position: absolute; right: 15px; top: 13px; cursor: pointer; color: #999; }
     </style>
 </head>
 <body>
-
-<div id="login-overlay">
-    <div class="login-box">
-        <i class="fa-solid fa-lock" style="font-size: 40px; color: var(--merah-notif); margin-bottom: 15px;"></i>
-        <h3>Akses Terbatas</h3>
-        <p style="font-size: 13px; color: #666;">Silakan masukkan password Admin/PKS</p>
-        
-        <div class="pass-container">
-            <input type="password" id="pass-input" placeholder="Masukkan Password" style="text-align: center; padding-right: 40px;">
-            <i class="fa-solid fa-eye" id="togglePassword"></i>
-        </div>
-
-        <button class="btn-send" onclick="cekAkses()">MASUK PORTAL</button>
-        <a href="menu.html" style="display:block; margin-top:15px; color:#666; text-decoration:none; font-size:13px;">Kembali</a>
-    </div>
-</div>
-
-<div id="custom-modal" class="notification-overlay">
-    <div class="notification-block">
-        <i id="modal-icon" class="fa-solid fa-circle-info" style="font-size: 45px; margin-bottom: 15px; display: block;"></i>
-        <h3 id="modal-title">Notifikasi</h3>
-        <p id="modal-msg">Pesan...</p>
-        <div id="modal-buttons" style="display: flex; gap: 10px; justify-content: center;"></div>
-    </div>
-</div>
 
 <div class="container">
     <h2 id="form-title"><i class="fa-solid fa-bullhorn"></i> Info Kegiatan Baru</h2>
@@ -105,8 +57,8 @@
     <button id="btn-cancel-edit" style="display:none; background:#666; margin-top:10px;" class="btn-send" onclick="resetForm()">BATAL EDIT</button>
 
     <div class="history-section" style="margin-top:30px;">
-        <h3>Riwayat</h3>
-        <div id="list-pengumuman">Memuat...</div>
+        <h3>Riwayat Informasi</h3>
+        <div id="list-pengumuman">Memuat data...</div>
     </div>
 </div>
 
@@ -114,7 +66,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
 <script>
-    // 1. FIREBASE CONFIG (Tetap gunakan config Anda yang sudah ada)
+    // 1. FIREBASE INITIALIZATION
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -127,72 +79,49 @@
     const db = firebase.firestore();
     let editID = null;
 
-    // 2. FUNGSI KIRIM DATA (DENGAN CEK PASSWORD DI AKHIR)
+    // 2. FUNGSI UTAMA (KIRIM DATA + CEK PASSWORD)
     async function prosesData() {
-        const kategori = document.getElementById('kategori').value;
         const judul = document.getElementById('judul').value;
-        const lokasi = document.getElementById('lokasi').value;
         const detail = document.getElementById('detail').value;
 
-        // Validasi form kosong
         if(!judul || !detail) {
-            alert("Harap isi Judul dan Detail pengumuman!");
+            alert("Harap isi Judul dan Detail!");
             return;
         }
 
-        // --- PROSES MINTA PASSWORD DIMULAI DI SINI ---
-        const passwordInput = prompt("Data sudah siap. Silakan masukkan password Admin atau PKS untuk memverifikasi pengiriman:");
-        
-        const PASS_ADMIN = "bukadong821";
-        const PASS_PKS = "PKS";
+        // --- PASSWORD MUNCUL DI SINI (SETELAH KLIK KIRIM) ---
+        const passwordInput = prompt("Silakan masukkan password Admin/PKS untuk mengirim:");
 
-        if (passwordInput === PASS_ADMIN || passwordInput === PASS_PKS) {
-            // JIKA PASSWORD BENAR, LANJUT KIRIM KE FIREBASE
+        if (passwordInput === "bukadong821" || passwordInput === "PKS") {
             try {
-                const dataObj = { 
-                    kategori, 
-                    judul, 
-                    lokasi, 
-                    detail, 
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp() 
+                const dataObj = {
+                    kategori: document.getElementById('kategori').value,
+                    judul: judul,
+                    lokasi: document.getElementById('lokasi').value,
+                    detail: detail,
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
                 if (editID) {
                     await db.collection("pengumuman_komsel").doc(editID).update(dataObj);
-                    alert("✅ Perubahan berhasil disimpan!");
+                    alert("✅ Informasi Berhasil Diperbarui!");
                 } else {
                     dataObj.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     await db.collection("pengumuman_komsel").add(dataObj);
-                    alert("✅ Pengumuman berhasil dikirim!");
+                    alert("✅ Informasi Berhasil Dikirim!");
                 }
-                
-                resetForm(); // Bersihkan form setelah sukses
-            } catch (e) {
-                alert("❌ Gagal mengirim data: " + e.message);
+                resetForm();
+            } catch (error) {
+                alert("Gagal: " + error.message);
             }
         } else if (passwordInput === null) {
-            // Jika user menekan 'Cancel' pada kotak password
-            return; 
+            // User menekan batal
         } else {
-            // Jika password salah
-            alert("⚠️ Password Salah! Anda tidak memiliki akses untuk mengirim informasi ini.");
+            alert("⚠️ Password Salah! Pengiriman dibatalkan.");
         }
     }
 
-    // 3. FUNGSI HAPUS (JUGA MINTA PASSWORD)
-    async function hapusInfo(id) {
-        const passwordInput = prompt("Masukkan password Admin/PKS untuk menghapus data:");
-        if (passwordInput === "bukadong821" || passwordInput === "PKS") {
-            if (confirm("Apakah Anda benar-benar ingin menghapus pengumuman ini?")) {
-                await db.collection("pengumuman_komsel").doc(id).delete();
-                alert("Data berhasil dihapus.");
-            }
-        } else {
-            alert("Password salah. Penghapusan dibatalkan.");
-        }
-    }
-
-    // 4. LOAD RIWAYAT (Tetap seperti biasa)
+    // 3. LOAD RIWAYAT
     function loadHistory() {
         db.collection("pengumuman_komsel").orderBy("lastUpdate", "desc").onSnapshot(snap => {
             const listDiv = document.getElementById('list-pengumuman');
@@ -207,27 +136,24 @@
                         </div>
                         <div class="accordion-content">
                             <p>${d.detail}</p>
-                            <small>Lokasi: ${d.lokasi || '-'}</small><br><br>
-                            <button onclick="isiDataEdit('${doc.id}', '${d.kategori}', '${d.judul}', '${d.lokasi}', \`${d.detail}\`)" style="color: blue; border:none; background:none; cursor:pointer; margin-right:15px;">Edit</button>
-                            <button onclick="hapusInfo('${doc.id}')" style="color: red; border:none; background:none; cursor:pointer;">Hapus</button>
+                            <button onclick="hapusInfo('${doc.id}')" style="color:red; border:none; background:none; cursor:pointer;">Hapus</button>
                         </div>
                     </div>`;
             });
         });
     }
 
+    async function hapusInfo(id) {
+        const pass = prompt("Masukkan password untuk menghapus:");
+        if (pass === "bukadong821" || pass === "PKS") {
+            await db.collection("pengumuman_komsel").doc(id).delete();
+        } else {
+            alert("Password salah!");
+        }
+    }
+
     function toggleAccordion(el) { el.nextElementSibling.classList.toggle('active'); }
     function resetForm() { location.reload(); }
-    
-    function isiDataEdit(id, kat, jud, lok, det) {
-        editID = id;
-        document.getElementById('kategori').value = kat;
-        document.getElementById('judul').value = jud;
-        document.getElementById('lokasi').value = lok;
-        document.getElementById('detail').value = det;
-        document.getElementById('form-title').innerHTML = "✏️ Edit Pengumuman";
-        window.scrollTo(0,0);
-    }
 
     window.onload = loadHistory;
 </script>
