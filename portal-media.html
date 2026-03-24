@@ -131,6 +131,7 @@
             font-size: 14px;
         }
 
+        /* Badge Styling */
         .badge {
             padding: 5px 10px;
             border-radius: 20px;
@@ -141,6 +142,9 @@
 
         .badge-img { background: #e3f2fd; color: #1976d2; }
         .badge-video { background: #fff3e0; color: #f57c00; }
+        .badge-audio { background: #f3e5f5; color: #7b1fa2; }
+        .badge-pdf { background: #ffebee; color: #c62828; }
+        .badge-text { background: #e8f5e9; color: #2e7d32; }
 
         .btn-action {
             border: none;
@@ -181,8 +185,11 @@
                 <div class="form-group" style="flex: 1;">
                     <label>Tipe Media</label>
                     <select id="tipe">
-                        <option value="Gambar">Gambar (Poster/Foto)</option>
-                        <option value="Video">Video (YouTube/Link)</option>
+                        <option value="Gambar">🖼️ Gambar (Poster/Foto)</option>
+                        <option value="Video">🎥 Video (YouTube/Link)</option>
+                        <option value="Audio">🎵 Audio (MP3/Podcast)</option>
+                        <option value="PDF">📄 Dokumen PDF</option>
+                        <option value="Text World">📝 Text World (Artikel/Berita)</option>
                     </select>
                 </div>
                 <div class="form-group" style="flex: 2;">
@@ -233,7 +240,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-    // Konfigurasi Firebase (Gunakan config Anda)
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -287,7 +293,18 @@
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                const badgeClass = data.tipe === 'Gambar' ? 'badge-img' : 'badge-video';
+                
+                // Logika penentuan warna badge
+                let badgeClass = '';
+                switch(data.tipe) {
+                    case 'Gambar': badgeClass = 'badge-img'; break;
+                    case 'Video': badgeClass = 'badge-video'; break;
+                    case 'Audio': badgeClass = 'badge-audio'; break;
+                    case 'PDF': badgeClass = 'badge-pdf'; break;
+                    case 'Text World': badgeClass = 'badge-text'; break;
+                    default: badgeClass = 'badge-img';
+                }
+
                 list.innerHTML += `
                     <tr>
                         <td>${data.tanggal}</td>
@@ -302,13 +319,21 @@
                     </tr>
                 `;
             });
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e); 
+            list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data.</td></tr>';
+        }
     }
 
+    // Fungsi Hapus Data
     async function deleteMedia(id) {
         if(confirm("Hapus konten ini?")) {
-            await db.collection("portal_media").doc(id).delete();
-            loadMedia();
+            try {
+                await db.collection("portal_media").doc(id).delete();
+                loadMedia();
+            } catch (error) {
+                alert("Gagal menghapus data");
+            }
         }
     }
 
