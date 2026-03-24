@@ -123,6 +123,7 @@
             padding: 2px 5px;
             border-radius: 50%;
             border: 2px solid white;
+            display: none; /* Sembunyikan jika nol */
         }
 
         /* --- STYLING MODAL POPUP --- */
@@ -142,10 +143,12 @@
             background: white;
             width: 90%;
             max-width: 400px;
+            max-height: 80vh; /* Batasi tinggi modal */
             border-radius: 25px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            border: 1px solid rgba(212, 175, 55, 0.3);
             animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
@@ -157,78 +160,48 @@
         .modal-header {
             background: linear-gradient(135deg, var(--biru-tua), #00509d);
             color: white;
-            padding: 30px 20px;
+            padding: 20px;
             text-align: center;
-            position: relative;
             border-bottom: 4px solid var(--emas-lux);
         }
 
         .modal-body {
-            padding: 25px;
-            color: #333;
+            padding: 15px;
+            overflow-y: auto; /* Agar bisa scroll jika pesan banyak */
             background: #fff;
-            text-align: left;
         }
 
-        .info-item {
-            margin-bottom: 15px;
-            padding: 15px;
+        /* Styling Item Pesan Baru */
+        .item-pesan {
             background: #f8f9fa;
             border-radius: 12px;
-            border-left: 4px solid var(--emas-lux);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--emas-lux);
+            transition: 0.2s;
+            cursor: pointer;
+            text-align: left;
         }
+        .item-pesan:hover { background: #f0f2f5; }
+        .item-pesan.sudah-dibaca { border-left-color: #ccc; opacity: 0.8; }
 
         .btn-action-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-            padding-bottom: 25px;
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid #eee;
         }
 
         .btn-close-popup {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-open-full {
             background: var(--biru-tua);
             color: white;
             border: none;
-            padding: 12px 40px;
+            padding: 10px 40px;
             border-radius: 30px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0,51,102,0.3);
-            text-decoration: none;
-            font-size: 14px;
         }
 
-        .btn-open-full:hover { background: var(--biru-safir); transform: translateY(-2px); }
-
-        .setting-icon-profile { position: absolute; top: 18px; right: 18px; color: var(--biru-tua); font-size: 22px; transition: 0.3s; }
-        .setting-icon-profile:hover { transform: rotate(90deg); color: var(--emas-lux); }
-        
-        .profile-img-container { 
-            width: 90px; height: 90px; border-radius: 50%; 
-            margin: 0 auto 12px auto; overflow: hidden; 
-            display: flex; align-items: center; justify-content: center; 
-            background: white; border: 3px solid var(--emas-lux);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-section i.fa-circle-user { font-size: 85px; color: var(--biru-safir); }
-        
-        .profile-section h2 { margin: 8px 0 2px 0; font-size: 24px; color: var(--biru-tua); font-weight: 800; }
-        .profile-section p { margin: 0; color: var(--hijau-zamrud); font-weight: bold; font-size: 14px; text-transform: uppercase; }
- 
+        /* Menu Grid styling tetap sama */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         .menu-box { 
             background: white; 
@@ -242,54 +215,10 @@
             font-weight: 800; 
             font-size: 12px; 
             box-shadow: 0 6px 15px rgba(0,0,0,0.05); 
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(0,0,0,0.03);
-        }
-        .menu-box:active { transform: scale(0.92); }
-        .menu-box i { 
-            font-size: 30px; 
-            margin-bottom: 12px; 
-            background: linear-gradient(135deg, var(--biru-safir), var(--hijau-zamrud));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(2px 4px 3px rgba(0,0,0,0.2));
-        }
- 
-        .icon-special { 
-            background: linear-gradient(135deg, var(--emas-lux), #fff3a0) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-        }
-        
-        .lacak-box i { color: #e11d48 !important; background: none !important; -webkit-text-fill-color: initial !important; }
-        .kegiatan-box i {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            filter: drop-shadow(3px 5px 4px rgba(225, 29, 72, 0.4)) !important;
-        }
-        .renungan-box i {
-            background: linear-gradient(135deg, var(--biru-safir), var(--biru-muda)) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            filter: drop-shadow(3px 5px 4px rgba(0, 86, 179, 0.3)) !important;
-        }
- 
-        .btn-logout { 
-            background: var(--biru-tua); 
-            color: #fff; 
-            padding: 14px 40px; 
-            border-radius: 50px; 
-            text-decoration: none; 
-            font-size: 14px; 
-            font-weight: bold; 
-            display: inline-block; 
-            margin-top: 40px; 
-            border: 2px solid var(--emas-lux);
-            box-shadow: 0 4px 15px rgba(0,51,102,0.3);
             transition: 0.3s;
-            cursor: pointer;
         }
+        .menu-box i { font-size: 30px; margin-bottom: 12px; }
+        .btn-logout { background: var(--biru-tua); color: #fff; padding: 14px 40px; border-radius: 50px; margin-top: 40px; cursor: pointer; border: 2px solid var(--emas-lux); }
     </style>
 </head>
 <body>
@@ -306,16 +235,16 @@
         <h3 class="org-title">Portal Komsel JC</h3>
  
         <div class="profile-section">
-            <div class="notif-email-container shake-active" onclick="bukaPesanKegiatan()">
+            <div class="notif-email-container" id="notif-trigger" onclick="bukaPesanKegiatan()">
                 <i class="fa-solid fa-envelope"></i>
-                <span class="notif-badge">1</span>
+                <span class="notif-badge" id="notif-badge">0</span>
             </div>
 
-            <a href="setting.html" class="setting-icon-profile"><i class="fa-solid fa-gear"></i></a>
+            <a href="setting.html" class="setting-icon-profile" style="position: absolute; top: 18px; right: 18px; color: var(--biru-tua);"><i class="fa-solid fa-gear"></i></a>
             
-            <div class="profile-img-container" id="photo-area">
-                <i class="fa-solid fa-circle-user" id="default-icon"></i>
-                <img id="user-photo" src="" style="display: none;">
+            <div class="profile-img-container" style="width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 12px auto; overflow: hidden; border: 3px solid var(--emas-lux); display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-circle-user" id="default-icon" style="font-size: 80px; color: var(--biru-safir);"></i>
+                <img id="user-photo" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
            </div>
             <h2 id="disp_nama">User</h2>
             <p id="disp_komsel">KOMSEL JC</p>
@@ -325,14 +254,13 @@
             <a href="profil.html" class="menu-box"><i class="fa-solid fa-user-shield"></i>Profil Saya</a>
             <a href="kehadiran.html" class="menu-box"><i class="fa-solid fa-calendar-check"></i>Kehadiran</a>
             <a href="baca-alkitab.html" class="menu-box"><i class="fa-solid fa-book-bible"></i>Laporan Baca</a>
-            <a href="input-renungan.html" class="menu-box renungan-box"><i class="fa-solid fa-book-open-reader"></i>Input Renungan</a>
+            <a href="input-renungan.html" class="menu-box"><i class="fa-solid fa-book-open-reader"></i>Input Renungan</a>
             <a href="statistik.html" class="menu-box"><i class="fa-solid fa-chart-pie"></i>Statistik</a>
-            <a href="leaderboard.html" class="menu-box"><i class="fa-solid fa-crown icon-special"></i>Peringkat JC</a>
+            <a href="leaderboard.html" class="menu-box"><i class="fa-solid fa-crown"></i>Peringkat JC</a>
             <a href="laporan-komsel.html" class="menu-box"><i class="fa-solid fa-file-signature"></i>Laporan Komsel</a>
-            <a href="input-kegiatan.html" class="menu-box kegiatan-box"><i class="fa-solid fa-tower-broadcast"></i>Informasi Kegiatan</a>
-            <a href="lacak-domba.html" class="menu-box lacak-box"><i class="fa-solid fa-map-location-dot"></i>Lacak Domba</a>
+            <a href="input-kegiatan.html" class="menu-box"><i class="fa-solid fa-tower-broadcast"></i>Informasi Kegiatan</a>
+            <a href="lacak-domba.html" class="menu-box"><i class="fa-solid fa-map-location-dot"></i>Lacak Domba</a>
             <a href="javascript:location.reload()" class="menu-box" style="color: #28a745;"><i class="fa-solid fa-arrows-rotate"></i>Refresh</a>
-            <a href="saran.html" class="menu-box"><i class="fa-solid fa-comment-dots"></i>Saran</a>
         </div>
  
         <div class="btn-logout" onclick="logoutDanHapusDevice()">KELUAR SISTEM</div>
@@ -341,16 +269,13 @@
     <div id="modalPengumuman" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <i class="fa-solid fa-envelope-open-text" style="font-size: 50px; margin-bottom: 10px;"></i>
-                <h3 style="margin: 0; letter-spacing: 1px;">Pesan Untuk Boby</h3>
+                <i class="fa-solid fa-envelope-open-text" style="font-size: 40px; margin-bottom: 10px;"></i>
+                <h3 style="margin: 0;">Pesan Untuk Boby</h3>
             </div>
-            <div id="isiModal" class="modal-body">
-                <div class="info-item">
-                    <p id="pesan-isi" style="text-align:center;">Memuat pesan surgawi...</p>
-                </div>
+            <div id="isi-pesan-container" class="modal-body">
+                <p style="text-align: center;">Memuat pesan...</p>
             </div>
             <div class="btn-action-container">
-                <button id="btn-buka-full" class="btn-open-full" style="display: none;">Baca Selengkapnya</button>
                 <button class="btn-close-popup" onclick="tutupModal()">Tutup</button>
             </div>
         </div>
@@ -373,159 +298,99 @@
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const database = firebase.database();
 
-        // 1. FUNGSI UPDATE WAKTU
+        // 1. UPDATE WAKTU
         function updateWaktuDanRunningText() {
             const now = new Date();
             const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
             const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            
-            const dayName = days[now.getDay()];
-            const date = now.getDate();
-            const monthName = months[now.getMonth()];
-            const year = now.getFullYear();
-            const time = now.toLocaleTimeString('id-ID', { hour12: false });
-            
-            document.getElementById('display-tanggal').innerText = `${dayName}, ${date} ${monthName} ${year}`;
-            document.getElementById('digital-clock').innerText = `${time} WIT`;
-            
-            const runningContent = `Shalom! ${dayName}, ${date} ${monthName} ${year} | ${time} WIT | SISTEM INFORMASI KOMSEL JC - PONDOK PEMULIHAN PAPUA | TETAP SEMANGAT MELAYANI TUHAN!`;
-            document.getElementById('running-text').innerText = runningContent;
+            document.getElementById('display-tanggal').innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+            document.getElementById('digital-clock').innerText = `${now.toLocaleTimeString('id-ID', { hour12: false })} WIT`;
         }
 
-        // 2. FUNGSI MODAL POPUP DENGAN INTEGRASI SCRIPT FIRESTORE BARU
-        function bukaPesanKegiatan() {
-            const modal = document.getElementById('modalPengumuman');
-            modal.style.display = 'flex';
-            
-            const notifContainer = document.querySelector('.notif-email-container');
-            if(notifContainer) notifContainer.classList.remove('shake-active');
+        // 2. LOGIKA PESAN MULTIPEL (INBOX)
+        const daftarPesanElement = document.getElementById('isi-pesan-container');
 
-            // --- INTEGRASI SCRIPT BARU KAMU ---
-            db.collection("pengumuman_komsel")
-              .orderBy("lastUpdate", "desc")
-              .limit(1)
-              .onSnapshot((querySnapshot) => {
-                const pesanIsiEl = document.getElementById('pesan-isi');
-                const btnFull = document.getElementById('btn-buka-full');
+        db.collection("pengumuman_komsel")
+          .orderBy("timestamp", "desc") 
+          .onSnapshot((snapshot) => {
+            daftarPesanElement.innerHTML = ""; 
+            let unreadCount = 0;
 
-                if (!querySnapshot.empty) {
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const docId = doc.id;
-                        
-                        // Menampilkan potongan teks (Preview)
-                        const previewTeks = data.detail.length > 100 ? data.detail.substring(0, 100) + "..." : data.detail;
-                        pesanIsiEl.innerText = previewTeks;
+            if (snapshot.empty) {
+                daftarPesanElement.innerHTML = "<p style='text-align:center;'>Tidak ada informasi saat ini.</p>";
+            }
 
-                        // Tampilkan tombol buka utuh
-                        btnFull.style.display = 'inline-block';
-                        btnFull.onclick = function() {
-                            localStorage.setItem('pesan_terakhir_id', docId);
-                            window.location.href = `informasi-kegiatan.html?id=${docId}`;
-                        };
-                    });
-                } else {
-                    pesanIsiEl.innerText = "Belum ada pengumuman baru.";
-                    btnFull.style.display = 'none';
-                }
-            }, (error) => {
-                console.error("Firestore Error:", error);
-                document.getElementById('pesan-isi').innerText = "Gagal memuat pesan.";
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const id = doc.id;
+                
+                if (data.sudahDibaca === false) { unreadCount++; }
+
+                const pesanItem = `
+                    <div class="item-pesan ${data.sudahDibaca ? 'sudah-dibaca' : ''}" onclick="bukaDetail('${id}')">
+                        <strong style="display:block; color:var(--biru-tua);">${data.judul || 'Informasi Baru'}</strong>
+                        <p style="font-size: 13px; margin: 5px 0; color:#555;">${data.detail ? data.detail.substring(0, 60) : ''}...</p>
+                        <small style="color:#999; font-size:10px;">${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : ''}</small>
+                        ${data.sudahDibaca ? '' : '<span style="float:right; color:red; font-size:10px;">● Baru</span>'}
+                    </div>
+                `;
+                daftarPesanElement.innerHTML += pesanItem;
             });
+            updateBadgeNotif(unreadCount);
+        });
+
+        function updateBadgeNotif(count) {
+            const badge = document.getElementById('notif-badge');
+            const trigger = document.getElementById('notif-trigger');
+            if (count > 0) {
+                badge.innerText = count;
+                badge.style.display = 'block';
+                trigger.classList.add('shake-active');
+            } else {
+                badge.style.display = 'none';
+                trigger.classList.remove('shake-active');
+            }
+        }
+
+        function bukaDetail(id) {
+            window.location.href = `informasi-kegiatan.html?id=${id}`;
+        }
+
+        function bukaPesanKegiatan() {
+            document.getElementById('modalPengumuman').style.display = 'flex';
         }
 
         function tutupModal() {
             document.getElementById('modalPengumuman').style.display = 'none';
         }
 
-        // 3. FUNGSI TRACKING GPS
-        function aktifkanTrackingOtomatis() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(async (position) => {
-                    const userEmail = localStorage.getItem("userEmail");
-                    const userName = localStorage.getItem("userName");
-                    const userJC = localStorage.getItem("userJC");
-
-                    if (userEmail && userName) {
-                        await db.collection("live_tracking").doc(userEmail).set({
-                            nama: userName,
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            komsel: userJC || "1",
-                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true });
-                    }
-                }, (error) => {
-                    console.warn("GPS Warning: " + error.message);
-                }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 27000 });
+        // 3. FUNGSI LOGOUT (Lengkap)
+        async function logoutDanHapusDevice() {
+            if (confirm("Apakah Anda yakin ingin keluar?")) {
+                localStorage.clear();
+                window.location.href = "index.html";
             }
         }
 
-        // 4. SYNC DATA PROFIL
+        // 4. SYNC USER DATA (Sederhana)
         function syncUserData() {
             const userEmail = localStorage.getItem("userEmail");
-            if (!userEmail) { window.location.href = "index.html"; return; }
-
+            if (!userEmail) return;
             db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
                 if (!querySnapshot.empty) {
                     const data = querySnapshot.docs[0].data();
-                    localStorage.setItem("userName", data.nama);
-                    localStorage.setItem("userJC", data.komsel);
-
                     document.getElementById('disp_nama').innerText = data.nama || "User";
                     document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
-                    
-                    const photoImg = document.getElementById('user-photo');
-                    const defaultIcon = document.getElementById('default-icon');
-                    if (data.fotoUrl) { 
-                        photoImg.src = data.fotoUrl; 
-                        photoImg.style.display = "block"; 
-                        defaultIcon.style.display = "none"; 
-                    } else { 
-                        photoImg.style.display = "none"; 
-                        defaultIcon.style.display = "block"; 
-                    }
-                    aktifkanTrackingOtomatis();
                 }
             });
         }
 
-        // 5. FUNGSI LOGOUT
-        async function logoutDanHapusDevice() {
-            const userEmail = localStorage.getItem("userEmail");
-            const currentDeviceId = localStorage.getItem("myDeviceId");
-
-            if (confirm("Apakah Anda yakin ingin keluar?")) {
-                try {
-                    if (userEmail && currentDeviceId) {
-                        const snapshot = await db.collection("users").where("email", "==", userEmail).get();
-                        if (!snapshot.empty) {
-                            const docId = snapshot.docs[0].id;
-                            await db.collection("users").doc(docId).update({
-                                deviceIds: firebase.firestore.FieldValue.arrayRemove(currentDeviceId)
-                            });
-                        }
-                    }
-                } catch (e) {
-                    console.error("Logout error:", e);
-                } finally {
-                    localStorage.clear();
-                    window.location.href = "index.html";
-                }
-            }
-        }
-
-        // JALANKAN SEMUA FUNGSI SAAT LOAD
         setInterval(updateWaktuDanRunningText, 1000);
-        updateWaktuDanRunningText();
         syncUserData();
-
-        // Close modal jika klik area luar
+        
         window.onclick = function(event) {
-            const modal = document.getElementById('modalPengumuman');
-            if (event.target == modal) { tutupModal(); }
+            if (event.target.className === 'modal-overlay') tutupModal();
         }
     </script>
 </body>
