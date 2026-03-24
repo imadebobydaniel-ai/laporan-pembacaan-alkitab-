@@ -127,88 +127,110 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSy...", 
-            authDomain: "laporan-pembacaan-alkitab.firebaseapp.com",
-            projectId: "laporan-pembacaan-alkitab",
-            storageBucket: "laporan-pembacaan-alkitab.appspot.com",
-            messagingSenderId: "...",
-            appId: "..."
-        };
+    // 1. Konfigurasi Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSy...", 
+        authDomain: "laporan-pembacaan-alkitab.firebaseapp.com",
+        projectId: "laporan-pembacaan-alkitab",
+        storageBucket: "laporan-pembacaan-alkitab.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
+    };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    // 2. Fungsi Tampilkan/Sembunyikan Password
+    function toggleAdminPass() {
+        const passInput = document.getElementById('adminPass');
+        const eyeIcon = document.getElementById('toggleEye');
+        
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passInput.type = 'password';
+            eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
         }
-        const db = firebase.firestore();
+    }
 
-        function toggleAdminPass() {
-            const passInput = document.getElementById('adminPass');
-            const eyeIcon = document.getElementById('toggleEye');
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                passInput.type = 'password';
-                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
+    // 3. Logika Modal Notifikasi
+    const modal = document.getElementById('statusModal');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMsg = document.getElementById('modalMsg');
+    const modalBtn = document.getElementById('closeModal');
+
+    function showNotification(type, title, message) {
+        modalMsg.innerText = message;
+        modalTitle.innerText = title;
+        if (type === 'success') {
+            modalIcon.className = "fa-solid fa-circle-check";
+            modalIcon.style.color = "#2ecc71";
+            modalBtn.style.backgroundColor = "#2ecc71";
+        } else {
+            modalIcon.className = "fa-solid fa-circle-xmark";
+            modalIcon.style.color = "#e74c3c";
+            modalBtn.style.backgroundColor = "#e74c3c";
         }
+        modal.style.display = 'flex';
+    }
 
-        const modal = document.getElementById('statusModal');
-        const modalIcon = document.getElementById('modalIcon');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalMsg = document.getElementById('modalMsg');
-        const modalBtn = document.getElementById('closeModal');
+    modalBtn.onclick = () => modal.style.display = 'none';
 
-        function showNotification(type, title, message) {
-            modalMsg.innerText = message;
-            modalTitle.innerText = title;
-            if (type === 'success') {
-                modalIcon.className = "fa-solid fa-circle-check";
-                modalIcon.style.color = "#2ecc71";
-                modalBtn.style.backgroundColor = "#2ecc71";
-            } else {
-                modalIcon.className = "fa-solid fa-circle-xmark";
-                modalIcon.style.color = "#e74c3c";
-                modalBtn.style.backgroundColor = "#e74c3c";
-            }
-            modal.style.display = 'flex';
-        }
+    // 4. Logika Submit Login
+    document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btnSubmit = document.getElementById('btnSubmit');
+        
+        // Ambil input dan paksa ke huruf kecil (lowercase) untuk username
+        const userValue = document.getElementById('adminUser').value.trim().toLowerCase();
+        const passValue = document.getElementById('adminPass').value.trim();
 
-        modalBtn.onclick = () => modal.style.display = 'none';
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "Memverifikasi...";
 
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const btnSubmit = document.getElementById('btnSubmit');
-            const userValue = document.getElementById('adminUser').value.trim();
-            const passValue = document.getElementById('adminPass').value.trim();
+        // Mencari di koleksi 'admins'
+        db.collection("admins")
+            .where("username", "==", userValue)
+            .get()
+            .then((querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    let loginBerhasil = false;
+                    
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        // Cek Password secara manual (case sensitive)
+                        if (data.password === passValue) {
+                            loginBerhasil = true;
+                        }
+                    });
 
-            btnSubmit.disabled = true;
-            btnSubmit.innerText = "Memverifikasi...";
-
-            // Mencari di koleksi 'admins'
-            db.collection("admins")
-                .where("username", "==", userValue)
-                .where("password", "==", passValue)
-                .get()
-                .then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
+                    if (loginBerhasil) {
                         showNotification('success', 'Berhasil!', 'Selamat datang, Admin.');
                         setTimeout(() => {
                             window.location.href = "dashboard_admin.html";
                         }, 1500);
                     } else {
-                        showNotification('error', 'Gagal Login', 'Username atau Password salah sesuai database.');
+                        showNotification('error', 'Gagal Login', 'Password yang Anda masukkan salah.');
                         btnSubmit.disabled = false;
                         btnSubmit.innerText = "MASUK SISTEM";
                     }
-                })
-                .catch((error) => {
-                    console.error("Error:", error);
-                    showNotification('error', 'Sistem Error', 'Gagal memproses login.');
+                } else {
+                    showNotification('error', 'Gagal Login', 'Username tidak ditemukan di database.');
                     btnSubmit.disabled = false;
                     btnSubmit.innerText = "MASUK SISTEM";
-                });
-        });
-    </script>
+                }
+            })
+            .catch((error) => {
+                console.error("Error Firestore:", error);
+                showNotification('error', 'Sistem Error', 'Gagal terhubung ke database. Cek koneksi internet.');
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "MASUK SISTEM";
+            });
+    });
+</script>
 </body>
 </html>
