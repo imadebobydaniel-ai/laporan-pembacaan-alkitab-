@@ -39,7 +39,7 @@
         #display-tanggal { color: var(--emas-lux); }
         #digital-clock { color: var(--biru-muda); }
 
-        /* Running Text Header */
+        /* Running Text Header Atas */
         header { 
             background: white; 
            border-bottom: 3px solid var(--hijau-zamrud); 
@@ -54,14 +54,14 @@
         .running-content { 
             display: inline-block; 
            padding-left: 100%; 
-            animation: marquee 30s linear infinite; 
+            animation: marqueeTop 30s linear infinite; 
            font-weight: 900; 
             font-size: 13px; 
             color: var(--biru-tua);
            text-transform: uppercase;
            letter-spacing: 1px;
         }
-        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        @keyframes marqueeTop { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         .container { padding: 20px; max-width: 450px; margin: auto; text-align: center; }
         .org-title { 
@@ -73,37 +73,110 @@
             letter-spacing: 1px;
         }
 
-        /* Profile Section */
-        .profile-section { 
-            background: linear-gradient(145deg, #ffffff, #e6e6e6);
-            padding: 25px; 
-           border-radius: 25px; 
-            box-shadow: 10px 10px 20px #d1d1d1, -10px -10px 20px #ffffff;
-           margin-bottom: 30px; 
+        /* --- INTEGRASI KARTU PROFIL SLIDE --- */
+        .top-section-container {
             position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 30px auto;
+            height: 180px; 
+            overflow: hidden; 
+            border-radius: 25px;
+        }
+
+        .profile-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 2;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             border-top: 4px solid var(--biru-safir);
         }
-        .setting-icon-profile { position: absolute; top: 18px; right: 18px; color: var(--biru-tua); font-size: 22px; transition: 0.3s; }
-        .setting-icon-profile:hover { transform: rotate(90deg); color: var(--emas-lux); }
-        
+
+        .profile-card.closed {
+            transform: translateX(-110%);
+        }
+
+        .btn-toggle-side {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: #ff0000;
+            color: white;
+            border: none;
+            width: 25px;
+            height: 50px;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+
+        .news-slider {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--biru-tua);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        .news-tag {
+            color: var(--emas-lux);
+            font-size: 12px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #runningTextContainer {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .news-item {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marqueeNews 15s linear infinite;
+            font-weight: bold;
+        }
+
+        @keyframes marqueeNews {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        /* Style Internal Kartu Profil */
+        .setting-icon-profile { position: absolute; top: 15px; right: 15px; color: var(--biru-tua); font-size: 20px; }
         .profile-img-container { 
-            width: 90px; height: 90px; border-radius: 50%; 
-            margin: 0 auto 12px auto; overflow: hidden; 
-            display: flex; align-items: center; justify-content: center; 
+            width: 80px; height: 80px; border-radius: 50%; 
+            margin-bottom: 8px; overflow: hidden; 
             background: white; border: 3px solid var(--emas-lux);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-section i.fa-circle-user { font-size: 85px; color: var(--biru-safir); }
-        
-        .profile-section h2 { margin: 8px 0 2px 0; font-size: 24px; color: var(--biru-tua); font-weight: 800; }
-        #disp_email { margin-bottom: 8px; color: #555; font-size: 13px; font-style: italic; }
-        .profile-section p { margin: 0; color: var(--hijau-zamrud); font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        .profile-card h2 { margin: 5px 0 0 0; font-size: 20px; color: var(--biru-tua); font-weight: 800; }
+        .profile-card #disp_email { color: #555; font-size: 12px; font-style: italic; }
+        .profile-card p#disp_komsel { margin-top: 5px; color: var(--hijau-zamrud); font-weight: bold; font-size: 13px; }
+        /* --- END INTEGRASI --- */
 
         /* Grid Menu */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         
-        /* Base Menu Box Style (Disesuaikan agar seragam) */
         .menu-box { 
             background: white; 
             padding: 22px 10px; 
@@ -124,7 +197,6 @@
         .menu-box:active { transform: scale(0.92); }
         .menu-box:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
-        /* Icon 3D Effects */
         .menu-box i { 
             font-size: 30px; 
            margin-bottom: 12px; 
@@ -134,40 +206,16 @@
             filter: drop-shadow(2px 4px 3px rgba(0,0,0,0.2));
         }
 
-        /* Variasi Warna Ikon Khusus */
         .icon-special { 
             background: linear-gradient(135deg, var(--emas-lux), #fff3a0) !important;
            -webkit-background-clip: text !important;
            -webkit-text-fill-color: transparent !important;
         }
         
-        .lacak-box i {
-            color: #e11d48 !important;
-            background: none !important;
-           -webkit-text-fill-color: initial !important;
-        }
-
-        .kegiatan-box i {
-           background: linear-gradient(135deg, #ff416c, #ff4b2b) !important;
-           -webkit-background-clip: text !important;
-           -webkit-text-fill-color: transparent !important;
-            filter: drop-shadow(3px 5px 4px rgba(225, 29, 72, 0.4)) !important;
-        }
-
-        .renungan-box i {
-           background: linear-gradient(135deg, var(--biru-safir), var(--biru-muda)) !important;
-           -webkit-background-clip: text !important;
-           -webkit-text-fill-color: transparent !important;
-            filter: drop-shadow(3px 5px 4px rgba(0, 86, 179, 0.3)) !important;
-        }
-
-        /* Styling Ikon Doa (Sesuai masukan Anda) */
-        .doa-box i {
-            background: linear-gradient(135deg, #00a8cc, #007bff) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)) !important;
-        }
+        .lacak-box i { color: #e11d48 !important; background: none !important; -webkit-text-fill-color: initial !important; }
+        .kegiatan-box i { background: linear-gradient(135deg, #ff416c, #ff4b2b) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; }
+        .renungan-box i { background: linear-gradient(135deg, var(--biru-safir), var(--biru-muda)) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; }
+        .doa-box i { background: linear-gradient(135deg, #00a8cc, #007bff) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; }
 
         .btn-logout { 
             background: var(--biru-tua); 
@@ -199,15 +247,30 @@
     <div class="container">
         <h3 class="org-title">Portal Komsel JC</h3>
 
-        <div class="profile-section">
-            <a href="setting.html" class="setting-icon-profile"><i class="fa-solid fa-gear"></i></a>
-            <div class="profile-img-container" id="photo-area">
-                <i class="fa-solid fa-circle-user" id="default-icon"></i>
-               <img id="user-photo" src="" style="display: none;">
-          </div>
-            <h2 id="disp_nama">User</h2>
-            <div id="disp_email">user@email.com</div>
-            <p id="disp_komsel">KOMSEL JC</p>
+        <div class="top-section-container">
+            <button id="toggleProfile" class="btn-toggle-side">
+                <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
+            </button>
+
+            <div id="profileCard" class="profile-card">
+                <a href="setting.html" class="setting-icon-profile"><i class="fa-solid fa-gear"></i></a>
+                <div class="profile-img-container">
+                    <i class="fa-solid fa-circle-user" id="default-icon" style="font-size: 70px; color: var(--biru-safir);"></i>
+                    <img id="user-photo" src="" style="display: none;">
+                </div>
+                <h2 id="disp_nama">User</h2>
+                <div id="disp_email">user@email.com</div>
+                <p id="disp_komsel">KOMSEL JC</p>
+            </div>
+
+            <div id="newsSlider" class="news-slider">
+                <div class="slide-content" style="width: 100%;">
+                    <h4 class="news-tag">BERITA TERKINI</h4>
+                    <div id="runningTextContainer">
+                        <p class="news-item">Selamat Datang di Portal Komsel JC - Tetap Semangat Melayani!</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="menu-grid">
@@ -220,11 +283,9 @@
             <a href="baca-alkitab.html" class="menu-box">
                 <i class="fa-solid fa-book-bible"></i>Laporan Baca
             </a>
-
             <a href="input-renungan.html" class="menu-box renungan-box">
                 <i class="fa-solid fa-book-open-reader"></i>Input Renungan
             </a>
-
             <a href="statistik.html" class="menu-box">
                 <i class="fa-solid fa-chart-pie"></i>Statistik
             </a>
@@ -234,19 +295,15 @@
             <a href="laporan-komsel.html" class="menu-box">
                 <i class="fa-solid fa-file-signature"></i>Laporan Komsel
             </a>
-            
             <a href="input-kegiatan.html" class="menu-box kegiatan-box">
                 <i class="fa-solid fa-tower-broadcast"></i>Informasi Kegiatan
             </a>
-
             <a href="capaian-doa.html" class="menu-box doa-box">
                 <i class="fa-solid fa-hands-praying"></i>Capaian Doa
             </a>
-
             <a href="lacak-domba.html" class="menu-box lacak-box">
                 <i class="fa-solid fa-map-location-dot"></i>Lacak Domba
             </a>
-
             <a href="javascript:location.reload()" class="menu-box" style="color: #28a745;">
                 <i class="fa-solid fa-arrows-rotate"></i>Refresh
             </a>
@@ -274,6 +331,20 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // LOGIKA SLIDE PROFIL
+        const btnToggle = document.getElementById('toggleProfile');
+        const profileCard = document.getElementById('profileCard');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        btnToggle.addEventListener('click', () => {
+            profileCard.classList.toggle('closed');
+            if (profileCard.classList.contains('closed')) {
+                toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
+            } else {
+                toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
+            }
+        });
+
         // 1. FUNGSI UPDATE WAKTU
         function updateWaktuDanRunningText() {
             const now = new Date();
@@ -286,33 +357,31 @@
             const year = now.getFullYear();
             const time = now.toLocaleTimeString('id-ID', { hour12: false });
             
-          document.getElementById('display-tanggal').innerText = `${dayName}, ${date} ${monthName} ${year}`;
-          document.getElementById('digital-clock').innerText = `${time} WIT`;
+            document.getElementById('display-tanggal').innerText = `${dayName}, ${date} ${monthName} ${year}`;
+            document.getElementById('digital-clock').innerText = `${time} WIT`;
             
-            const runningContent = `Shalom! ${dayName}, ${date} ${monthName} ${year} | ${time} WIT | SISTEM INFORMASI KOMSEL JC - PONDOK PEMULIHAN PAPUA | TETAP SEMANGAT MELAYANI TUHAN!`;
-          document.getElementById('running-text').innerText = runningContent;
+            const runningContent = `Shalom! ${dayName}, ${date} ${monthName} ${year} | ${time} WIT | SISTEM INFORMASI KOMSEL JC | TETAP SEMANGAT MELAYANI!`;
+            document.getElementById('running-text').innerText = runningContent;
         }
 
         // 2. FUNGSI TRACKING GPS
         function aktifkanTrackingOtomatis() {
             if (navigator.geolocation) {
-              navigator.geolocation.watchPosition(async (position) => {
-                  const userEmail = localStorage.getItem("userEmail");
-                  const userName = localStorage.getItem("userName");
-                  const userJC = localStorage.getItem("userJC");
+                navigator.geolocation.watchPosition(async (position) => {
+                    const userEmail = localStorage.getItem("userEmail");
+                    const userName = localStorage.getItem("userName");
+                    const userJC = localStorage.getItem("userJC");
 
                     if (userEmail && userName) {
-                      await db.collection("live_tracking").doc(userEmail).set({
-                          nama: userName,
-                          lat: position.coords.latitude,
-                          lng: position.coords.longitude,
-                          komsel: userJC || "1",
-                          lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-                      }, { merge: true });
+                        await db.collection("live_tracking").doc(userEmail).set({
+                            nama: userName,
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            komsel: userJC || "1",
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
                     }
-                }, (error) => {
-                  console.warn("GPS Warning: " + error.message);
-                }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 27000 });
+                }, null, { enableHighAccuracy: true });
             }
         }
 
@@ -323,28 +392,26 @@
 
             document.getElementById('disp_email').innerText = userEmail;
 
-          db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
+            db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
                 if (!querySnapshot.empty) {
-                  const data = querySnapshot.docs[0].data();
-                  localStorage.setItem("userName", data.nama);
-                  localStorage.setItem("userJC", data.komsel);
+                    const data = querySnapshot.docs[0].data();
+                    localStorage.setItem("userName", data.nama);
+                    localStorage.setItem("userJC", data.komsel);
 
-                  document.getElementById('disp_nama').innerText = data.nama || "User";
-                  document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
-                  
-                  if(data.email) document.getElementById('disp_email').innerText = data.email;
+                    document.getElementById('disp_nama').innerText = data.nama || "User";
+                    document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
                     
-                  const photoImg = document.getElementById('user-photo');
-                  const defaultIcon = document.getElementById('default-icon');
+                    const photoImg = document.getElementById('user-photo');
+                    const defaultIcon = document.getElementById('default-icon');
                     if (data.fotoUrl) { 
-                      photoImg.src = data.fotoUrl; 
-                      photoImg.style.display = "block"; 
-                      defaultIcon.style.display = "none"; 
+                        photoImg.src = data.fotoUrl; 
+                        photoImg.style.display = "block"; 
+                        defaultIcon.style.display = "none"; 
                     } else { 
-                      photoImg.style.display = "none"; 
-                      defaultIcon.style.display = "block"; 
+                        photoImg.style.display = "none"; 
+                        defaultIcon.style.display = "block"; 
                     }
-                  aktifkanTrackingOtomatis();
+                    aktifkanTrackingOtomatis();
                 }
             });
         }
@@ -353,30 +420,26 @@
         async function logoutDanHapusDevice() {
             const userEmail = localStorage.getItem("userEmail");
             const currentDeviceId = localStorage.getItem("myDeviceId");
-
             if (confirm("Apakah Anda yakin ingin keluar?")) {
                 try {
                     if (userEmail && currentDeviceId) {
-                      const snapshot = await db.collection("users").where("email", "==", userEmail).get();
-                      if (!snapshot.empty) {
-                          const docId = snapshot.docs[0].id;
-                          await db.collection("users").doc(docId).update({
-                              deviceIds: firebase.firestore.FieldValue.arrayRemove(currentDeviceId)
-                          });
-                      }
+                        const snapshot = await db.collection("users").where("email", "==", userEmail).get();
+                        if (!snapshot.empty) {
+                            await db.collection("users").doc(snapshot.docs[0].id).update({
+                                deviceIds: firebase.firestore.FieldValue.arrayRemove(currentDeviceId)
+                            });
+                        }
                     }
-                } catch (e) {
-                  console.error("Logout error:", e);
-                } finally {
-                  localStorage.clear();
-                  window.location.href = "index.html";
+                } catch (e) { console.error(e); } finally {
+                    localStorage.clear();
+                    window.location.href = "index.html";
                 }
             }
         }
 
-      setInterval(updateWaktuDanRunningText, 1000);
-      updateWaktuDanRunningText();
-       syncUserData();
+        setInterval(updateWaktuDanRunningText, 1000);
+        updateWaktuDanRunningText();
+        syncUserData();
     </script>
 </body>
 </html>
