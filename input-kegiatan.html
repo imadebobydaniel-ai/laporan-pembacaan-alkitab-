@@ -26,18 +26,39 @@
         .btn-send:active { transform: scale(0.95); }
         .btn-back { display: block; text-align: center; margin-top: 15px; color: var(--biru-tua); text-decoration: none; font-weight: bold; font-size: 14px; }
 
+        /* Style untuk proteksi login */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--biru-tua); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-box {
+            background: white; padding: 30px; border-radius: 20px;
+            text-align: center; width: 85%; max-width: 350px;
+        }
+
+        /* Style untuk Dropdown Riwayat (Accordion) */
         .history-section { margin-top: 30px; border-top: 2px dashed #ddd; padding-top: 20px; }
-        .info-card { background: #fff5f5; border-left: 5px solid var(--merah-notif); padding: 15px; border-radius: 10px; margin-bottom: 15px; position: relative; }
-        .info-card h4 { margin: 0; color: var(--merah-notif); padding-right: 60px; font-size: 16px; }
-        .info-card p { margin: 5px 0; font-size: 13px; line-height: 1.4; }
+        .accordion-item {
+            background: white; border: 1px solid #ddd;
+            border-radius: 10px; margin-bottom: 8px; overflow: hidden;
+        }
+        .accordion-header {
+            padding: 15px; background: #fff5f5; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            border-left: 5px solid var(--merah-notif);
+        }
+        .accordion-header h4 { margin: 0; font-size: 14px; color: var(--biru-tua); flex: 1; }
+        .accordion-content {
+            padding: 15px; display: none; background: #fff;
+            border-top: 1px solid #eee; font-size: 13px;
+        }
+        .accordion-content.active { display: block; }
+        .chevron { transition: 0.3s; }
+        .rotate { transform: rotate(180deg); }
+
         .timestamp { font-size: 11px; color: #999; font-style: italic; display: block; margin-top: 8px; }
         
-        .card-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 12px; }
-        .action-btn { cursor: pointer; font-size: 16px; transition: 0.2s; }
-        .edit-btn { color: var(--biru-safir); }
-        .delete-btn { color: #ccc; }
-        .delete-btn:hover { color: var(--merah-notif); }
-
         .notification-overlay {
             display: none; position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; background: rgba(0, 51, 102, 0.8);
@@ -52,6 +73,17 @@
     </style>
 </head>
 <body>
+
+<div id="login-overlay">
+    <div class="login-box">
+        <i class="fa-solid fa-lock" style="font-size: 40px; color: var(--merah-notif); margin-bottom: 15px;"></i>
+        <h3>Akses Terbatas</h3>
+        <p style="font-size: 13px; color: #666;">Masukkan Password Ketua Komsel / Admin</p>
+        <input type="password" id="pass-input" placeholder="Masukkan Password" style="margin-bottom: 15px; text-align: center;">
+        <button class="btn-send" onclick="cekAkses()">MASUK PORTAL</button>
+        <a href="menu.html" class="btn-back">Kembali</a>
+    </div>
+</div>
 
 <div id="notif-container" class="notification-overlay">
     <div class="notification-block">
@@ -108,6 +140,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
 <script>
+    // Konfigurasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -119,11 +152,10 @@
         measurementId: "G-X14300RJL4"
     };
 
-    // INISIALISASI DENGAN PENGECEKAN
+    // Inisialisasi Firebase
     try {
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
-            console.log("Firebase Berhasil Terhubung");
         }
         var db = firebase.firestore();
     } catch (e) {
@@ -133,6 +165,25 @@
 
     let editID = null;
 
+    // FUNGSI CEK AKSES
+    function cekAkses() {
+        const pass = document.getElementById('pass-input').value;
+        const pksPass = "PKS"; 
+        const adminPass = "bukadong821";
+
+        if (pass === pksPass || pass === adminPass) {
+            document.getElementById('login-overlay').style.display = 'none';
+            sessionStorage.setItem("akses_komsel", "true");
+        } else {
+            alert("Password Salah! Akses ditolak.");
+        }
+    }
+
+    if (sessionStorage.getItem("akses_komsel") === "true") {
+        document.getElementById('login-overlay').style.display = 'none';
+    }
+
+    // FUNGSI PROSES DATA (TAMBAH/UPDATE)
     async function prosesData() {
         const kategori = document.getElementById('kategori').value;
         const judul = document.getElementById('judul').value;
@@ -161,15 +212,14 @@
             resetForm();
         } catch (e) {
             alert("Terjadi kesalahan: " + e.message);
-            console.error(e);
         } finally {
             btn.disabled = false;
         }
     }
 
+    // FUNGSI LOAD HISTORY (DROPDOWN MODE)
     function loadHistory() {
-        console.log("Mulai memuat riwayat...");
-        db.collection("pengumuman_komsel").orderBy("lastUpdate", "desc").limit(10).onSnapshot((snap) => {
+        db.collection("pengumuman_komsel").orderBy("lastUpdate", "desc").limit(15).onSnapshot((snap) => {
             const listDiv = document.getElementById('list-pengumuman');
             if (snap.empty) {
                 listDiv.innerHTML = "<p style='text-align:center;'>Belum ada riwayat.</p>";
@@ -182,21 +232,37 @@
                 const safeDetail = d.detail.replace(/`/g, '\\`');
                 
                 listDiv.innerHTML += `
-                    <div class="info-card">
-                        <div class="card-actions">
-                            <i class="fa-solid fa-pen-to-square action-btn edit-btn" onclick="isiDataEdit('${doc.id}', '${d.kategori}', '${d.judul}', '${d.lokasi}', \`${safeDetail}\`)"></i>
-                            <i class="fa-solid fa-trash action-btn delete-btn" onclick="hapusInfo('${doc.id}')"></i>
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <h4>[${d.kategori}] ${d.judul}</h4>
+                            <i class="fa-solid fa-chevron-down chevron"></i>
                         </div>
-                        <h4>[${d.kategori}] ${d.judul}</h4>
-                        <p><strong><i class="fa-solid fa-location-dot"></i></strong> ${d.lokasi || '-'}</p>
-                        <p>${d.detail}</p>
-                        <span class="timestamp">${t}</span>
+                        <div class="accordion-content">
+                            <p><strong><i class="fa-solid fa-location-dot"></i></strong> ${d.lokasi || '-'}</p>
+                            <p style="white-space: pre-wrap;">${d.detail}</p>
+                            <span class="timestamp"><i class="fa-regular fa-clock"></i> ${t}</span>
+                            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                            <div style="display: flex; gap: 20px; justify-content: flex-end;">
+                                <span class="edit-btn" style="cursor:pointer; font-size: 13px;" onclick="isiDataEdit('${doc.id}', '${d.kategori}', '${d.judul}', '${d.lokasi}', \`${safeDetail}\`)">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </span>
+                                <span class="delete-btn" style="cursor:pointer; font-size: 13px;" onclick="hapusInfo('${doc.id}')">
+                                    <i class="fa-solid fa-trash"></i> Hapus
+                                </span>
+                            </div>
+                        </div>
                     </div>`;
             });
         }, (err) => {
-            console.error("Error Snapshot:", err);
-            document.getElementById('list-pengumuman').innerHTML = "Gagal memuat: " + err.message;
+            document.getElementById('list-pengumuman').innerHTML = "Gagal memuat data.";
         });
+    }
+
+    function toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector('.chevron');
+        content.classList.toggle('active');
+        icon.classList.toggle('rotate');
     }
 
     function isiDataEdit(id, kat, jud, lok, det) {
@@ -207,8 +273,9 @@
         document.getElementById('detail').value = det;
         document.getElementById('form-title').innerText = "Edit Informasi";
         document.getElementById('btn-text').innerText = "SIMPAN PERUBAHAN";
+        document.getElementById('btn-submit').style.background = "var(--biru-safir)";
         document.getElementById('btn-cancel-edit').style.display = "block";
-        window.scrollTo(0,0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function resetForm() {
@@ -218,13 +285,16 @@
         document.getElementById('detail').value = "";
         document.getElementById('form-title').innerText = "Info Kegiatan Baru";
         document.getElementById('btn-text').innerText = "KIRIM SEKARANG";
+        document.getElementById('btn-submit').style.background = "var(--merah-notif)";
         document.getElementById('btn-cancel-edit').style.display = "none";
     }
 
     async function hapusInfo(id) {
-        if(confirm("Hapus data ini?")) {
-            await db.collection("pengumuman_komsel").doc(id).delete();
-            showCustomNotif("Terhapus", "fa-trash");
+        if(confirm("Apakah Anda yakin ingin menghapus pengumuman ini?")) {
+            try {
+                await db.collection("pengumuman_komsel").doc(id).delete();
+                showCustomNotif("Data telah dihapus", "fa-trash-can");
+            } catch (e) { alert("Gagal menghapus: " + e.message); }
         }
     }
 
