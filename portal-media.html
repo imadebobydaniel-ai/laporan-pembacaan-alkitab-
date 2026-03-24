@@ -140,11 +140,11 @@
             text-transform: uppercase;
         }
 
-        .badge-img { background: #e3f2fd; color: #1976d2; }
+        .badge-gambar { background: #e3f2fd; color: #1976d2; }
         .badge-video { background: #fff3e0; color: #f57c00; }
         .badge-audio { background: #f3e5f5; color: #7b1fa2; }
         .badge-pdf { background: #ffebee; color: #c62828; }
-        .badge-text { background: #e8f5e9; color: #2e7d32; }
+        .badge-teks { background: #e8f5e9; color: #2e7d32; }
 
         .btn-action {
             border: none;
@@ -181,20 +181,21 @@
                 <input type="text" id="judul" placeholder="Contoh: Kegiatan Ibadah Raya Minggu..." required>
             </div>
             
-            <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Tipe Media</label>
-                    <select id="tipe">
-                        <option value="Gambar">🖼️ Gambar (Poster/Foto)</option>
-                        <option value="Video">🎥 Video (YouTube/Link)</option>
-                        <option value="Audio">🎵 Audio (MP3/Podcast)</option>
-                        <option value="PDF">📄 Dokumen PDF</option>
-                        <option value="Text World">📝 Text World (Artikel/Berita)</option>
-                    </select>
-                </div>
-                <div class="form-group" style="flex: 2;">
-                    <label>URL Media / Link</label>
-                    <input type="url" id="url" placeholder="https://..." required>
+            <div class="form-group">
+                <label>Tipe Media</label>
+                <select id="tipeMedia" onchange="updateInputMedia()">
+                    <option value="gambar">Gambar (Poster/Foto)</option>
+                    <option value="video">Video (YouTube/Link)</option>
+                    <option value="audio">Audio (MP3/Podcast)</option>
+                    <option value="pdf">Dokumen PDF</option>
+                    <option value="teks">Text World (Artikel/Berita)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label id="labelMedia">URL Media / Link</label>
+                <div id="inputMediaWrapper">
+                    <input type="text" id="inputMedia" placeholder="https://..." required>
                 </div>
             </div>
 
@@ -203,7 +204,7 @@
                 <textarea id="deskripsi" placeholder="Tuliskan keterangan singkat konten di sini..."></textarea>
             </div>
 
-            <button type="submit" class="btn-submit">
+            <button type="submit" class="btn-submit" id="btnSubmit">
                 <i class="fas fa-paper-plane"></i> Publikasikan ke Portal
             </button>
         </form>
@@ -240,6 +241,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+    // Konfigurasi Firebase Anda
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -252,28 +254,56 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+    // Fungsi Update Input Berdasarkan Tipe
+    function updateInputMedia() {
+        const tipe = document.getElementById('tipeMedia').value;
+        const wrapper = document.getElementById('inputMediaWrapper');
+        const label = document.getElementById('labelMedia');
+
+        if (tipe === 'video') {
+            label.innerText = "Link YouTube / Video";
+            wrapper.innerHTML = '<input type="text" id="inputMedia" placeholder="Tempel link video di sini..." required>';
+        } 
+        else if (tipe === 'teks') {
+            label.innerText = "Isi Berita Lengkap";
+            wrapper.innerHTML = '<textarea id="inputMedia" rows="5" placeholder="Tulis artikel di sini..." required></textarea>';
+        }
+        else {
+            // Untuk gambar, audio, pdf sementara menggunakan input teks (URL)
+            // Jika ingin upload file asli, gunakan input type="file" dan Firebase Storage
+            label.innerText = "Link / URL " + tipe.charAt(0).toUpperCase() + tipe.slice(1);
+            wrapper.innerHTML = '<input type="text" id="inputMedia" placeholder="https://..." required>';
+        }
+    }
+
     // Fungsi Simpan Data
     document.getElementById('mediaForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = e.target.querySelector('button');
+        const btn = document.getElementById('btnSubmit');
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
 
+        const judul = document.getElementById('judul').value;
+        const tipe = document.getElementById('tipeMedia').value;
+        const urlContent = document.getElementById('inputMedia').value;
+        const deskripsi = document.getElementById('deskripsi').value;
+
         try {
             await db.collection("portal_media").add({
-                judul: document.getElementById('judul').value,
-                tipe: document.getElementById('tipe').value,
-                url: document.getElementById('url').value,
-                deskripsi: document.getElementById('deskripsi').value,
+                judul: judul,
+                tipe: tipe,
+                url: urlContent,
+                deskripsi: deskripsi,
                 tanggal: new Date().toLocaleDateString('id-ID'),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             alert("Konten berhasil dipublikasikan!");
             e.target.reset();
+            updateInputMedia(); // Kembalikan label ke default
             loadMedia();
         } catch (error) {
             console.error(error);
-            alert("Gagal menyimpan data");
+            alert("Gagal menyimpan data: " + error.message);
         }
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publikasikan ke Portal';
@@ -293,17 +323,10 @@
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
+                const id = doc.id;
                 
-                // Logika penentuan warna badge
-                let badgeClass = '';
-                switch(data.tipe) {
-                    case 'Gambar': badgeClass = 'badge-img'; break;
-                    case 'Video': badgeClass = 'badge-video'; break;
-                    case 'Audio': badgeClass = 'badge-audio'; break;
-                    case 'PDF': badgeClass = 'badge-pdf'; break;
-                    case 'Text World': badgeClass = 'badge-text'; break;
-                    default: badgeClass = 'badge-img';
-                }
+                // Class badge disesuaikan dengan value tipe (huruf kecil)
+                const badgeClass = "badge-" + data.tipe;
 
                 list.innerHTML += `
                     <tr>
@@ -312,7 +335,7 @@
                         <td><span class="badge ${badgeClass}">${data.tipe}</span></td>
                         <td><span style="color:var(--success); font-weight:bold;">● Aktif</span></td>
                         <td style="text-align: center;">
-                            <button class="btn-action btn-delete" onclick="deleteMedia('${doc.id}')">
+                            <button class="btn-action btn-delete" onclick="deleteMedia('${id}')" title="Hapus">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>
@@ -327,7 +350,7 @@
 
     // Fungsi Hapus Data
     async function deleteMedia(id) {
-        if(confirm("Hapus konten ini?")) {
+        if(confirm("Apakah Anda yakin ingin menghapus konten ini?")) {
             try {
                 await db.collection("portal_media").doc(id).delete();
                 loadMedia();
@@ -337,6 +360,7 @@
         }
     }
 
+    // Jalankan saat halaman dibuka
     window.onload = loadMedia;
 </script>
 </body>
