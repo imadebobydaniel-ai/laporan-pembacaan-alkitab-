@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://www.gstatic.com https://apis.google.com 'unsafe-inline'; frame-src 'self' https://www.youtube.com">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu Utama - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -269,129 +270,134 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // 1. CONFIG FIREBASE
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
-            authDomain: "boby-apps-project.firebaseapp.com", 
-            projectId: "boby-apps-project", 
-            storageBucket: "boby-apps-project.appspot.com", 
-            messagingSenderId: "125984859692", 
-            appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389" 
-        };
+       // 1. CONFIG FIREBASE
+const firebaseConfig = { 
+    apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
+    authDomain: "boby-apps-project.firebaseapp.com", 
+    projectId: "boby-apps-project", 
+    storageBucket: "boby-apps-project.appspot.com", 
+    messagingSenderId: "125984859692", 
+    appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389" 
+};
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-        // 2. FUNGSI PEMBANTU
-        function extractVideoID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+// 2. FUNGSI PEMBANTU (UTILITY)
+function getYouTubeEmbedUrl(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length == 11) {
+        const videoId = match[2];
+        // Tambahkan parameter autoplay, mute, dan loop agar lancar di dashboard
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}`;
+    }
+    return url;
+}
+
+function toggleMute() {
+    alert("Klik pada video untuk mengaktifkan suara (Kebijakan Browser)");
+}
+
+// 3. TAMPILKAN MEDIA DARI FIRESTORE
+async function displayLatestNews() {
+    const contentHolder = document.getElementById('contentHolder');
+    const newsTitle = document.getElementById('newsTitle');
+    const newsLabel = document.getElementById('newsLabel');
+    
+    try {
+        const snapshot = await db.collection("portal_media")
+                                 .orderBy("timestamp", "desc")
+                                 .limit(1)
+                                 .get();
+
+        if (snapshot.empty) {
+            contentHolder.innerHTML = `<div style="color:white; padding-top:80px;">Belum ada pengumuman terbaru.</div>`;
+            return;
         }
 
-        function toggleMute() {
-            alert("Klik pada video untuk mengaktifkan suara (Kebijakan Browser)");
-        }
+        const data = snapshot.docs[0].data();
+        newsTitle.innerText = data.judul || "Tanpa Judul";
+        newsLabel.innerText = "BERITA TERKINI";
 
-        // 3. TAMPILKAN MEDIA DARI FIRESTORE
-        async function displayLatestNews() {
-            const contentHolder = document.getElementById('contentHolder');
-            const newsTitle = document.getElementById('newsTitle');
-            const newsLabel = document.getElementById('newsLabel');
+        // Cek tipe media (mendukung string dari dropdown atau input manual)
+        const tipeLower = data.tipe.toLowerCase();
+        
+        if (tipeLower.includes('video')) {
+            const embedUrl = getYouTubeEmbedUrl(data.url);
+            contentHolder.innerHTML = `
+                <iframe width="100%" height="100%" 
+                    src="${embedUrl}" 
+                    frameborder="0" allow="autoplay; encrypted-media; fullscreen" 
+                    style="object-fit: cover; width:100%; height:100%;">
+                </iframe>
+                <div id="muteBtn" onclick="toggleMute()" style="position: absolute; bottom: 60px; right: 15px; z-index: 10; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 50%; color: white; cursor: pointer;">
+                    <i class="fa-solid fa-volume-xmark"></i>
+                </div>`;
+        } else {
+            // Jika Gambar atau lainnya
+            contentHolder.innerHTML = `<img src="${data.url}" style="width:100%; height:100%; object-fit:cover;">`;
+        }
+    } catch (error) {
+        console.error("Error loading news:", error);
+        contentHolder.innerHTML = "<p style='color:red; padding-top:80px;'>Gagal memuat media.</p>";
+    }
+}
+
+// 4. LOGIKA UI (TOGGLE PROFILE)
+const btnToggle = document.getElementById('toggleProfile');
+const profileCard = document.getElementById('profileCard');
+const toggleIcon = document.getElementById('toggleIcon');
+
+btnToggle.addEventListener('click', () => {
+    profileCard.classList.toggle('closed');
+    toggleIcon.className = profileCard.classList.contains('closed') ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+});
+
+// 5. TIME & SYNC DATA
+function updateWaktuDanRunningText() {
+    const now = new Date();
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const dayName = days[now.getDay()];
+    const time = now.toLocaleTimeString('id-ID', { hour12: false });
+    
+    document.getElementById('display-tanggal').innerText = `${dayName}, ${now.getDate()} Maret ${now.getFullYear()}`;
+    document.getElementById('digital-clock').innerText = `${time} WIT`;
+    document.getElementById('running-text').innerText = `Shalom! ${dayName} | ${time} WIT | SISTEM INFORMASI KOMSEL JC | TETAP SEMANGAT MELAYANI!`;
+}
+
+function syncUserData() {
+    const userEmail = localStorage.getItem("userEmail");
+    if (!userEmail) { window.location.href = "index.html"; return; }
+
+    document.getElementById('disp_email').innerText = userEmail;
+    db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
+        if (!querySnapshot.empty) {
+            const data = querySnapshot.docs[0].data();
+            document.getElementById('disp_nama').innerText = data.nama || "User";
+            document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
             
-            try {
-                const snapshot = await db.collection("portal_media")
-                                         .orderBy("timestamp", "desc")
-                                         .limit(1)
-                                         .get();
-
-                if (snapshot.empty) {
-                    contentHolder.innerHTML = `<div style="color:white; padding-top:80px;">Belum ada pengumuman.</div>`;
-                    return;
-                }
-
-                const data = snapshot.docs[0].data();
-                newsTitle.innerText = data.judul || "Tanpa Judul";
-                newsLabel.innerText = "BERITA TERKINI";
-
-                if (data.tipe === 'Video (YouTube/Link)' || data.tipe === 'video') {
-                    const videoId = extractVideoID(data.url);
-                    contentHolder.innerHTML = `
-                        <iframe width="100%" height="100%" 
-                            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}" 
-                            frameborder="0" allow="autoplay; encrypted-media" style="object-fit: cover; width:100%; height:100%;">
-                        </iframe>
-                        <div id="muteBtn" onclick="toggleMute()" style="position: absolute; bottom: 60px; right: 15px; z-index: 10; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 50%; color: white; cursor: pointer;">
-                            <i class="fa-solid fa-volume-xmark"></i>
-                        </div>`;
-                } else {
-                    // Jika Gambar
-                    contentHolder.innerHTML = `<img src="${data.url}" style="width:100%; height:100%; object-fit:cover;">`;
-                }
-            } catch (error) {
-                console.error("Error loading news:", error);
-                contentHolder.innerHTML = "<p style='color:red; padding-top:80px;'>Gagal memuat media.</p>";
+            if (data.fotoUrl) { 
+                const userPhoto = document.getElementById('user-photo');
+                userPhoto.src = data.fotoUrl;
+                userPhoto.style.display = "block";
+                document.getElementById('default-icon').style.display = "none";
             }
         }
+    });
+}
 
-        // 4. LOGIKA UI (TOGGLE PROFILE)
-        const btnToggle = document.getElementById('toggleProfile');
-        const profileCard = document.getElementById('profileCard');
-        const toggleIcon = document.getElementById('toggleIcon');
+function confirmLogout() { document.getElementById('modal-logout').style.display = 'flex'; }
+function closeLogoutModal() { document.getElementById('modal-logout').style.display = 'none'; }
+function executeLogout() { localStorage.clear(); window.location.href = "index.html"; }
 
-        btnToggle.addEventListener('click', () => {
-            profileCard.classList.toggle('closed');
-            if (profileCard.classList.contains('closed')) {
-                toggleIcon.className = 'fa-solid fa-chevron-right';
-            } else {
-                toggleIcon.className = 'fa-solid fa-chevron-left';
-            }
-        });
-
-        // 5. TIME & SYNC DATA
-        function updateWaktuDanRunningText() {
-            const now = new Date();
-            const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const dayName = days[now.getDay()];
-            const time = now.toLocaleTimeString('id-ID', { hour12: false });
-            
-            document.getElementById('display-tanggal').innerText = `${dayName}, ${now.getDate()} Maret ${now.getFullYear()}`;
-            document.getElementById('digital-clock').innerText = `${time} WIT`;
-            document.getElementById('running-text').innerText = `Shalom! ${dayName} | ${time} WIT | SISTEM INFORMASI KOMSEL JC | TETAP SEMANGAT MELAYANI!`;
-        }
-
-        function syncUserData() {
-            const userEmail = localStorage.getItem("userEmail");
-            if (!userEmail) { window.location.href = "index.html"; return; }
-
-            document.getElementById('disp_email').innerText = userEmail;
-            db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    const data = querySnapshot.docs[0].data();
-                    document.getElementById('disp_nama').innerText = data.nama || "User";
-                    document.getElementById('disp_komsel').innerText = data.komsel ? "JC " + data.komsel : "KOMSEL JC";
-                    
-                    if (data.fotoUrl) { 
-                        const userPhoto = document.getElementById('user-photo');
-                        userPhoto.src = data.fotoUrl;
-                        userPhoto.style.display = "block";
-                        document.getElementById('default-icon').style.display = "none";
-                    }
-                }
-            });
-        }
-
-        function confirmLogout() { document.getElementById('modal-logout').style.display = 'flex'; }
-        function closeLogoutModal() { document.getElementById('modal-logout').style.display = 'none'; }
-        function executeLogout() { localStorage.clear(); window.location.href = "index.html"; }
-
-        // START APP
-        window.onload = function() {
-            updateWaktuDanRunningText();
-            setInterval(updateWaktuDanRunningText, 1000);
-            syncUserData();
-            displayLatestNews();
-        };
+// START APP
+window.onload = function() {
+    updateWaktuDanRunningText();
+    setInterval(updateWaktuDanRunningText, 1000);
+    syncUserData();
+    displayLatestNews();
+};
     </script>
 </body>
 </html>
