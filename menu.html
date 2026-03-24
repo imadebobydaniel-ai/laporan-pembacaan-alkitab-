@@ -65,12 +65,12 @@
  
         .container { padding: 20px; max-width: 450px; margin: auto; text-align: center; }
         .org-title { 
-            margin: 10px 0 20px 0; 
-            font-weight: 900; 
-            color: var(--biru-tua); 
-            text-transform: uppercase; 
-            font-size: 18px;
-            letter-spacing: 1px;
+             margin: 10px 0 20px 0; 
+             font-weight: 900; 
+             color: var(--biru-tua); 
+             text-transform: uppercase; 
+             font-size: 18px;
+             letter-spacing: 1px;
         }
  
         /* Profile Section */
@@ -200,7 +200,6 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .btn-close-popup:active { transform: scale(0.95); }
 
         /* Menu Grid */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
@@ -296,18 +295,19 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
  
     <script>
-        // CONFIG FIREBASE
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
-            authDomain: "boby-apps-project.firebaseapp.com", 
-            projectId: "boby-apps-project", 
-            storageBucket: "boby-apps-project.appspot.com", 
-            messagingSenderId: "125984859692", 
+        const firebaseConfig = {
+            apiKey: "AIzaSy...", 
+            authDomain: "boby-apps-project.firebaseapp.com",
+            projectId: "boby-apps-project",
+            storageBucket: "boby-apps-project.appspot.com",
+            messagingSenderId: "125984859692",
             appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389",
             databaseURL: "https://boby-apps-project-default-rtdb.firebaseio.com" 
         };
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
 
         // 1. UPDATE WAKTU
@@ -383,7 +383,7 @@
         }
 
         // 3. FUNGSI LOGOUT
-        async function logoutDanHapusDevice() {
+        function logoutDanHapusDevice() {
             if (confirm("Apakah Anda yakin ingin keluar?")) {
                 localStorage.clear();
                 window.location.href = "index.html";
@@ -397,6 +397,7 @@
                 document.getElementById('disp_nama').innerText = "Tamu";
                 return;
             }
+            
             db.collection("users").where("email", "==", userEmail).onSnapshot((querySnapshot) => {
                 if (!querySnapshot.empty) {
                     const data = querySnapshot.docs[0].data();
@@ -417,7 +418,6 @@
         updateWaktuDanRunningText();
         syncUserData();
         
-        // Close modal on outside click
         window.onclick = function(event) {
             const modal = document.getElementById('modalPengumuman');
             if (event.target === modal) tutupModal();
