@@ -3,63 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Portal Media</title>
-    <link rel="stylesheet" href="css/style.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Portal Media - Pondok Pemulihan Papua</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #007bff;
+            --dark: #333;
+            --light: #f4f7f6;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        /* Header & Nav */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: #666;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover { color: var(--primary); }
+
+        /* Card Form */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* Form Styling */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        textarea { height: 100px; resize: vertical; }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover { background: #0056b3; }
+
+        /* Table Styling */
+        .table-responsive {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-img { background: #e3f2fd; color: #1976d2; }
+        .badge-video { background: #fff3e0; color: #f57c00; }
+
+        .btn-action {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            transition: 0.2s;
+        }
+
+        .btn-delete { color: var(--danger); }
+        .btn-delete:hover { transform: scale(1.2); }
+
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Portal Media</h1>
-            <p>Manajemen Konten Berita & Media Pondok Pemulihan</p>
-            <button onclick="window.location.href='admin.html'" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
-            </button>
-        </header>
 
-        <section class="form-section card">
-            <h3><i class="fas fa-plus-circle"></i> Tambah Konten Baru</h3>
-            <form id="mediaForm">
-                <div class="input-group">
-                    <label>Judul Konten/Berita</label>
-                    <input type="text" id="judulMedia" placeholder="Contoh: Kegiatan Ibadah Raya" required>
-                </div>
-                <div class="input-group">
-                    <label>Tipe Media</label>
-                    <select id="tipeMedia">
-                        <option value="gambar">Gambar (Poster/Foto)</option>
-                        <option value="video">Video (Link YouTube/Drive)</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>URL Media / Deskripsi</label>
-                    <textarea id="urlMedia" placeholder="Tempel link video atau deskripsi singkat berita di sini" required></textarea>
-                </div>
-                <button type="submit" class="btn-save">Publikasikan Ke Portal</button>
-            </form>
-        </section>
-
-        <section class="table-section card">
-            <h3><i class="fas fa-list"></i> Daftar Konten Terbit</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tgl Terbit</th>
-                            <th>Judul</th>
-                            <th>Tipe</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mediaList">
-                        </tbody>
-                </table>
-            </div>
-        </section>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1 style="margin:0; font-size: 24px;">Portal Media</h1>
+            <p style="margin:5px 0 0; color:#777; font-size: 13px;">Manajemen Berita & Konten Pondok Pemulihan</p>
+        </div>
+        <a href="admin.html" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+        </a>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="js/media-handler.js"></script>
+    <div class="card">
+        <h2><i class="fas fa-plus-circle" style="color: var(--success);"></i> Tambah Konten Baru</h2>
+        <form id="mediaForm">
+            <div class="form-group">
+                <label>Judul Konten / Berita</label>
+                <input type="text" id="judul" placeholder="Contoh: Kegiatan Ibadah Raya Minggu..." required>
+            </div>
+            
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Tipe Media</label>
+                    <select id="tipe">
+                        <option value="Gambar">Gambar (Poster/Foto)</option>
+                        <option value="Video">Video (YouTube/Link)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>URL Media / Link</label>
+                    <input type="url" id="url" placeholder="https://..." required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Deskripsi Singkat</label>
+                <textarea id="deskripsi" placeholder="Tuliskan keterangan singkat konten di sini..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Publikasikan ke Portal
+            </button>
+        </form>
+    </div>
+
+    <div class="card" style="padding: 0;">
+        <div style="padding: 20px 25px;">
+            <h2 style="border:none; margin:0;"><i class="fas fa-list-ul" style="color: var(--primary);"></i> Daftar Konten Terbit</h2>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tgl Terbit</th>
+                        <th>Judul</th>
+                        <th>Tipe</th>
+                        <th>Status</th>
+                        <th style="text-align: center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="mediaList">
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#999; padding: 40px;">
+                            <i class="fas fa-spinner fa-spin"></i> Memuat data...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+    // Konfigurasi Firebase (Gunakan config Anda)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+        authDomain: "boby-apps-project.firebaseapp.com",
+        projectId: "boby-apps-project",
+        storageBucket: "boby-apps-project.appspot.com",
+        messagingSenderId: "125984859692",
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+    };
+
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.firestore();
+
+    // Fungsi Simpan Data
+    document.getElementById('mediaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+
+        try {
+            await db.collection("portal_media").add({
+                judul: document.getElementById('judul').value,
+                tipe: document.getElementById('tipe').value,
+                url: document.getElementById('url').value,
+                deskripsi: document.getElementById('deskripsi').value,
+                tanggal: new Date().toLocaleDateString('id-ID'),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert("Konten berhasil dipublikasikan!");
+            e.target.reset();
+            loadMedia();
+        } catch (error) {
+            console.error(error);
+            alert("Gagal menyimpan data");
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publikasikan ke Portal';
+    });
+
+    // Fungsi Ambil Data
+    async function loadMedia() {
+        const list = document.getElementById('mediaList');
+        try {
+            const snapshot = await db.collection("portal_media").orderBy("timestamp", "desc").get();
+            list.innerHTML = "";
+            
+            if(snapshot.empty) {
+                list.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada konten.</td></tr>';
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const badgeClass = data.tipe === 'Gambar' ? 'badge-img' : 'badge-video';
+                list.innerHTML += `
+                    <tr>
+                        <td>${data.tanggal}</td>
+                        <td><strong>${data.judul}</strong></td>
+                        <td><span class="badge ${badgeClass}">${data.tipe}</span></td>
+                        <td><span style="color:var(--success); font-weight:bold;">● Aktif</span></td>
+                        <td style="text-align: center;">
+                            <button class="btn-action btn-delete" onclick="deleteMedia('${doc.id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    async function deleteMedia(id) {
+        if(confirm("Hapus konten ini?")) {
+            await db.collection("portal_media").doc(id).delete();
+            loadMedia();
+        }
+    }
+
+    window.onload = loadMedia;
+</script>
 </body>
 </html>
