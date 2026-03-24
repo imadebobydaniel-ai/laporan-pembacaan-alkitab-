@@ -138,7 +138,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// --- 2. FUNGSI ALKITAB (Koleksi: laporan_bacaan) ---
+// --- 2. FUNGSI ALKITAB ---
 function syncCapaianRealtime() {
     const selKomsel = document.getElementById('select-komsel-alkitab').value;
     const periode = parseInt(document.getElementById('select-periode-alkitab').value);
@@ -151,13 +151,14 @@ function syncCapaianRealtime() {
 
         snap.forEach(doc => {
             const d = doc.data();
+            // Handling format tanggal agar tidak error
             const tgl = d.tanggal?.toDate ? d.tanggal.toDate() : new Date(d.tanggal);
             
             if (tgl >= limitDate) {
                 totalGlobal++;
                 if (d.status === "Selesai") doneGlobal++;
                 
-                if (d.komsel === selKomsel) {
+                if (String(d.komsel).trim() === selKomsel.trim()) {
                     totalKomsel++;
                     if (d.status === "Selesai") doneKomsel++;
                 }
@@ -174,7 +175,7 @@ function syncCapaianRealtime() {
     });
 }
 
-// --- 3. FUNGSI DOA (Koleksi: laporan_doa) ---
+// --- 3. FUNGSI DOA (SLA) ---
 function syncDoaRealtime() {
     const selKomsel = document.getElementById('select-komsel-doa').value;
     
@@ -183,7 +184,7 @@ function syncDoaRealtime() {
 
         snap.forEach(doc => {
             const d = doc.data();
-            if (selKomsel === "Semua" || d.komsel === selKomsel) {
+            if (selKomsel === "Semua" || String(d.komsel).trim() === selKomsel.trim()) {
                 count++;
                 if (d.status === "Dijawab") {
                     dijawab++;
@@ -204,7 +205,7 @@ function syncDoaRealtime() {
     });
 }
 
-// --- 4. FUNGSI KEHADIRAN (Koleksi: kehadiran) ---
+// --- 4. FUNGSI KEHADIRAN ---
 function syncKehadiranRealtime() {
     const selKomsel = document.getElementById('select-komsel-hadir').value;
     const periode = parseInt(document.getElementById('select-periode-hadir').value);
@@ -216,7 +217,7 @@ function syncKehadiranRealtime() {
         snap.forEach(doc => {
             const d = doc.data();
             const tgl = d.tanggal?.toDate ? d.tanggal.toDate() : new Date(d.tanggal);
-            if (d.komsel === selKomsel && tgl >= limitDate) {
+            if (String(d.komsel).trim() === selKomsel.trim() && tgl >= limitDate) {
                 total++;
                 if (d.status === "Hadir") hadir++;
             }
@@ -227,7 +228,7 @@ function syncKehadiranRealtime() {
     });
 }
 
-// --- 5. FUNGSI GOLONGAN DARAH (Koleksi: users) ---
+// --- 5. FUNGSI GOLONGAN DARAH ---
 function syncGoldarRealtime() {
     const filter = document.getElementById('select-komsel-goldar').value;
     db.collection("users").onSnapshot(snap => {
@@ -259,14 +260,15 @@ function openUserDetail(type, filter, data) {
     list.innerHTML = "";
     
     const filtered = data.filter(u => (u.golongan_darah || u.golDarah || "").toUpperCase().trim() === type);
+    
     if (filtered.length === 0) {
-        list.innerHTML = "<p style='text-align:center'>Tidak ada data.</p>";
+        list.innerHTML = "<p style='text-align:center; padding:20px;'>Tidak ada data.</p>";
     } else {
         filtered.forEach(u => {
             const item = document.createElement('div');
             item.className = 'user-list-item';
             item.innerHTML = `
-                <img src="${u.foto_url || 'https://via.placeholder.com/45'}">
+                <img src="${u.foto_url || 'https://via.placeholder.com/45'}" onerror="this.src='https://via.placeholder.com/45'">
                 <div class="user-info-text">
                     <p class="user-name">${u.nama || 'Tanpa Nama'}</p>
                     <p class="user-jc">${u.komsel || '-'}</p>
@@ -277,7 +279,7 @@ function openUserDetail(type, filter, data) {
     document.getElementById('modal-goldar').style.display = 'flex';
 }
 
-// --- INISIALISASI SAAT HALAMAN DIBUKA ---
+// --- INISIALISASI ---
 window.onload = () => {
     syncCapaianRealtime();
     syncDoaRealtime();
