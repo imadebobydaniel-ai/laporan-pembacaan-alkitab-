@@ -76,7 +76,6 @@
         }
         .vibrate { animation: shake 0.5s infinite; color: var(--emas-lux) !important; }
 
-        /* Custom Modal Styling agar Full */
         .modal-content { border-radius: 20px; border: none; overflow: hidden; }
         .modal-header { background: var(--biru-tua); color: white; border-bottom: 3px solid var(--emas-lux); }
         .msg-item {
@@ -127,7 +126,7 @@
                     <h5 class="modal-title"><i class="fas fa-envelope-open me-2"></i>Inbox JC</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="p-2 bg-light d-flex justify-content-between align-items: center; border-bottom: 1px solid #ddd;">
+                <div class="p-2 bg-light d-flex justify-content-between align-items-center border-bottom: 1px solid #ddd;">
                     <div class="form-check ms-2 mt-1">
                         <input class="form-check-input" type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
                         <label class="form-check-label small fw-bold" for="selectAll">Pilih Semua</label>
@@ -224,7 +223,7 @@
         const db = firebase.firestore();
         let ytPlayer; 
 
-        // --- MANAJEMEN INBOX & CHECKBOX ---
+        // --- MANAJEMEN INBOX ---
         function toggleSelectAll(source) {
             const checkboxes = document.querySelectorAll('.msg-check');
             checkboxes.forEach(chk => chk.checked = source.checked);
@@ -246,15 +245,13 @@
                 if (docId === "WELCOME") {
                     localStorage.setItem("welcomeDeleted_" + userEmail, "true");
                 } else {
-                    // Dalam sistem multiuser, biasanya kita tidak menghapus dokumen pusat, 
-                    // melainkan menambahkan email ke field 'hiddenBy' agar tidak muncul lagi bagi user ini.
                     await db.collection("pengumuman_komsel").doc(docId).update({
                         hiddenBy: firebase.firestore.FieldValue.arrayUnion(userEmail)
                     });
                 }
             }
             document.getElementById('selectAll').checked = false;
-            alert("Pesan berhasil dihapus dari tampilan Anda.");
+            alert("Pesan berhasil dihapus.");
         }
 
         function monitorEmailInbox(userJC, userEmail) {
@@ -266,7 +263,6 @@
                 if(!listDiv) return;
                 listDiv.innerHTML = "";
 
-                // 1. Pesan Sambutan (Virtual)
                 const isDeleted = localStorage.getItem("welcomeDeleted_" + userEmail);
                 if (!isDeleted) {
                     const hasReadWelcome = localStorage.getItem("welcomeRead_" + userEmail);
@@ -281,11 +277,10 @@
                         </div>`;
                 }
 
-                // 2. Pesan dari Firestore
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const hiddenBy = data.hiddenBy || [];
-                    if (hiddenBy.includes(userEmail)) return; // Jangan tampilkan jika sudah dihapus
+                    if (hiddenBy.includes(userEmail)) return;
 
                     const target = data.target || data.target_jc; 
                     if (target === "Semua JC" || target === userJC || (Array.isArray(target) && target.includes(userJC))) {
@@ -304,7 +299,6 @@
                     }
                 });
 
-                // Update UI Feedback
                 const icon = document.getElementById('icon-mail');
                 const badge = document.getElementById('email-badge');
                 if (unreadCount > 0) {
@@ -324,7 +318,8 @@
                     sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
                 });
             } catch (e) { console.error(e); }
-            window.location.href = "detail-pengumuman.html?id=" + docId;
+            // LINK SUDAH DIPERBAIKI KE informasi-email.html
+            window.location.href = "informasi-email.html?id=" + docId;
         }
 
         function bacaWelcome(userEmail) {
