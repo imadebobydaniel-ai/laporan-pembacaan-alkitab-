@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Informasi Email - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <style>
+        :root { --primary: #003366; --gold: #D4AF37; --light: #f4f7f6; --danger: #dc3545; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: auto; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 5px solid var(--primary); }
+        
+        h2 { color: var(--primary); margin-top: 0; font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        .jc-selector { display: flex; gap: 12px; flex-wrap: wrap; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
+        .jc-option { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 13px; }
+
+        .btn-send { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-send:hover { background: #002244; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+
+        /* Table Log Style */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; font-size: 13px; }
+        table th { background: #f1f1f1; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
+        table td { padding: 10px; border-bottom: 1px solid #eee; }
+        
+        .badge-file { background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #666; }
+        .btn-action { padding: 5px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px; }
+        .btn-edit { background: var(--gold); color: white; }
+        .btn-delete { background: var(--danger); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2><i class="fas fa-envelope-open-text"></i> Portal Informasi Email (Broadcast)</h2>
+        
+        <input type="hidden" id="editDocId">
+
+        <div class="form-group">
+            <label>Judul Informasi</label>
+            <input type="text" id="infoJudul" placeholder="Contoh: Pengumuman Ibadah Minggu">
+        </div>
+
+        <div class="form-group">
+            <label>Target JC (Tujuan)</label>
+            <div class="jc-selector">
+                <label class="jc-option"><input type="checkbox" id="checkAllJC" onclick="toggleAllJC(this)"> <b>Pilih Semua</b></label>
+                <label class="jc-option"><input type="checkbox" class="jc-checkbox" value="1"> JC 1</label>
+                <label class="jc-option"><input type="checkbox" class="jc-checkbox" value="2"> JC 2</label>
+                <label class="jc-option"><input type="checkbox" class="jc-checkbox" value="3"> JC 3</label>
+                <label class="jc-option"><input type="checkbox" class="jc-checkbox" value="4"> JC 4</label>
+                <label class="jc-option"><input type="checkbox" class="jc-checkbox" value="5"> JC 5</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Lampiran File (JPG, PNG, PDF)</label>
+            <input type="file" id="infoFile" accept=".jpg,.png,.pdf">
+            <small style="color: #888;">*Kosongkan jika hanya ingin mengirim teks.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Isi Pesan</label>
+            <textarea id="infoPesan" rows="4" placeholder="Tuliskan detail informasi..."></textarea>
+        </div>
+
+        <button class="btn-send" id="btnSubmit" onclick="prosesData()"><i class="fas fa-paper-plane"></i> Publikasikan Informasi</button>
+        <button class="btn-send" id="btnCancelEdit" style="display:none; background:#666;" onclick="resetForm()">Batal Edit</button>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-history"></i> Log Informasi Terkirim</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="mainCheckAll" onclick="selectAllLog(this)"></th>
+                        <th>Tanggal</th>
+                        <th>Judul</th>
+                        <th>Target</th>
+                        <th>File</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="logTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Konfigurasi Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
+        authDomain: "boby-apps-project.firebaseapp.com",
+        projectId: "boby-apps-project",
+        storageBucket: "boby-apps-project.appspot.com",
+        messagingSenderId: "125984859692",
+        appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
+    };
+
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    function toggleAllJC(source) {
+        document.querySelectorAll('.jc-checkbox').forEach(cb => cb.checked = source.checked);
+    }
+
+    function selectAllLog(source) {
+        document.querySelectorAll('.log-checkbox').forEach(cb => cb.checked = source.checked);
+    }
+
+    // Fungsi Utama: Simpan atau Update
+    async function prosesData() {
+        const judul = document.getElementById('infoJudul').value;
+        const pesan = document.getElementById('infoPesan').value;
+        const targetJC = Array.from(document.querySelectorAll('.jc-checkbox:checked')).map(cb => cb.value);
+        const fileInput = document.getElementById('infoFile');
+        const editId = document.getElementById('editDocId').value;
+
+        if (!judul || !pesan || targetJC.length === 0) {
+            alert("Harap lengkapi Judul, Pesan, dan Target!");
+            return;
+        }
+
+        document.getElementById('btnSubmit').innerText = "Sedang Memproses...";
+        document.getElementById('btnSubmit').disabled = true;
+
+        let fileUrl = "";
+        let fileName = "";
+
+        // Logika Upload File jika ada
+        if (fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const storageRef = storage.ref(`informasi_files/${Date.now()}_${file.name}`);
+            await storageRef.put(file);
+            fileUrl = await storageRef.getDownloadURL();
+            fileName = file.name;
+        }
+
+        const payload = {
+            judul: judul,
+            detail: pesan,
+            target_jc: targetJC,
+            fileUrl: fileUrl,
+            fileName: fileName,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            sudahDibaca: [] 
+        };
+
+        try {
+            if (editId) {
+                // Update Data
+                await db.collection("pengumuman_komsel").doc(editId).update(payload);
+                alert("Informasi Berhasil Diupdate!");
+            } else {
+                // Simpan Baru
+                await db.collection("pengumuman_komsel").add(payload);
+                alert("Informasi Berhasil Terkirim!");
+            }
+            resetForm();
+        } catch (e) { console.error(e); alert("Terjadi kesalahan."); }
+    }
+
+    // Load Data ke Tabel
+    db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        const tbody = document.getElementById('logTableBody');
+        tbody.innerHTML = "";
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            const date = d.timestamp ? d.timestamp.toDate().toLocaleDateString('id-ID') : '-';
+            const fileTag = d.fileUrl ? `<span class="badge-file"><i class="fas fa-file"></i> Ada</span>` : '-';
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td><input type="checkbox" class="log-checkbox"></td>
+                    <td>${date}</td>
+                    <td><b>${d.judul}</b></td>
+                    <td>JC ${d.target_jc.join(', ')}</td>
+                    <td>${fileTag}</td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="prepareEdit('${doc.id}', '${d.judul}', '${d.detail}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn-action btn-delete" onclick="hapusInfo('${doc.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        });
+    });
+
+    function prepareEdit(id, judul, detail) {
+        document.getElementById('editDocId').value = id;
+        document.getElementById('infoJudul').value = judul;
+        document.getElementById('infoPesan').value = detail;
+        document.getElementById('btnSubmit').innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
+        document.getElementById('btnSubmit').disabled = false;
+        document.getElementById('btnCancelEdit').style.display = "block";
+        window.scrollTo(0,0);
+    }
+
+    function resetForm() {
+        document.getElementById('editDocId').value = "";
+        document.getElementById('infoJudul').value = "";
+        document.getElementById('infoPesan').value = "";
+        document.getElementById('infoFile').value = "";
+        document.getElementById('btnSubmit').innerHTML = "<i class='fas fa-paper-plane'></i> Publikasikan Informasi";
+        document.getElementById('btnSubmit').disabled = false;
+        document.getElementById('btnCancelEdit').style.display = "none";
+    }
+
+    async function hapusInfo(id) {
+        if (confirm("Hapus informasi ini dari sistem?")) {
+            await db.collection("pengumuman_komsel").doc(id).delete();
+        }
+    }
+</script>
+</body>
+</html>
