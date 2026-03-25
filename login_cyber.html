@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval';">
     <title>Cybernet Admin Access - Pondok Pemulihan Papua</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <style>
-        /* --- STYLING UTAMA & CYBERNET ELEMENTS --- */
         :root {
             --cyan-neon: #00ffff;
             --blue-neon: #007bff;
@@ -16,61 +20,37 @@
         }
 
         body, html {
-            height: 100%;
-            margin: 0;
+            height: 100%; margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--dark-bg);
-            color: #fff;
-            overflow: hidden; 
+            background-color: var(--dark-bg); color: #fff; overflow: hidden; 
         }
 
-        /* --- BACKGROUND VIDEO --- */
         #bg-video {
-            position: fixed;
-            right: 0; bottom: 0;
-            min-width: 100%; min-height: 100%;
-            z-index: -100;
-            filter: brightness(0.4) saturate(1.2) contrast(1.1);
-            object-fit: cover;
+            position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%;
+            z-index: -100; filter: brightness(0.4) saturate(1.2) contrast(1.1); object-fit: cover;
         }
 
         .cyber-grid {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
                 linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, .05) 25%, rgba(0, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, .05) 75%, rgba(0, 255, 255, .05) 76%, transparent 77%, transparent),
                 linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, .05) 25%, rgba(0, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, .05) 75%, rgba(0, 255, 255, .05) 76%, transparent 77%, transparent);
-            background-size: 50px 50px;
-            z-index: -50;
-            pointer-events: none;
+            background-size: 50px 50px; z-index: -50; pointer-events: none;
         }
 
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            perspective: 1000px;
-        }
+        .login-container { display: flex; justify-content: center; align-items: center; height: 100vh; perspective: 1000px; }
 
         .cyber-panel {
-            background-color: var(--panel-bg);
-            padding: 40px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 420px;
-            text-align: center;
+            background-color: var(--panel-bg); padding: 40px; border-radius: 20px;
+            width: 90%; max-width: 420px; text-align: center;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), 0 0 5px rgba(0, 255, 255, 0.4) inset;
-            border: 2px solid var(--cyan-neon);
-            position: relative;
-            backdrop-filter: blur(10px);
+            border: 2px solid var(--cyan-neon); position: relative; backdrop-filter: blur(10px);
         }
 
         .header-icon { font-size: 60px; color: var(--cyan-neon); text-shadow: 0 0 15px var(--cyan-neon); margin-bottom: 15px; }
         h2 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--cyan-neon); text-transform: uppercase; text-shadow: 0 0 10px var(--cyan-neon); }
         .subtitle { color: #aaa; margin-bottom: 40px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- FORM STYLING --- */
         .form-group { margin-bottom: 25px; text-align: left; position: relative; }
         label { display: block; margin-bottom: 10px; font-size: 11px; font-weight: bold; color: var(--cyan-neon); text-transform: uppercase; }
         .input-wrapper { position: relative; display: flex; align-items: center; }
@@ -80,7 +60,6 @@
         input:focus + i.fa-solid { color: var(--cyan-neon); }
         .toggle-password { position: absolute; right: 15px; cursor: pointer; color: #555; }
 
-        /* --- BUTTONS --- */
         .btn-cyber { width: 100%; padding: 16px; background: transparent; color: var(--cyan-neon); border: 2px solid var(--cyan-neon); border-radius: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 15px; }
         .btn-cyber:hover { background: var(--cyan-neon); color: #000; box-shadow: 0 0 30px rgba(0, 255, 255, 0.6); }
 
@@ -89,12 +68,10 @@
 
         .back-link { display: block; margin-top: 20px; color: #666; text-decoration: none; font-size: 11px; text-transform: uppercase; }
 
-        /* --- MODAL GENERATE ADMIN --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 10000; justify-content: center; align-items: center; }
         .modal-content { background: var(--panel-bg); padding: 30px; border-radius: 20px; width: 85%; max-width: 380px; border: 2px solid var(--cyan-neon); text-align: center; box-shadow: 0 0 20px var(--cyan-neon); }
         .btn-modal-action { width: 100%; padding: 12px; border-radius: 8px; margin-top: 15px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- LOG BOX --- */
         #resultLog { display: none; margin-top: 20px; padding: 15px; background: rgba(0, 255, 255, 0.1); border: 1px dashed var(--cyan-neon); border-radius: 10px; text-align: left; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -143,33 +120,19 @@
     <div id="genModal" class="modal-overlay">
         <div class="modal-content">
             <h3 style="color: var(--cyan-neon); margin-top: 0; letter-spacing: 2px;">ADMIN GENERATOR</h3>
-            <p style="font-size: 11px; color: #888; margin-bottom: 20px;">Lengkapi data di bawah untuk membuat akses admin baru.</p>
-            
-            <div class="form-group">
-                <input type="text" id="newName" placeholder="NAMA LENGKAP" style="padding-left: 15px;">
-            </div>
-            <div class="form-group">
-                <input type="text" id="newAdminUser" placeholder="USERNAME" style="padding-left: 15px;">
-            </div>
-            <div class="form-group">
-                <input type="password" id="newAdminPass" placeholder="PASSWORD" style="padding-left: 15px;">
-            </div>
-            <div class="form-group">
-                <input type="password" id="confirmPass" placeholder="MASUKAN PASSWORD YANG SAMA" style="padding-left: 15px;">
-            </div>
-
+            <div class="form-group"><input type="text" id="newName" placeholder="NAMA LENGKAP" style="padding-left: 15px;"></div>
+            <div class="form-group"><input type="text" id="newAdminUser" placeholder="USERNAME" style="padding-left: 15px;"></div>
+            <div class="form-group"><input type="password" id="newAdminPass" placeholder="PASSWORD" style="padding-left: 15px;"></div>
+            <div class="form-group"><input type="password" id="confirmPass" placeholder="KONFIRMASI PASSWORD" style="padding-left: 15px;"></div>
             <button class="btn-modal-action" onclick="generateSimpel()" style="background: var(--cyan-neon); color: #000;">GENERATE ACCESS</button>
-            
             <div id="resultLog">
-                <p style="color: #2ecc71; font-weight: bold; font-size: 12px; margin: 0 0 10px 0;">✔ Selamat! User dan Password Anda telah jadi:</p>
-                <div style="font-family: monospace; font-size: 12px; color: #fff; line-height: 1.6;">
-                    <div>NAME: <span id="logName" style="color: var(--cyan-neon);"></span></div>
+                <p style="color: #2ecc71; font-weight: bold; font-size: 12px;">✔ Berhasil Dibuat!</p>
+                <div style="font-family: monospace; font-size: 11px; color: #fff;">
                     <div>USER: <span id="logUser" style="color: var(--cyan-neon);"></span></div>
                     <div>PASS: <span id="logPass" style="color: var(--cyan-neon);"></span></div>
                 </div>
             </div>
-
-            <button class="btn-modal-action" onclick="closeGenModal()" style="background: transparent; color: #666; font-size: 11px; border: 1px solid #333;">CLOSE</button>
+            <button class="btn-modal-action" onclick="closeGenModal()" style="background: transparent; color: #666; border: 1px solid #333;">CLOSE</button>
         </div>
     </div>
 
@@ -183,11 +146,23 @@
     </div>
 
 <script>
-    // 1. Akun Master Tetap Berfungsi
+    // --- 1. KONFIGURASI FIREBASE ---
+    // GANTI DENGAN CONFIG MILIKMU SENDIRI DARI FIREBASE CONSOLE
+    const firebaseConfig = {
+        apiKey: "AIzaSy...",
+        authDomain: "komsel-jc.firebaseapp.com",
+        projectId: "komsel-jc",
+        storageBucket: "komsel-jc.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const VALID_USERNAME = "admin";
     const VALID_PASSWORD = "bukadong821";
 
-    // 2. Toggle Password
     function togglePasswordVisibility(inputId, eyeId) {
         const passInput = document.getElementById(inputId);
         const eyeIcon = document.getElementById(eyeId);
@@ -200,90 +175,81 @@
         }
     }
 
-    // 3. Fungsi Modal
     function openGenModal() { document.getElementById('genModal').style.display = 'flex'; }
     function closeGenModal() { 
         document.getElementById('genModal').style.display = 'none';
         document.getElementById('resultLog').style.display = 'none';
     }
 
-    // 4. GENERATE ADMIN (Simpan ke Firebase)
+    // --- 2. GENERATE ADMIN KE COLLECTION 'admins' ---
     async function generateSimpel() {
         const nama = document.getElementById('newName').value;
         const user = document.getElementById('newAdminUser').value;
         const pass = document.getElementById('newAdminPass').value;
         const confirm = document.getElementById('confirmPass').value;
 
-        if (!nama || !user || !pass) { alert("Mohon lengkapi semua kolom!"); return; }
+        if (!nama || !user || !pass) { alert("Lengkapi data!"); return; }
         if (pass !== confirm) { alert("Password tidak cocok!"); return; }
 
         try {
-            await db.collection("admin_users").add({
+            await db.collection("admins").add({
                 nama: nama,
                 username: user,
                 password: pass,
-                createdAt: new Date()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            document.getElementById('logName').innerText = nama;
             document.getElementById('logUser').innerText = user;
             document.getElementById('logPass').innerText = pass;
             document.getElementById('resultLog').style.display = 'block';
         } catch (error) {
             console.error(error);
-            alert("Gagal koneksi ke database!");
+            alert("Database Error: " + error.message);
         }
     }
 
-    // 5. Notifikasi Visual
     function showCyberNotification(type, title, message) {
         const modal = document.getElementById('cyberModal');
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalMsg').innerText = message;
-        
         const icon = document.getElementById('modalIcon');
-        const btn = document.getElementById('closeModal');
-        const border = document.getElementById('modalBorder');
-
         if (type === 'success') {
-            icon.className = "fa-solid fa-shield-check";
-            icon.style.color = "#2ecc71";
-            btn.style.backgroundColor = "#2ecc71";
-            border.style.borderColor = "#2ecc71";
+            icon.className = "fa-solid fa-shield-check"; icon.style.color = "#2ecc71";
         } else {
-            icon.className = "fa-solid fa-bug";
-            icon.style.color = "#e74c3c";
-            btn.style.backgroundColor = "#e74c3c";
-            border.style.borderColor = "#e74c3c";
+            icon.className = "fa-solid fa-bug"; icon.style.color = "#e74c3c";
         }
         modal.style.display = 'flex';
     }
 
     document.getElementById('closeModal').onclick = () => document.getElementById('cyberModal').style.display = 'none';
 
-    // 6. LOGIN SUBMIT (Fix Looping & Fix Database Check)
+    // --- 3. LOGIN DENGAN PRIORITAS MASTER ACCOUNT ---
     document.getElementById('cyberLoginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const user = document.getElementById('cyberUser').value.trim();
         const pass = document.getElementById('cyberPass').value.trim();
 
-        try {
-            // Cek ke Database Firestore
-            const snapshot = await db.collection("admin_users")
-                                     .where("username", "==", user)
-                                     .where("password", "==", pass)
-                                     .get();
+        // CEK MASTER ACCOUNT DULU (Agar tetap bisa masuk jika DB error)
+        if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
+            localStorage.setItem("adminLoggedIn", "true");
+            showCyberNotification('success', 'Access Granted', 'Master Admin Verified.');
+            setTimeout(() => { window.location.href = "menu.html"; }, 1500);
+            return;
+        }
 
-            // Verifikasi Login (Master Account ATAU Database Account)
-            if (!snapshot.empty || (user === VALID_USERNAME && pass === VALID_PASSWORD)) {
-                
-                // PENTING: Simpan session agar tidak looping di menu.html
+        // CEK DATABASE
+        try {
+            const snapshot = await db.collection("admins")
+                .where("username", "==", user)
+                .where("password", "==", pass)
+                .get();
+
+            if (!snapshot.empty) {
                 localStorage.setItem("adminLoggedIn", "true");
-                
-                showCyberNotification('success', 'Access Granted', 'Administrator verified. Redirecting...');
-                setTimeout(() => { window.location.href = "menu.html"; }, 2000);
+                showCyberNotification('success', 'Access Granted', 'Administrator Verified.');
+                setTimeout(() => { window.location.href = "menu.html"; }, 1500);
             } else {
-                showCyberNotification('error', 'Access Denied', 'Authentication failed. Incorrect credentials.');
+                showCyberNotification('error', 'Access Denied', 'Invalid Credentials.');
             }
         } catch (error) {
             console.error(error);
