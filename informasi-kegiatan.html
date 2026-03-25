@@ -29,10 +29,32 @@
         }
         textarea { height: 120px; resize: vertical; }
 
+        /* Custom Styles untuk Target Pengiriman */
+        .mb-3 { margin-bottom: 20px; }
+        .mb-2 { margin-bottom: 10px; }
+        .d-flex { display: flex; }
+        .gap-2 { gap: 10px; }
+        
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            flex: 1;
+        }
+        .btn-outline-primary:hover, .btn-active {
+            background: var(--primary);
+            color: white;
+        }
+
         .btn-send { 
             width: 100%; padding: 12px; background: var(--primary); color: white; 
             border: none; border-radius: 8px; font-weight: bold; cursor: pointer; 
-            font-size: 16px; transition: 0.3s;
+            font-size: 16px; transition: 0.3s; margin-top: 10px;
         }
         .btn-send:hover { background: #0056b3; }
         .btn-back { 
@@ -61,6 +83,24 @@
         </select>
     </div>
 
+    <div class="mb-3">
+        <label>Target Pengiriman</label>
+        <div class="d-flex gap-2 mb-2">
+            <button type="button" id="btnAllJC" class="btn btn-outline-primary">
+                <i class="fas fa-users"></i> Ke Semua JC (JC1-JC5)
+            </button>
+        </div>
+        
+        <select id="targetJC">
+            <option value="" selected disabled>-- Atau Pilih Parsial (JC1-JC5) --</option>
+            <option value="JC1">JC 1</option>
+            <option value="JC2">JC 2</option>
+            <option value="JC3">JC 3</option>
+            <option value="JC4">JC 4</option>
+            <option value="JC5">JC 5</option>
+        </select>
+    </div>
+
     <div class="form-group">
         <label>Isi Detail Informasi</label>
         <textarea id="detail" placeholder="Tuliskan detail informasi di sini..."></textarea>
@@ -72,7 +112,7 @@
 </div>
 
 <script>
-    // Konfigurasi Firebase Anda
+    // Konfigurasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -85,13 +125,33 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+    let targetStatus = ""; // Untuk menyimpan apakah "Semua JC" dipilih
+    const btnAllJC = document.getElementById('btnAllJC');
+    const selectJC = document.getElementById('targetJC');
+
+    // Klik Tombol Semua JC
+    btnAllJC.onclick = function() {
+        targetStatus = "Semua JC";
+        this.classList.add('btn-active');
+        selectJC.value = ""; // Reset dropdown jika tombol ditekan
+    };
+
+    // Pilih Dropdown Parsial
+    selectJC.onchange = function() {
+        targetStatus = ""; // Reset status tombol jika dropdown dipilih
+        btnAllJC.classList.remove('btn-active');
+    };
+
     async function kirimData() {
         const judul = document.getElementById('judul').value;
         const kategori = document.getElementById('kategori').value;
         const detail = document.getElementById('detail').value;
+        
+        // Logika penentuan target
+        const targetFinal = targetStatus !== "" ? targetStatus : selectJC.value;
 
-        if(!judul || !detail) {
-            alert("Harap isi judul dan detail informasi!");
+        if(!judul || !detail || !targetFinal) {
+            alert("Harap isi judul, detail, dan pilih Target Pengiriman!");
             return;
         }
 
@@ -99,15 +159,20 @@
             await db.collection("pengumuman_komsel").add({
                 judul: judul,
                 kategori: kategori,
+                target: targetFinal, // Field baru untuk filter di menu nanti
                 detail: detail,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 sudahDibaca: false
             });
 
-            alert("Informasi berhasil dipublikasikan!");
-            // Reset form
+            alert("Informasi berhasil dipublikasikan ke: " + targetFinal);
+            
+            // Reset form setelah berhasil
             document.getElementById('judul').value = "";
             document.getElementById('detail').value = "";
+            selectJC.value = "";
+            btnAllJC.classList.remove('btn-active');
+            targetStatus = "";
             
         } catch (error) {
             console.error("Error menambahkan dokumen: ", error);
