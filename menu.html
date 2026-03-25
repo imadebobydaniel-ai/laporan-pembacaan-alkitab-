@@ -60,7 +60,7 @@
         .msg-item b { display: block; color: var(--biru-tua); font-size: 14px; }
         .msg-item small { color: #888; font-size: 11px; }
         .inbox-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 2px solid #eee; margin-top: 10px; }
-        .btn-delete-selected { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-delete-selected { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 12px; }
 
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .menu-box { background: white; padding: 20px 10px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--biru-tua); font-weight: 800; font-size: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.05); transition: 0.3s; }
@@ -70,7 +70,6 @@
         .btn-logout { background: var(--biru-tua); color: #fff; padding: 14px 40px; border-radius: 50px; text-decoration: none; font-size: 14px; font-weight: bold; display: inline-block; margin-top: 30px; border: 2px solid var(--emas-lux); }
         #admin-badge { display: none; background: red; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-top: 5px; }
         
-        /* Media Display Area */
         .news-slider { width: 100%; height: 100%; position: relative; }
     </style>
 </head>
@@ -178,7 +177,7 @@
         }
         const db = firebase.firestore();
 
-        // --- MEDIA PLAYER LISTENER ---
+        // --- MEDIA PLAYER LISTENER (KOREKSI LOGIKA) ---
         function inisialisasiMediaPlayer() {
             const container = document.getElementById("media-display-area"); 
             
@@ -188,23 +187,28 @@
                     return;
                 }
 
+                let contentHTML = ""; 
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     if (data.type === "youtube") {
-                        container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.content}?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>`;
+                        contentHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.content}?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>`;
                     } else if (data.type === "image") {
-                        container.innerHTML = `<img src="${data.content}" style="width:100%; height:100%; object-fit:cover; border-radius:25px;">`;
+                        contentHTML = `<img src="${data.content}" style="width:100%; height:100%; object-fit:cover; border-radius:25px;">`;
                     } else if (data.type === "text") {
-                        container.innerHTML = `
-                            <div style="display:flex; align-items:center; justify-content:center; height:100%; padding:20px; color:white; background:var(--biru-safir); text-align:center;">
+                        contentHTML = `
+                            <div style="display:flex; align-items:center; justify-content:center; height:100%; padding:20px; color:white; background:var(--biru-safir); text-align:center; border-radius:25px;">
                                 <h3>${data.content}</h3>
                             </div>`;
                     }
                 });
+                container.innerHTML = contentHTML; 
+            }, (error) => {
+                console.error("Firestore Error: ", error); 
+                container.innerHTML = `<p style='color:white; padding-top:50px;'>Error: ${error.message}</p>`;
             });
         }
 
-        // --- FUNGSI INBOX & USER SYNC (Lanjutan script Anda) ---
+        // --- FUNGSI INBOX & USER SYNC ---
         function monitorEmailInbox(userJC, userEmail) {
             localStorage.setItem("userKomsel", userJC);
             db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot(snapshot => {
