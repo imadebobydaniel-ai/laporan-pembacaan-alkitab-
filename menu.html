@@ -68,6 +68,36 @@
         }
         .profile-card.closed { transform: translateX(-100%); }
 
+        /* FITUR EMAIL BERGETAR */
+        .email-btn {
+            position: absolute; top: 15px; right: 15px; cursor: pointer; z-index: 20;
+        }
+        .email-icon { font-size: 22px; color: var(--biru-tua); transition: 0.3s; }
+        #email-badge {
+            position: absolute; top: -8px; right: -8px; background: red; color: white;
+            font-size: 10px; padding: 2px 6px; border-radius: 50%; font-weight: bold; display: none;
+        }
+        @keyframes shake {
+            0% { transform: rotate(0deg); } 10% { transform: rotate(-10deg); } 20% { transform: rotate(10deg); }
+            30% { transform: rotate(-10deg); } 40% { transform: rotate(10deg); } 50% { transform: rotate(0deg); }
+        }
+        .vibrate { animation: shake 0.5s infinite; color: var(--emas-lux) !important; }
+
+        /* POPUP INBOX */
+        .popup-inbox {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center;
+        }
+        .inbox-content {
+            background: white; width: 90%; max-width: 380px; border-radius: 20px; padding: 20px; max-height: 80vh; overflow-y: auto;
+        }
+        .msg-item {
+            padding: 12px; border-bottom: 1px solid #eee; text-align: left; cursor: pointer;
+        }
+        .msg-item:hover { background: #f9f9f9; }
+        .msg-item b { display: block; color: var(--biru-tua); font-size: 14px; }
+        .msg-item small { color: #888; font-size: 11px; }
+
         .btn-toggle-side { 
             position: absolute; left: 0; top: 50%; transform: translateY(-50%); 
             z-index: 10; background: #ff0000; color: white; border: none; 
@@ -90,7 +120,7 @@
 </head>
 <body>
 
-    <div id="modal-logout" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; padding: 20px;">
+    <div id="modal-logout" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 4000; justify-content: center; align-items: center; padding: 20px;">
         <div style="background: white; width: 100%; max-width: 320px; border-radius: 15px; text-align: center; padding: 20px;">
             <i class="fa-solid fa-right-from-bracket" style="font-size: 40px; color: #dc3545; margin-bottom: 15px;"></i>
             <h3 style="margin: 0;">Konfirmasi Keluar</h3>
@@ -98,6 +128,18 @@
             <div style="display: flex; gap: 10px;">
                 <button onclick="closeLogoutModal()" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: white;">Batal</button>
                 <button onclick="executeLogout()" style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: #dc3545; color: white; font-weight: bold;">Keluar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup-inbox" class="popup-inbox">
+        <div class="inbox-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--emas-lux); padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 style="margin:0; color:var(--biru-tua);"><i class="fas fa-envelope-open"></i> Inbox JC</h3>
+                <i class="fas fa-times" onclick="tutupInbox()" style="cursor:pointer; font-size:20px; color:red;"></i>
+            </div>
+            <div id="list-pesan">
+                <p style="font-size:12px; color:#999;">Memuat pesan...</p>
             </div>
         </div>
     </div>
@@ -116,6 +158,11 @@
 
         <div class="top-section-container">
             <div id="profileCard" class="profile-card">
+                <div class="email-btn" onclick="bukaInbox()">
+                    <i class="fas fa-envelope email-icon" id="icon-mail"></i>
+                    <span id="email-badge">0</span>
+                </div>
+
                 <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; border: 3px solid var(--emas-lux); background: white; display: flex; align-items: center; justify-content: center;">
                     <i class="fa-solid fa-circle-user" id="default-icon" style="font-size: 70px; color: var(--biru-safir);"></i>
                     <img id="user-photo" src="" style="display: none; width:100%; height:100%; object-fit:cover;">
@@ -182,7 +229,64 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let ytPlayer; 
+        let currentUserJC = ""; // Akan diisi otomatis saat syncUser
 
+        // 1. MONITORING EMAIL & GETARAN
+        function monitorEmailInbox(userJC, userEmail) {
+            db.collection("pengumuman_komsel")
+              .where("target_jc", "array-contains", userJC)
+              .onSnapshot(snapshot => {
+                let unreadCount = 0;
+                const listDiv = document.getElementById('list-pesan');
+                listDiv.innerHTML = "";
+
+                if (snapshot.empty) {
+                    listDiv.innerHTML = "<p style='font-size:12px; color:#999;'>Belum ada pesan untuk JC Anda.</p>";
+                }
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const sudahDibaca = data.sudahDibaca || [];
+                    const isUnread = !sudahDibaca.includes(userEmail);
+
+                    if (isUnread) unreadCount++;
+
+                    // Render ke list Inbox
+                    listDiv.innerHTML += `
+                        <div class="msg-item" onclick="bacaDetailPesan('${doc.id}', '${userEmail}')" style="${isUnread ? 'background:#fff9e6; border-left:4px solid var(--emas-lux);' : ''}">
+                            <b>${data.judul}</b>
+                            <small>${data.timestamp ? data.timestamp.toDate().toLocaleDateString('id-ID') : '-'} ${isUnread ? '(BARU)' : ''}</small>
+                        </div>
+                    `;
+                });
+
+                const icon = document.getElementById('icon-mail');
+                const badge = document.getElementById('email-badge');
+
+                if (unreadCount > 0) {
+                    icon.classList.add('vibrate');
+                    badge.style.display = 'block';
+                    badge.innerText = unreadCount;
+                } else {
+                    icon.classList.remove('vibrate');
+                    badge.style.display = 'none';
+                }
+            });
+        }
+
+        async function bacaDetailPesan(docId, userEmail) {
+            // Tandai sudah dibaca di Firestore
+            await db.collection("pengumuman_komsel").doc(docId).update({
+                sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
+            });
+            // Arahkan ke halaman detail (file lama Anda)
+            window.location.href = "detail-pengumuman.html?id=" + docId;
+        }
+
+        function bukaInbox() { document.getElementById('popup-inbox').style.display = 'flex'; }
+        function tutupInbox() { document.getElementById('popup-inbox').style.display = 'none'; }
+
+        // 2. LOGIKA USER & MEDIA (SISA SCRIPT ASLI ANDA)
         function syncUser() {
             const email = localStorage.getItem("userEmail");
             const isAdmin = localStorage.getItem("adminLoggedIn");
@@ -203,6 +307,11 @@
                         const d = s.docs[0].data();
                         document.getElementById('disp_nama').innerText = d.nama || "User";
                         document.getElementById('disp_komsel').innerText = d.komsel ? "JC " + d.komsel : "KOMSEL JC";
+                        currentUserJC = d.komsel;
+                        
+                        // MULAI MONITOR EMAIL SETELAH DAPAT DATA JC
+                        monitorEmailInbox(String(d.komsel), email);
+
                         if (d.fotoUrl) { 
                             imgElement.src = d.fotoUrl; 
                             imgElement.style.display = "block";
@@ -217,10 +326,8 @@
             const container = document.getElementById('youtube-player-container'); 
             const muteBtn = document.getElementById('muteBtn');
             const tipe = data.tipe ? data.tipe.toLowerCase() : "";
-
             muteBtn.style.display = 'none';
             container.innerHTML = "";
-
             if (tipe.includes('video')) {
                 container.innerHTML = `<div id="player"></div>`;
                 initYouTube(extractVideoID(data.url));
