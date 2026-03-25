@@ -199,7 +199,6 @@
 
         // --- FUNGSI INBOX ---
         function monitorEmailInbox(userJC, userEmail) {
-            // Simpan data di global atau localStorage untuk tombol kembali
             localStorage.setItem("userKomsel", userJC);
 
             db.collection("pengumuman_komsel")
@@ -210,11 +209,9 @@
                 if(!listDiv) return;
                 listDiv.innerHTML = "";
                 
-                // Reset controls view
                 document.getElementById('inbox-controls').style.display = 'flex';
                 document.getElementById('btn-hapus-footer').style.display = 'block';
 
-                // Pesan Sambutan Virtual
                 const hasReadWelcome = localStorage.getItem("welcomeRead_" + userEmail);
                 if (!hasReadWelcome) {
                     unreadCount++;
@@ -261,7 +258,7 @@
             });
         }
 
-        // --- FUNGSI DETAIL PESAN (Popup Mode) ---
+        // --- FUNGSI DETAIL PESAN (Popup Mode) - PERBAIKAN ---
         async function bacaDetailPesan(docId, userEmail) {
             try {
                 // 1. Update status sudah dibaca di database
@@ -275,6 +272,9 @@
                     const data = doc.data();
                     const tgl = data.timestamp ? data.timestamp.toDate().toLocaleDateString('id-ID') : '-';
                     
+                    // MENGGUNAKAN LOGIKA PERBAIKAN: Mencari konten dari berbagai kemungkinan nama field
+                    const isiPesan = data.pesan || data.isi || data.konten || data.detail || "Isi pesan tidak ditemukan di database.";
+
                     // Sembunyikan kontrol checkbox saat baca detail
                     document.getElementById('inbox-controls').style.display = 'none';
                     document.getElementById('btn-hapus-footer').style.display = 'none';
@@ -287,11 +287,11 @@
                                     style="background:none; border:none; color:var(--biru-safir); cursor:pointer; font-weight:bold; padding:0; margin-bottom:15px; font-size:13px;">
                                 <i class="fas fa-arrow-left"></i> Kembali ke Daftar
                             </button>
-                            <h3 style="margin:0 0 5px 0; color:var(--biru-tua); font-size:16px;">${data.judul}</h3>
+                            <h3 style="margin:0 0 5px 0; color:var(--biru-tua); font-size:16px;">${data.judul || "Tanpa Judul"}</h3>
                             <small style="color:#888; display:block; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
                                 ${tgl} • Oleh: Admin
                             </small>
-                            <div style="font-size:14px; line-height:1.6; color:#333; white-space:pre-wrap;">${data.isi || data.pesan || "Tidak ada detail pesan."}</div>
+                            <div style="font-size:14px; line-height:1.6; color:#333; white-space:pre-wrap; min-height:100px;">${isiPesan}</div>
                         </div>
                     `;
                 }
