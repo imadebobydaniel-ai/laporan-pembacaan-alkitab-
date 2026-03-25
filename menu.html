@@ -313,13 +313,15 @@
         }
 
         async function bacaDetailPesan(docId, userEmail) {
-            try {
-                await db.collection("pengumuman_komsel").doc(docId).update({
-                    sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
-                });
-            } catch (e) { console.error(e); }
-            // LINK SUDAH DIPERBAIKI KE informasi-email.html
-            window.location.href = "informasi-email.html?id=" + docId;
+    try {
+        await db.collection("pengumuman_komsel").doc(docId).update({
+            sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
+        });
+    } catch (e) { console.error(e); }
+
+    // BAGIAN PENTING: Arahkan ke nama file yang baru
+    window.location.href = "informasi-email.html?id=" + docId;
+}
         }
 
         function bacaWelcome(userEmail) {
