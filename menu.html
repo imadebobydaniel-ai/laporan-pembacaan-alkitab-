@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://www.gstatic.com https://apis.google.com https://www.youtube.com https://s.ytimg.com 'unsafe-inline' 'unsafe-eval'; frame-src 'self' https://www.youtube.com">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:; script-src * 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://www.youtube.com https://s.ytimg.com; style-src * 'self' 'unsafe-inline'; frame-src 'self' https://www.youtube.com">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu Utama - Pondok Pemulihan Papua</title>
     
@@ -219,7 +219,7 @@
         const db = firebase.firestore();
         let ytPlayer;
 
-        // --- MANAJEMEN INBOX (VERSI PERBAIKAN) ---
+        // --- MANAJEMEN INBOX (VERSI COMPLIANT CSP) ---
         db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
             const listDiv = document.getElementById('inbox-list');
             listDiv.innerHTML = "";
@@ -229,19 +229,26 @@
                 const data = doc.data();
                 unread++;
                 
+                // Pastikan mengambil field yang benar dari Firebase
                 const kontenPesan = data.isi || data.isi_pesan || data.pesan || "Tidak ada detail pesan.";
                 const judulPesan = data.judul || "Tanpa Judul";
+                const tanggalPesan = data.timestamp ? data.timestamp.toDate().toLocaleDateString('id-ID') : 'Baru';
 
                 const item = document.createElement('div');
                 item.className = "msg-item";
+                item.style.cursor = "pointer";
                 item.innerHTML = `
                     <div style="display: flex; flex-direction: column;">
                         <strong style="color: var(--biru-tua);">${judulPesan}</strong>
-                        <small style="color: #888;">${data.timestamp ? data.timestamp.toDate().toLocaleDateString('id-ID') : 'Baru'}</small>
+                        <small style="color: #888;">${tanggalPesan}</small>
                     </div>
                 `;
                 
-                item.onclick = () => tampilkanDetail(judulPesan, kontenPesan);
+                // Menggunakan addEventListener alih-alih onclick di HTML string untuk menghindari blokir CSP
+                item.addEventListener('click', () => {
+                    tampilkanDetail(judulPesan, kontenPesan);
+                });
+                
                 listDiv.appendChild(item);
             });
 
@@ -250,13 +257,16 @@
                 badge.style.display = "block"; 
                 badge.innerText = unread;
                 document.getElementById('icon-mail').classList.add('vibrate');
+            } else {
+                badge.style.display = "none";
             }
         });
 
         function tampilkanDetail(judul, isi) {
+            const modal = document.getElementById('message-modal');
             document.getElementById('modal-title').innerText = judul;
             document.getElementById('modal-body').innerHTML = isi; 
-            document.getElementById('message-modal').style.display = 'block';
+            modal.style.display = 'block';
         }
 
         function closeModal() { document.getElementById('message-modal').style.display = 'none'; }
