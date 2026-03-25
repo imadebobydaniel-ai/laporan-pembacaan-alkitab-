@@ -22,7 +22,7 @@
             padding: 20px; 
         }
 
-        /* CONTAINER DASHBOARD DENGAN SCROLL INTERNAL */
+        /* CONTAINER DASHBOARD */
         .dashboard-card {
             max-width: 1200px;
             margin: auto;
@@ -36,7 +36,6 @@
             margin-bottom: 30px;
         }
 
-        /* Custom Scrollbar */
         .dashboard-card::-webkit-scrollbar { width: 8px; }
         .dashboard-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
         .dashboard-card::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
@@ -61,15 +60,21 @@
         .freeze-col { position: sticky; left: 0; z-index: 2; background: white !important; border-right: 2px solid #eee; }
         th.freeze-col { z-index: 6; background: var(--primary) !important; }
 
-        /* PORTAL MENU SECTION */
+        /* PORTAL MENU SECTION - PERBAIKAN GRID */
         .portal-menu-grid {
             max-width: 1200px;
             margin: auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            /* Mengatur 4 kolom sejajar horizontal */
+            grid-template-columns: repeat(4, 1fr); 
             gap: 20px;
             padding-bottom: 40px;
         }
+
+        @media (max-width: 768px) {
+            .portal-menu-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
         .menu-box {
             background: white;
             padding: 25px;
@@ -87,11 +92,8 @@
         }
         .menu-box:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         .menu-box i { font-size: 2.5rem; margin-bottom: 15px; }
-        .menu-box h3 { margin: 0 0 8px; font-size: 18px; }
-        .menu-box p { margin: 0; font-size: 12px; color: #777; }
-
-        .btn-save { width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #loading-state { text-align: center; padding: 40px; color: var(--primary); font-weight: bold; }
+        .menu-box h3 { margin: 0 0 8px; font-size: 16px; }
+        .menu-box p { margin: 0; font-size: 11px; color: #777; }
     </style>
 </head>
 <body>
@@ -136,8 +138,7 @@
         </div>
     </div>
 
-    
-
+    <div class="portal-menu-grid">
         <a href="informasi-kegiatan.html" class="menu-box">
             <i class="fas fa-broadcast-tower" style="color: #e74c3c;"></i>
             <h3>Informasi Kegiatan</h3>
@@ -167,6 +168,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script>
+    // Konfigurasi Firebase tetap sama
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -198,9 +200,9 @@
                         <td>${data.jabatan || '-'}</td>
                         <td>JC ${data.komsel || '-'}</td>
                         <td>Aktif</td>
-                        <td class="action-icons">
-                            <i class="fas fa-edit btn-edit" style="cursor:pointer; color:var(--primary); margin-right:10px;"></i>
-                            <i class="fas fa-trash btn-delete" style="cursor:pointer; color:#dc3545;"></i>
+                        <td>
+                            <i class="fas fa-edit" style="cursor:pointer; color:var(--primary); margin-right:10px;"></i>
+                            <i class="fas fa-trash" style="cursor:pointer; color:#dc3545;"></i>
                         </td>
                     </tr>`;
             });
