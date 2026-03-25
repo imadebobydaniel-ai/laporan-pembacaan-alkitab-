@@ -233,7 +233,7 @@
         if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
             localStorage.setItem("adminLoggedIn", "true");
             showCyberNotification('success', 'Access Granted', 'Master Admin Verified.');
-            setTimeout(() => { window.location.href = "menu.html"; }, 1500);
+            setTimeout(() => { window.location.href = "admin.html"; }, 1500);
             return;
         }
 
@@ -247,7 +247,7 @@
             if (!snapshot.empty) {
                 localStorage.setItem("adminLoggedIn", "true");
                 showCyberNotification('success', 'Access Granted', 'Administrator Verified.');
-                setTimeout(() => { window.location.href = "menu.html"; }, 1500);
+                setTimeout(() => { window.location.href = "admin.html"; }, 1500);
             } else {
                 showCyberNotification('error', 'Access Denied', 'Invalid Credentials.');
             }
