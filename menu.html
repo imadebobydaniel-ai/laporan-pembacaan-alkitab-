@@ -124,10 +124,10 @@
 
     <div id="message-modal">
         <div class="modal-inner">
-            <h3 id="modal-title" style="margin-top:0;"></h3>
+            <h3 id="modal-title" style="margin-top:0; color: var(--biru-tua);"></h3>
             <hr>
-            <div id="modal-body" style="font-size:14px; line-height:1.5;"></div> <br>
-            <button onclick="closeModal()" style="padding: 10px 20px; width:100%; background:var(--biru-tua); color:white; border:none; border-radius:8px;">Tutup</button>
+            <div id="modal-body" style="font-size:14px; line-height:1.5; color: #444; min-height: 50px;"></div> <br>
+            <button id="close-modal-btn" style="padding: 10px 20px; width:100%; background:var(--biru-tua); color:white; border:none; border-radius:8px; cursor: pointer;">Tutup</button>
         </div>
     </div>
 
@@ -135,7 +135,7 @@
         <div class="inbox-content">
             <div class="inbox-header">
                 <h3 style="margin:0;"><i class="fas fa-envelope-open"></i> Inbox JC</h3>
-                <i class="fas fa-times" onclick="tutupInbox()" style="cursor:pointer; font-size:20px;"></i>
+                <i class="fas fa-times" id="close-inbox-icon" style="cursor:pointer; font-size:20px;"></i>
             </div>
             <div id="inbox-list" class="list-pesan-container">
                 <p style="text-align:center; padding:20px;">Memuat pesan...</p>
@@ -157,7 +157,7 @@
 
         <div class="top-section-container">
             <div id="profileCard" class="profile-card">
-                <div class="email-btn" onclick="bukaInbox()">
+                <div class="email-btn" id="open-inbox-btn">
                     <i class="fas fa-envelope email-icon" id="icon-mail"></i>
                     <span id="email-badge">0</span>
                 </div>
@@ -180,7 +180,7 @@
                 <div id="youtube-player-container" style="width: 100%; height: 100%;">
                     <div id="player"></div> 
                 </div>
-                <div id="muteBtn" onclick="handleToggleMute()" style="display:none; position: absolute; bottom: 15px; right: 15px; z-index: 10; background: rgba(0,0,0,0.7); padding: 8px; border-radius: 50%; color: white; cursor: pointer;">
+                <div id="muteBtn" style="display:none; position: absolute; bottom: 15px; right: 15px; z-index: 10; background: rgba(0,0,0,0.7); padding: 8px; border-radius: 50%; color: white; cursor: pointer;">
                     <i class="fa-solid fa-volume-xmark" id="muteIcon"></i>
                 </div>
             </div>
@@ -199,7 +199,7 @@
             <a href="saran.html" class="menu-box"><i class="fa-solid fa-comment-dots"></i>Saran</a>
         </div>
 
-        <a href="javascript:void(0)" onclick="executeLogout()" class="btn-logout"><i class="fa-solid fa-power-off"></i> Keluar</a>
+        <a href="javascript:void(0)" id="logout-btn" class="btn-logout"><i class="fa-solid fa-power-off"></i> Keluar</a>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -219,32 +219,35 @@
         const db = firebase.firestore();
         let ytPlayer;
 
-        // --- MANAJEMEN INBOX (VERSI COMPLIANT CSP) ---
+        // --- MANAJEMEN INBOX (VERSI STABIL) ---
         db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
             const listDiv = document.getElementById('inbox-list');
             listDiv.innerHTML = "";
             let unread = 0;
 
+            if (snapshot.empty) {
+                listDiv.innerHTML = "<p style='text-align:center; padding:20px;'>Tidak ada pesan.</p>";
+            }
+
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 unread++;
                 
-                // Pastikan mengambil field yang benar dari Firebase
-                const kontenPesan = data.isi || data.isi_pesan || data.pesan || "Tidak ada detail pesan.";
+                // Cek multi-field agar tidak undefined
+                const kontenPesan = data.isi || data.isi_pesan || data.pesan || data.content || "Tidak ada detail pesan.";
                 const judulPesan = data.judul || "Tanpa Judul";
                 const tanggalPesan = data.timestamp ? data.timestamp.toDate().toLocaleDateString('id-ID') : 'Baru';
 
                 const item = document.createElement('div');
                 item.className = "msg-item";
-                item.style.cursor = "pointer";
                 item.innerHTML = `
-                    <div style="display: flex; flex-direction: column;">
-                        <strong style="color: var(--biru-tua);">${judulPesan}</strong>
-                        <small style="color: #888;">${tanggalPesan}</small>
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <strong style="color: var(--biru-tua); font-size: 14px;">${judulPesan}</strong>
+                        <small style="color: #888; margin-top: 4px;">${tanggalPesan}</small>
                     </div>
                 `;
                 
-                // Menggunakan addEventListener alih-alih onclick di HTML string untuk menghindari blokir CSP
+                // Listener klik untuk membuka detail
                 item.addEventListener('click', () => {
                     tampilkanDetail(judulPesan, kontenPesan);
                 });
@@ -253,25 +256,30 @@
             });
 
             const badge = document.getElementById('email-badge');
+            const iconMail = document.getElementById('icon-mail');
             if(unread > 0) { 
                 badge.style.display = "block"; 
                 badge.innerText = unread;
-                document.getElementById('icon-mail').classList.add('vibrate');
+                iconMail.classList.add('vibrate');
             } else {
                 badge.style.display = "none";
+                iconMail.classList.remove('vibrate');
             }
+        }, (error) => {
+            console.error("Gagal memuat pesan:", error);
         });
 
         function tampilkanDetail(judul, isi) {
             const modal = document.getElementById('message-modal');
-            document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-body').innerHTML = isi; 
-            modal.style.display = 'block';
-        }
+            const titleEl = document.getElementById('modal-title');
+            const bodyEl = document.getElementById('modal-body');
 
-        function closeModal() { document.getElementById('message-modal').style.display = 'none'; }
-        function bukaInbox() { document.getElementById('popup-inbox').style.display = 'flex'; }
-        function tutupInbox() { document.getElementById('popup-inbox').style.display = 'none'; }
+            if (modal && titleEl && bodyEl) {
+                titleEl.innerText = judul;
+                bodyEl.innerHTML = isi; // Gunakan innerHTML agar support formatting pesan
+                modal.style.display = 'block';
+            }
+        }
 
         // --- SISTEM UTILITAS ---
         function syncUser() {
@@ -288,8 +296,9 @@
                         document.getElementById('disp_email').innerText = email;
                         document.getElementById('disp_komsel').innerText = "JC " + (d.komsel || "");
                         if (d.fotoUrl) {
-                            document.getElementById('user-photo').src = d.fotoUrl;
-                            document.getElementById('user-photo').style.display = "block";
+                            const photo = document.getElementById('user-photo');
+                            photo.src = d.fotoUrl;
+                            photo.style.display = "block";
                             document.getElementById('default-icon').style.display = "none";
                         }
                     }
@@ -318,32 +327,57 @@
             const m = url.match(reg); return (m && m[2].length == 11) ? m[2] : null;
         }
 
-        function handleToggleMute() {
-            if (ytPlayer.isMuted()) {
-                ytPlayer.unMute(); document.getElementById('muteIcon').className = "fa-solid fa-volume-high";
-            } else {
-                ytPlayer.mute(); document.getElementById('muteIcon').className = "fa-solid fa-volume-xmark";
-            }
-        }
-
         function updateTime() {
             const now = new Date();
             document.getElementById('display-tanggal').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID') + " WIT";
         }
 
-        function executeLogout() { localStorage.clear(); window.location.href = "login.html"; }
-
+        // --- EVENT LISTENERS (CSP FRIENDLY) ---
         window.onload = () => {
-            updateTime(); setInterval(updateTime, 1000); syncUser();
+            updateTime(); 
+            setInterval(updateTime, 1000); 
+            syncUser();
+            
             document.getElementById('running-text').innerText = "Selamat Datang di Sistem Informasi Komsel JC Papua | Copyright 2026";
             
-            const btn = document.getElementById('toggleProfile');
+            // Toggle Profile Card
+            const btnToggle = document.getElementById('toggleProfile');
             const card = document.getElementById('profileCard');
-            btn.onclick = () => {
-                card.classList.toggle('closed');
-                document.getElementById('toggleIcon').className = card.classList.contains('closed') ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left";
-            };
+            if (btnToggle) {
+                btnToggle.addEventListener('click', () => {
+                    card.classList.toggle('closed');
+                    document.getElementById('toggleIcon').className = card.classList.contains('closed') ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left";
+                });
+            }
+
+            // Modal & Inbox Controls
+            document.getElementById('close-modal-btn').addEventListener('click', () => {
+                document.getElementById('message-modal').style.display = 'none';
+            });
+
+            document.getElementById('open-inbox-btn').addEventListener('click', () => {
+                document.getElementById('popup-inbox').style.display = 'flex';
+            });
+
+            document.getElementById('close-inbox-icon').addEventListener('click', () => {
+                document.getElementById('popup-inbox').style.display = 'none';
+            });
+
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.clear(); 
+                window.location.href = "login.html";
+            });
+
+            document.getElementById('muteBtn').addEventListener('click', () => {
+                if (ytPlayer && ytPlayer.isMuted()) {
+                    ytPlayer.unMute(); 
+                    document.getElementById('muteIcon').className = "fa-solid fa-volume-high";
+                } else if (ytPlayer) {
+                    ytPlayer.mute(); 
+                    document.getElementById('muteIcon').className = "fa-solid fa-volume-xmark";
+                }
+            });
         };
     </script>
 </body>
