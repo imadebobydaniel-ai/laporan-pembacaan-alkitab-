@@ -108,6 +108,8 @@
 </head>
 <body>
 
+    <audio id="notifSound" src="https://www.soundjay.com/buttons/beep-01a.mp3" preload="auto"></audio>
+
     <div id="modal-logout" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 4000; justify-content: center; align-items: center; padding: 20px;">
         <div style="background: white; width: 100%; max-width: 320px; border-radius: 15px; text-align: center; padding: 20px;">
             <i class="fa-solid fa-right-from-bracket" style="font-size: 40px; color: #dc3545; margin-bottom: 15px;"></i>
@@ -212,6 +214,11 @@
         const db = firebase.firestore();
         let ytPlayer; 
 
+        // Notifikasi Izin
+        if (Notification.permission !== 'granted') {
+            Notification.requestPermission();
+        }
+
         function handleToggleMute() {
             if (ytPlayer && typeof ytPlayer.isMuted === 'function') {
                 if (ytPlayer.isMuted()) {
@@ -224,7 +231,7 @@
             }
         }
 
-        // --- MONITOR INBOX DENGAN VIRTUAL WELCOME MESSAGE ---
+        // --- MONITOR INBOX DENGAN NOTIFIKASI SUARA & BANNER ---
         function monitorEmailInbox(userJC, userEmail) {
             db.collection("pengumuman_komsel")
               .orderBy("timestamp", "desc")
@@ -234,7 +241,7 @@
                 if(!listDiv) return;
                 listDiv.innerHTML = "";
 
-                // 1. Tambahkan Pesan Sambutan Default (Virtual)
+                // Pesan Sambutan
                 const hasReadWelcome = localStorage.getItem("welcomeRead_" + userEmail);
                 if (!hasReadWelcome) unreadCount++;
 
@@ -247,7 +254,30 @@
                 
                 listDiv.innerHTML += welcomeItem;
 
-                // 2. Muat Pesan dari Firestore
+                // Logika Deteksi Perubahan Data Baru untuk Notif Banner & Suara
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        const target = data.target || data.target_jc;
+                        
+                        // Cek apakah user adalah target pengumuman
+                        if (target === "Semua JC" || target === userJC) {
+                             // Jalankan Suara
+                             const sound = document.getElementById('notifSound');
+                             if(sound) sound.play().catch(e => console.log("Audio play blocked"));
+
+                             // Jalankan Banner Notifikasi
+                             if (Notification.permission === 'granted') {
+                                new Notification("Info JC Baru!", {
+                                    body: data.judul,
+                                    icon: 'logo_pondok.png'
+                                });
+                             }
+                        }
+                    }
+                });
+
+                // Muat Pesan dari Firestore ke UI
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const target = data.target || data.target_jc; 
@@ -270,7 +300,7 @@
                     }
                 });
 
-                // Update Badge & Getar
+                // Update Badge & Getar Icon Mail
                 const icon = document.getElementById('icon-mail');
                 const badge = document.getElementById('email-badge');
                 if (unreadCount > 0) {
@@ -284,7 +314,6 @@
             });
         }
 
-        // Fungsi khusus untuk membaca pesan sambutan pertama kali
         function bacaWelcome(userEmail) {
             localStorage.setItem("welcomeRead_" + userEmail, "true");
             alert("Selamat Datang Di Aplikasi Sistem Informasi Integrasi Komsel JC. Semoga Anda Diberkati Dengan Adanya Aplikasi Ini. Tuhan Yesus Memberkati.");
@@ -297,7 +326,6 @@
                     sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
                 });
             } catch (e) { console.error("Gagal update status baca:", e); }
-            
             window.location.href = "detail-pengumuman.html?id=" + docId;
         }
 
@@ -317,10 +345,7 @@
                 document.getElementById('disp_komsel').innerText = "ALL KOMSEL";
                 imgElement.style.display = "none";
                 iconElement.style.display = "block";
-                
-                // Admin juga bisa lihat inbox (semua pesan)
                 monitorEmailInbox("Semua JC", "admin@system.com");
-                
             } else if (email) {
                 document.getElementById('disp_email').innerText = email;
                 db.collection("users").where("email", "==", email).onSnapshot(s => {
@@ -328,9 +353,7 @@
                         const d = s.docs[0].data();
                         document.getElementById('disp_nama').innerText = d.nama || "User";
                         document.getElementById('disp_komsel').innerText = d.komsel ? "JC " + d.komsel : "KOMSEL JC";
-                        
                         monitorEmailInbox(String(d.komsel), email);
-
                         if (d.fotoUrl) { 
                             imgElement.src = d.fotoUrl; 
                             imgElement.style.display = "block";
