@@ -23,9 +23,42 @@
         .stat-card h4 { margin: 0; font-size: 11px; text-transform: uppercase; }
         .stat-card p { margin: 5px 0 0; font-size: 24px; font-weight: bold; }
 
+        /* --- SEARCH BAR STYLE BARU --- */
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 0px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 10px 45px 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .search-container input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+            outline: none;
+        }
+
+        .search-container i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 18px;
+        }
+
         /* Toolbar & Table */
-        .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; }
-        .btn-delete-global { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; }
+        .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; gap: 15px; }
+        .btn-delete-global { background: var(--danger); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; display: none; }
         
         .table-responsive { overflow-x: auto; border: 1px solid #eee; border-radius: 10px; }
         table { width: 100%; border-collapse: collapse; min-width: 1300px; font-size: 12px; }
@@ -48,10 +81,7 @@
         
         .btn-save { background: var(--success); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
 
-        /* Media Playlist */
         .playlist-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0; }
-        .playlist-info { flex: 1; }
-        .playlist-controls { display: flex; gap: 5px; }
     </style>
 </head>
 <body>
@@ -78,11 +108,16 @@
     </div>
 
     <div class="table-toolbar">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari nama/JC..." style="padding:8px; border-radius:5px; border:1px solid #ddd;">
-            <button id="btnDeleteSelected" class="btn-delete-global" onclick="deleteSelected()"><i class="fas fa-trash"></i> Hapus Terpilih</button>
+        <div class="search-container">
+            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari nama, email, atau alamat anggota...">
+            <i class="fas fa-search"></i>
         </div>
-        <span style="font-size:12px; color:#666;">*Gunakan checkbox untuk hapus masal</span>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <button id="btnDeleteSelected" class="btn-delete-global" onclick="deleteSelected()">
+                <i class="fas fa-trash"></i> Hapus Terpilih
+            </button>
+            <span style="font-size:12px; color:#666;">*Data terurut A-Z secara otomatis</span>
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -164,7 +199,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-    // Konfigurasi Firebase Anda
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -178,9 +212,35 @@
 
     window.onload = function() { loadUsers(); loadAbsensi(); loadDoa(); loadPlaylist(); };
 
-    // --- DATA ANGGOTA & CHECKBOX LOGIC ---
+    // --- LOGIKA FILTER & SORTING (A-Z) ---
+    function filterTable() {
+        const input = document.getElementById("searchInput").value.toLowerCase();
+        const tbody = document.getElementById("memberData");
+        const rows = Array.from(tbody.getElementsByTagName("tr"));
+
+        // 1. Logika Filter
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? "" : "none";
+        });
+
+        // 2. Logika Pengurutan Nama (A-Z) saat mencari
+        if (input.length > 0) {
+            const visibleRows = rows.filter(row => row.style.display !== "none");
+            
+            visibleRows.sort((a, b) => {
+                const nameA = a.cells[1].innerText.toLowerCase(); 
+                const nameB = b.cells[1].innerText.toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+
+            visibleRows.forEach(row => tbody.appendChild(row));
+        }
+    }
+
+    // --- DATA ANGGOTA (Ordered by Nama A-Z) ---
     function loadUsers() {
-        db.collection("users").onSnapshot(snap => {
+        db.collection("users").orderBy("nama", "asc").onSnapshot(snap => {
             const tbody = document.getElementById("memberData");
             tbody.innerHTML = "";
             document.getElementById("stat_total").innerText = snap.size;
@@ -197,13 +257,14 @@
                         <td>${d.jabatan || '-'}</td>
                         <td><code>${d.password || '****'}</code></td>
                         <td style="text-align:center;">
-                            <i class="fas fa-edit" style="color:blue; cursor:pointer; margin-right:10px;" onclick="openEdit('${doc.id}')"></i>
+                            <i class="fas fa-edit" style="color:blue; cursor:pointer;" onclick="openEdit('${doc.id}')"></i>
                         </td>
                     </tr>`;
             });
         });
     }
 
+    // --- FUNGSI TOOLS (Checkbox, Hapus, Edit) ---
     function toggleAll(source) {
         document.querySelectorAll('.user-check').forEach(cb => cb.checked = source.checked);
         updateDeleteBtn();
@@ -222,7 +283,6 @@
         updateDeleteBtn();
     }
 
-    // --- REALTIME EDIT LOGIC ---
     async function openEdit(id) {
         const doc = await db.collection("users").doc(id).get();
         const d = doc.data();
@@ -250,12 +310,12 @@
             password: document.getElementById("edit_pass").value
         });
         closeModal();
-        alert("Data berhasil diperbarui secara realtime!");
+        alert("Data berhasil diperbarui!");
     };
 
     function closeModal() { document.getElementById("editModal").style.display = "none"; }
 
-    // --- PORTAL FUNCTIONS (DOA, ABSENSI, DLL) ---
+    // --- PORTAL DATA (Absensi, Doa, Playlist) ---
     function sendDoa() {
         const txt = document.getElementById("doa_isi").value;
         if(!txt) return;
@@ -284,13 +344,6 @@
         db.collection("portal_media").orderBy("urutan", "asc").onSnapshot(snap => {
             const div = document.getElementById("playlistData"); div.innerHTML = "";
             snap.forEach(doc => { div.innerHTML += `<div class="playlist-item"><span>${doc.data().judul}</span></div>`; });
-        });
-    }
-
-    function filterTable() {
-        let input = document.getElementById("searchInput").value.toLowerCase();
-        document.querySelectorAll("#memberData tr").forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
         });
     }
 </script>
