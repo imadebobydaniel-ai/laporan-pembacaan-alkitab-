@@ -158,8 +158,9 @@
         const db = firebase.firestore();
         let ytPlayer; 
 
-        // --- UTILITY SAKTI ---
+        // --- UTILITY SAKTI UNTUK YOUTUBE ---
         function extractYouTubeID(url) {
+            if (!url) return null;
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : null;
@@ -167,34 +168,35 @@
 
         // --- MULTI-MEDIA PLAYER LOGIC ---
         function onYouTubeIframeAPIReady() {
-            db.collection("portal_media").limit(1).onSnapshot(snapshot => {
+            // Kita gunakan orderBy urutan agar yang muncul pertama adalah urutan ke-1
+            db.collection("portal_media").orderBy("urutan", "asc").limit(1).onSnapshot(snapshot => {
                 const otherMedia = document.getElementById('other-media');
                 const ytContainer = document.getElementById('player');
 
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
-                    const type = data.type || "youtube";
-                    const content = data.url || data.linkVideo || data.content || "";
+                    const type = data.tipe || "video_youtube"; // Mendukung key dari Portal Media
+                    const content = data.url || "";
 
                     otherMedia.style.display = 'none';
                     ytContainer.style.display = 'none';
                     otherMedia.innerHTML = '';
 
-                    if (type === "youtube") {
+                    if (type === "video_youtube" || type === "youtube") {
                         ytContainer.style.display = 'block';
                         playYouTube(content);
                     } 
-                    else if (type === "video") {
+                    else if (type === "video_player" || type === "video") {
                         otherMedia.style.display = 'flex';
-                        otherMedia.innerHTML = `<video src="${content}" autoplay muted loop style="width:100%; height:100%; object-fit:cover;"></video>`;
+                        otherMedia.innerHTML = `<video src="${content}" autoplay controls style="width:100%; height:100%; object-fit:contain;"></video>`;
                     } 
-                    else if (type === "image") {
+                    else if (type === "gambar") {
                         otherMedia.style.display = 'flex';
                         otherMedia.innerHTML = `<img src="${content}" style="width:100%; height:100%; object-fit:contain;">`;
                     } 
-                    else if (type === "text") {
+                    else if (type === "teks") {
                         otherMedia.style.display = 'flex';
-                        otherMedia.innerHTML = `<div style="color:white; padding:20px; font-weight:bold; font-size:16px; text-align:center;">${content}</div>`;
+                        otherMedia.innerHTML = `<div style="color:white; padding:20px; font-weight:bold; font-size:16px; text-align:center;">${data.isi_artikel || content}</div>`;
                     }
                 } else {
                     otherMedia.style.display = 'flex';
@@ -207,26 +209,38 @@
             const videoId = extractYouTubeID(rawUrl);
 
             if (videoId) {
-                console.log("Memutar Video ID: " + videoId);
                 if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-                    ytPlayer.loadVideoById(videoId);
+                    // Jika player sudah ada, tinggal ganti video ID nya
+                    // mute: 0 agar suara defaultnya ada jika browser mengizinkan
+                    ytPlayer.loadVideoById({
+                        videoId: videoId,
+                        startSeconds: 0
+                    });
+                    ytPlayer.unMute(); // Coba paksa unmute
                 } else {
+                    // Buat player baru
                     ytPlayer = new YT.Player('player', {
                         videoId: videoId,
                         playerVars: { 
                             'autoplay': 1, 
-                            'mute': 1, 
+                            'mute': 0, // Set ke 0 agar suara muncul
+                            'controls': 1, // Munculkan kontrol agar user bisa klik unmute sendiri jika terblokir
                             'loop': 1, 
                             'playlist': videoId, 
-                            'controls': 0, 
                             'rel': 0, 
                             'modestbranding': 1 
                         },
-                        events: { 'onReady': (e) => e.target.playVideo() }
+                        events: { 
+                            'onReady': (event) => {
+                                event.target.playVideo();
+                                // Beberapa browser butuh interaksi user sebelum suara keluar
+                                // Kita coba pancing unmute setelah video mulai
+                                setTimeout(() => { event.target.unMute(); }, 1000);
+                            } 
+                        }
                     });
                 }
             } else {
-                console.error("ID Video tidak ditemukan!");
                 document.getElementById('player').innerHTML = "<div style='color:white;text-align:center;padding:20px;'>Link YouTube tidak valid</div>";
             }
         }
