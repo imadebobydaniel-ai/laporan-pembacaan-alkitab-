@@ -177,46 +177,73 @@
         }
         const db = firebase.firestore();
 
-        // --- MEDIA PLAYER & RUNNING TEXT LISTENER ---
+        // --- MEDIA PLAYER & RUNNING TEXT LISTENER (SMART CONFIGURATION) ---
         function inisialisasiMediaPlayer() {
             const container = document.getElementById("media-display-area");
             const runningText = document.getElementById("running-text");
 
+            // MONITORING DATABASE (Untuk konten Upload: Gambar, PDF, Video MP4)
             db.collection("media_player").where("active", "==", true).onSnapshot((snapshot) => {
-                if (snapshot.empty) {
-                    container.innerHTML = "<p style='color:white; padding-top:80px;'>Tidak ada konten aktif</p>";
-                    runningText.innerText = "SELAMAT DATANG DI SISTEM INFORMASI INTEGRASI KOMSEL JC | MEMBANTU PERTUMBUHAN DAN PERKEMBANGAN ROHANI SECARA DIGITALISASI | COPYRIGHT IMADE BOBY 2026 |"; 
-                    return;
-                }
+                let contentHTML = "";
+                let textUpdate = "PONDOK PEMULIHAN PAPUA - PULIH, BANGKIT, JADI BERKAT";
 
-                let htmlUntukMedia = "";
-                let teksUntukRunning = "";
-
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.type === "youtube") {
-                        htmlUntukMedia = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.content}?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>`;
-                    } else if (data.type === "image") {
-                        htmlUntukMedia = `<img src="${data.content}" style="width:100%; height:100%; object-fit:cover; border-radius:25px;">`;
-                    }
-                    
-                    if (data.type === "text") {
-                        teksUntukRunning = data.content;
-                    }
-                });
-
-                if (htmlUntukMedia !== "") container.innerHTML = htmlUntukMedia;
-                
-                if (teksUntukRunning !== "") {
-                    runningText.innerText = teksUntukRunning;
+                if (!snapshot.empty) {
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        
+                        // Logika Switcher berdasarkan Tipe Upload (Permanen di DB)
+                        if (data.type === "image") {
+                            contentHTML = `<img src="${data.content}" style="width:100%; height:100%; object-fit:cover; border-radius:25px;">`;
+                        } 
+                        else if (data.type === "video") {
+                            contentHTML = `<video width="100%" height="100%" controls style="border-radius:25px; background:black;">
+                                            <source src="${data.content}" type="video/mp4">
+                                           </video>`;
+                        }
+                        else if (data.type === "pdf") {
+                            contentHTML = `<iframe src="${data.content}" width="100%" height="100%" style="border:none; border-radius:25px;"></iframe>`;
+                        }
+                        else if (data.type === "text") {
+                            textUpdate = data.content;
+                        }
+                        // Handle Youtube yang tersimpan di DB (Opsional)
+                        else if (data.type === "youtube") {
+                            contentHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.content}?autoplay=1&mute=1" frameborder="0" allowfullscreen style="border-radius:25px;"></iframe>`;
+                        }
+                    });
                 } else {
-                    runningText.innerText = "PONDOK PEMULIHAN PAPUA - PULIH, BANGKIT, JADI BERKAT";
+                    contentHTML = `<p style="color:white; padding-top:80px;">Belum ada media upload aktif</p>`;
                 }
+
+                // Update Tampilan (Kecuali jika sedang memutar YouTube Live Link)
+                if (container.getAttribute("data-mode") !== "youtube-live") {
+                    container.innerHTML = contentHTML;
+                }
+                runningText.innerText = textUpdate;
 
             }, (error) => {
                 console.error("Firestore Error: ", error);
                 runningText.innerText = "Koneksi Bermasalah...";
             });
+        }
+
+        // FUNGSI KHUSUS YOUTUBE (Hanya memutar player saja via Link, tidak simpan ke DB)
+        function playYouTube(url) {
+            const container = document.getElementById("media-display-area");
+            let videoId = "";
+            
+            // Ekstrak ID dari Link YouTube
+            if (url.includes("v=")) { videoId = url.split("v=")[1].substring(0, 11); }
+            else if (url.includes("youtu.be/")) { videoId = url.split("youtu.be/")[1].substring(0, 11); }
+
+            if (videoId) {
+                // Set attribute agar tidak tertimpa snapshot database sementara waktu
+                container.setAttribute("data-mode", "youtube-live");
+                container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1" frameborder="0" allowfullscreen style="border-radius:25px;"></iframe>`;
+                console.log("YouTube Player aktif via link.");
+            } else {
+                alert("Link YouTube tidak valid!");
+            }
         }
 
         // --- FUNGSI INBOX & USER SYNC ---
@@ -257,10 +284,12 @@
                 });
                 const badge = document.getElementById('email-badge');
                 const icon = document.getElementById('icon-mail');
-                if (unreadCount > 0) { 
-                    badge.style.display = 'block'; badge.innerText = unreadCount; icon.classList.add('vibrate');
-                } else { 
-                    badge.style.display = 'none'; icon.classList.remove('vibrate');
+                if (badge && icon) {
+                    if (unreadCount > 0) { 
+                        badge.style.display = 'block'; badge.innerText = unreadCount; icon.classList.add('vibrate');
+                    } else { 
+                        badge.style.display = 'none'; icon.classList.remove('vibrate');
+                    }
                 }
             });
         }
@@ -307,8 +336,10 @@
 
         function updateTime() {
             const now = new Date();
-            document.getElementById('display-tanggal').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID', { hour12: false }) + " WIT";
+            const tgl = document.getElementById('display-tanggal');
+            const clk = document.getElementById('digital-clock');
+            if(tgl) tgl.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            if(clk) clk.innerText = now.toLocaleTimeString('id-ID', { hour12: false }) + " WIT";
         }
 
         function toggleSelectAll(source) { document.querySelectorAll('.msg-checkbox').forEach(cb => cb.checked = source.checked); }
