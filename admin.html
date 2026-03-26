@@ -114,7 +114,11 @@
                 </div>
                 <div class="form-group" id="input_link_wrapper">
                     <label id="label_link">URL Link (YouTube Embed / Image URL)</label>
-                    <input type="text" id="media_url" placeholder="Masukkan link di sini...">
+                    <input type="text" id="media_url" placeholder="Masukkan link di sini..." required>
+                </div>
+                <div class="form-group" id="input_teks_wrapper" style="display:none;">
+                    <label>Isi Konten Teks</label>
+                    <textarea id="media_isi_teks" rows="5" placeholder="Ketik isi konten teks di sini..."></textarea>
                 </div>
                 <div class="form-group">
                     <label>Urutan Tampil</label>
@@ -173,17 +177,23 @@
     // Fungsi Toggle Input Media
     function toggleMediaInput() {
         const tipe = document.getElementById("media_tipe").value;
-        const wrapper = document.getElementById("input_link_wrapper");
-        const label = document.getElementById("label_link");
-        const input = document.getElementById("media_url");
+        const linkWrapper = document.getElementById("input_link_wrapper");
+        const teksWrapper = document.getElementById("input_teks_wrapper");
+        const labelLink = document.getElementById("label_link");
+        const inputUrl = document.getElementById("media_url");
+        const inputTeks = document.getElementById("media_isi_teks");
 
         if (tipe === "teks") {
-            wrapper.style.display = "none";
-            input.required = false;
+            linkWrapper.style.display = "none";
+            teksWrapper.style.display = "block";
+            inputUrl.required = false;
+            inputTeks.required = true;
         } else {
-            wrapper.style.display = "block";
-            input.required = true;
-            label.innerText = (tipe === "video_youtube") ? "URL YouTube Embed" : "URL Link Gambar";
+            linkWrapper.style.display = "block";
+            teksWrapper.style.display = "none";
+            inputUrl.required = true;
+            inputTeks.required = false;
+            labelLink.innerText = (tipe === "video_youtube") ? "URL YouTube Embed" : "URL Link Gambar";
         }
     }
 
@@ -227,7 +237,7 @@
         } catch (err) { alert("Error: " + err.message); }
     });
 
-    // SIMPAN PORTAL MEDIA (FIXED)
+    // SIMPAN PORTAL MEDIA (DENGAN LOGIKA TEKS)
     document.getElementById("formMedia").addEventListener("submit", async (e) => {
         e.preventDefault();
         try {
@@ -239,18 +249,23 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            if (tipe !== "teks") {
+            if (tipe === "teks") {
+                dataObj.isi_konten = document.getElementById("media_isi_teks").value;
+                // Kosongkan URL jika tipenya teks
+                dataObj.url = ""; 
+            } else {
                 dataObj.url = document.getElementById("media_url").value;
+                dataObj.isi_konten = "";
             }
 
             await db.collection("portal_media").add(dataObj);
             alert("Portal Media Berhasil Diperbarui!");
             e.target.reset();
-            toggleMediaInput();
+            toggleMediaInput(); // Kembali ke default view
         } catch (err) { alert("Error: " + err.message); }
     });
 
-    // EDIT & DELETE (Fungsi Standar)
+    // EDIT & DELETE
     async function openEditModal(id) {
         const doc = await db.collection("users").doc(id).get();
         const data = doc.data();
@@ -283,6 +298,10 @@
         let input = document.getElementById("searchInput").value.toLowerCase();
         let rows = document.querySelectorAll("#memberData tr");
         rows.forEach(row => { row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none"; });
+    }
+
+    function resetAbsenHarian() {
+        if(confirm("Yakin ingin reset absen?")) alert("Fitur diproses.");
     }
 </script>
 </body>
