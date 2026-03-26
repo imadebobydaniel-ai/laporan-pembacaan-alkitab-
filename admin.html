@@ -34,14 +34,6 @@
         table td { padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 11.5px; vertical-align: middle; }
         .freeze-col { position: sticky; left: 0; z-index: 2; background: white !important; border-right: 2px solid #eee; }
 
-        .admin-grid-forms { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        .admin-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .admin-card h3 { color: var(--primary); margin: 0 0 15px; font-size: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 4px; color: #666; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box; }
-        .btn-save { width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { padding: 15px; border-radius: 12px; color: white; position: relative; }
         .stat-card i { position: absolute; right: 10px; bottom: 10px; font-size: 2rem; opacity: 0.3; }
@@ -53,6 +45,7 @@
         .close-modal { position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .full-width { grid-column: span 2; }
+        .btn-save { width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -104,25 +97,6 @@
             <tbody id="memberData"></tbody>
         </table>
     </div>
-
-    <div class="admin-grid-forms">
-        <div class="admin-card">
-            <h3><i class="fas fa-bullhorn"></i> Kirim Informasi</h3>
-            <form id="formInfo">
-                <div class="form-group"><label>Judul</label><input type="text" id="info_judul" required></div>
-                <div class="form-group"><label>Pesan</label><textarea id="info_pesan" rows="3" required></textarea></div>
-                <button type="submit" class="btn-save">PUBLIKASIKAN</button>
-            </form>
-        </div>
-        <div class="admin-card">
-            <h3><i class="fas fa-heart" style="color:var(--danger)"></i> Doa Global</h3>
-            <div id="doaData" style="max-height: 180px; overflow-y:auto; font-size:11px; margin-bottom:10px; border:1px solid #f0f0f0; padding:5px;"></div>
-        </div>
-        <div class="admin-card">
-            <h3><i class="fas fa-fingerprint" style="color:var(--success)"></i> Absensi Hari Ini</h3>
-            <div id="absensiData" style="max-height: 180px; overflow-y:auto;"></div>
-        </div>
-    </div>
 </div>
 
 <div id="editModal" class="modal">
@@ -132,12 +106,12 @@
         <form id="formUpdate">
             <input type="hidden" id="edit_id">
             <div class="modal-grid">
-                <div class="form-group full-width"><label>Nama Lengkap</label><input type="text" id="edit_nama" required></div>
-                <div class="form-group"><label>WhatsApp</label><input type="text" id="edit_wa" required></div>
-                <div class="form-group"><label>Email</label><input type="email" id="edit_email" required></div>
-                <div class="form-group"><label>Password Akun</label><input type="text" id="edit_password" placeholder="Password anggota"></div>
+                <div class="form-group full-width"><label>Nama Lengkap</label><input type="text" id="edit_nama" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></div>
+                <div class="form-group"><label>WhatsApp</label><input type="text" id="edit_wa" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="edit_email" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></div>
+                <div class="form-group"><label>Password Akun</label><input type="text" id="edit_password" placeholder="Password anggota" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></div>
                 <div class="form-group"><label>Golongan Darah</label>
-                    <select id="edit_goldar">
+                    <select id="edit_goldar" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                         <option value="-">-</option>
                         <option value="A">A</option>
                         <option value="B">B</option>
@@ -146,14 +120,14 @@
                     </select>
                 </div>
                 <div class="form-group"><label>Jabatan</label>
-                    <select id="edit_jabatan">
+                    <select id="edit_jabatan" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                         <option value="Anggota">Anggota</option>
                         <option value="Ketua Komsel">Ketua Komsel</option>
                         <option value="Pengurus">Pengurus</option>
                     </select>
                 </div>
                 <div class="form-group"><label>JC (Komsel)</label>
-                    <select id="edit_jc">
+                    <select id="edit_jc" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                         <option value="1">JC 1</option>
                         <option value="2">JC 2</option>
                         <option value="3">JC 3</option>
@@ -161,9 +135,9 @@
                         <option value="5">JC 5</option>
                     </select>
                 </div>
-                <div class="form-group full-width"><label>Alamat Lengkap</label><textarea id="edit_alamat" rows="2"></textarea></div>
+                <div class="form-group full-width"><label>Alamat Lengkap</label><textarea id="edit_alamat" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></textarea></div>
             </div>
-            <button type="submit" class="btn-save" style="background:var(--accent); margin-top: 10px;">SIMPAN PERUBAHAN</button>
+            <button type="submit" class="btn-save" style="background:var(--accent); margin-top: 15px;">SIMPAN PERUBAHAN</button>
         </form>
     </div>
 </div>
@@ -183,7 +157,19 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    window.onload = function() { loadUsers(); loadAbsensi(); loadDoa(); };
+    window.onload = function() { 
+        loadUsers(); 
+        updateStats(); // Memuat statistik dasar
+    };
+
+    function updateStats() {
+        // Tetap memantau jumlah absen hari ini untuk kartu statistik
+        db.collection("absensi").where("tanggal", "==", new Date().toISOString().split('T')[0])
+            .onSnapshot(snap => { document.getElementById("stat_hadir").innerText = snap.size; });
+        
+        // Tetap memantau jumlah doa untuk kartu statistik
+        db.collection("doa_global").onSnapshot(snap => { document.getElementById("stat_doa").innerText = snap.size; });
+    }
 
     function loadUsers() {
         db.collection("users").onSnapshot((snapshot) => {
@@ -227,7 +213,6 @@
         }
     }
 
-    // FUNGSI LOAD DATA KE FORM EDIT
     async function editSelected() {
         const selected = document.querySelectorAll(".user-checkbox:checked");
         if (selected.length !== 1) { alert("Pilih satu anggota saja untuk diedit."); return; }
@@ -249,7 +234,6 @@
         document.getElementById("editModal").style.display = "block";
     }
 
-    // FUNGSI UPDATE DATA KE FIREBASE
     document.getElementById("formUpdate").onsubmit = async function(e) {
         e.preventDefault();
         const id = document.getElementById("edit_id").value;
@@ -286,28 +270,6 @@
         let input = document.getElementById("searchInput").value.toLowerCase();
         document.querySelectorAll("#memberData tr").forEach(row => {
             row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
-        });
-    }
-
-    function loadDoa() {
-        db.collection("doa_global").orderBy("timestamp", "desc").limit(10).onSnapshot(snap => {
-            const div = document.getElementById("doaData");
-            div.innerHTML = "";
-            document.getElementById("stat_doa").innerText = snap.size;
-            snap.forEach(doc => {
-                div.innerHTML += `<div style="padding:4px; border-bottom:1px solid #eee;"><b>${doc.data().pengirim || 'Anonim'}:</b> ${doc.data().isi}</div>`;
-            });
-        });
-    }
-
-    function loadAbsensi() {
-        db.collection("absensi").where("tanggal", "==", new Date().toISOString().split('T')[0]).onSnapshot(snap => {
-            const div = document.getElementById("absensiData");
-            div.innerHTML = "";
-            document.getElementById("stat_hadir").innerText = snap.size;
-            snap.forEach(doc => {
-                div.innerHTML += `<div style="padding:6px; border-bottom:1px solid #f9f9f9; font-size:12px;"><i class="fas fa-check-circle" style="color:green"></i> ${doc.data().nama}</div>`;
-            });
         });
     }
 </script>
