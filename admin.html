@@ -13,162 +13,253 @@
             --success: #28a745; 
             --info: #17a2b8;
             --warning: #ffc107;
+            --danger: #dc3545;
         }
 
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background: var(--light); 
             margin: 0; 
-            padding: 20px; 
+            padding: 0; 
+            overflow: hidden; /* Mencegah scroll pada body utama agar freeze working */
         }
 
-        /* CONTAINER DASHBOARD */
-        .dashboard-card {
-            max-width: 1200px;
-            margin: auto;
+        /* Container Utama Dashboard */
+        .dashboard-container {
+            height: 100vh; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 1. FREEZE HEADER (UP) */
+        .header-admin {
+            flex-shrink: 0; /* Header tidak boleh menyusut */
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            max-height: 550px; 
-            overflow-y: auto;  
-            position: relative;
-            margin-bottom: 30px;
+            padding: 15px 25px;
+            border-bottom: 2px solid var(--primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
         }
 
-        .dashboard-card::-webkit-scrollbar { width: 8px; }
-        .dashboard-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .dashboard-card::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        .btn-logout { 
+            background: var(--danger); 
+            color: white; 
+            padding: 8px 15px; 
+            border: none;
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: bold; 
+            transition: 0.3s;
+        }
+        .btn-logout:hover { background: #c82333; }
 
-        .header-section { 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; 
-            position: sticky; top: 0; background: white; z-index: 10;
+        .search-box { position: relative; width: 100%; max-width: 400px; }
+        .search-box input { 
+            width: 100%; 
+            padding: 10px 40px 10px 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 20px; 
+            outline: none; 
+            transition: 0.3s;
+        }
+        .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(0,123,255,0.2); }
+        .search-box i { position: absolute; right: 15px; top: 12px; color: #aaa; }
+
+        /* 2. AREA TENGAH (SCROLLABLE) */
+        .table-scroll-area {
+            flex: 1; 
+            overflow: auto; 
+            background: #f8f9fa;
         }
 
-        .btn-logout { background: #dc3545; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
-        
-        .search-box { position: relative; margin-bottom: 20px; width: 100%; max-width: 400px; }
-        .search-box input { width: 100%; padding: 12px 40px 12px 15px; border: 1px solid #ddd; border-radius: 10px; outline: none; }
-        .search-box i { position: absolute; right: 15px; top: 13px; color: #aaa; }
-        
-        .table-responsive { overflow-x: auto; border-radius: 10px; border: 1px solid #eee; }
-        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
-        table th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; position: sticky; top: 0; z-index: 5; }
-        table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; color: var(--dark); }
-        
-        .freeze-col { position: sticky; left: 0; z-index: 2; background: white !important; border-right: 2px solid #eee; }
-        th.freeze-col { z-index: 6; background: var(--primary) !important; }
+        table { 
+            width: 100%; 
+            border-collapse: separate; /* Penting untuk sticky column */
+            border-spacing: 0;
+            min-width: 1500px; 
+            background: white;
+        }
 
-        /* PORTAL MENU SECTION - PERBAIKAN GRID */
+        /* Freeze Header Tabel */
+        table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20; /* Lebih tinggi dari freeze col */
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 13px;
+            border-bottom: 2px solid #0062cc;
+        }
+
+        table td { 
+            padding: 12px 15px; 
+            border-bottom: 1px solid #eee; 
+            font-size: 13px; 
+            color: var(--dark); 
+        }
+
+        /* 3. FREEZE COLUMN (NK & Checkbox) */
+        /* Kolom Checkbox */
+        .freeze-col-1 { 
+            position: sticky; 
+            left: 0; 
+            z-index: 10; 
+            background: white !important; 
+            min-width: 45px;
+        }
+        /* Kolom NK */
+        .freeze-col-2 { 
+            position: sticky; 
+            left: 45px; 
+            z-index: 10; 
+            background: white !important; 
+            border-right: 2px solid #ddd;
+            min-width: 100px;
+        }
+        
+        /* Header untuk kolom freeze harus tetap biru */
+        th.freeze-col-1, th.freeze-col-2 { z-index: 21 !important; background: var(--primary) !important; }
+
+        /* Row Hover */
+        tbody tr:hover td { background-color: #f1f7ff !important; }
+
+        /* 4. FREEZE BOTTOM BAR */
+        .footer-action-bar {
+            flex-shrink: 0;
+            background: white;
+            padding: 10px 25px;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .btn-nav {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-nav:hover { background: #f8f9fa; border-color: var(--primary); }
+
+        /* Menu Grid Section */
         .portal-menu-grid {
-            max-width: 1200px;
-            margin: auto;
             display: grid;
-            /* Mengatur 4 kolom sejajar horizontal */
-            grid-template-columns: repeat(4, 1fr); 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
             gap: 20px;
-            padding-bottom: 40px;
-        }
-
-        @media (max-width: 768px) {
-            .portal-menu-grid { grid-template-columns: repeat(2, 1fr); }
+            padding: 30px 25px;
+            background: #f1f3f5;
         }
 
         .menu-box {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             transition: 0.3s;
-            cursor: pointer;
             text-decoration: none;
             color: inherit;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            border-bottom: 4px solid transparent;
         }
-        .menu-box:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .menu-box i { font-size: 2.5rem; margin-bottom: 15px; }
-        .menu-box h3 { margin: 0 0 8px; font-size: 16px; }
-        .menu-box p { margin: 0; font-size: 11px; color: #777; }
+        .menu-box:hover { transform: translateY(-5px); border-bottom-color: var(--primary); }
+        .menu-box i { font-size: 2rem; margin-bottom: 10px; }
+        .menu-box h3 { margin: 0; font-size: 14px; color: var(--dark); }
+
+        #loading-state { padding: 40px; text-align: center; color: var(--primary); font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="dashboard-card">
-        <div class="header-section">
+<div class="dashboard-container">
+    
+    <div class="header-admin">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h2 style="margin:0;">Dashboard Administrator</h2>
-                <p style="margin:5px 0 0; color:#777; font-size: 13px;">Manajemen Data Anggota Pondok Pemulihan Papua</p>
+                <h2 style="margin:0; font-size: 22px; color: var(--primary);"><i class="fas fa-user-shield"></i> Admin Panel</h2>
+                <p style="margin:3px 0 0; color:#777; font-size: 12px;">Pondok Pemulihan Papua • <span id="currentDate"></span></p>
             </div>
-            <a href="login_cyber.html" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Keluar
+            </button>
         </div>
-
-        <div class="search-box">
+        <div class="search-box" style="margin-top: 15px;">
             <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari Nama, NK, atau Alamat...">
             <i class="fas fa-search"></i>
         </div>
+    </div>
 
-        <div id="loading-state"><i class="fas fa-spinner fa-spin"></i> Menghubungkan ke Firebase...</div>
+    <div class="table-scroll-area">
+        <div id="loading-state">
+            <i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>
+            Menghubungkan ke Database...
+        </div>
+        
+        <table id="adminTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th class="freeze-col-1"><input type="checkbox" id="checkAll"></th>
+                    <th class="freeze-col-2">NK</th>
+                    <th>Nama Anggota</th>
+                    <th>WhatsApp</th>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Alamat</th>
+                    <th>Gol. Darah</th>
+                    <th>Jabatan</th>
+                    <th>JC</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="memberData">
+                </tbody>
+        </table>
 
-        <div class="table-responsive">
-            <table id="adminTable" style="display:none;">
-                <thead>
-                    <tr>
-                        <th class="freeze-col"><input type="checkbox"></th>
-                        <th style="left: 45px;" class="freeze-col">NK</th>
-                        <th>Nama Anggota</th>
-                        <th>WhatsApp</th>
-                        <th>Email</th>
-                        <th>Password</th>
-                        <th>Alamat</th>
-                        <th>Gol. Darah</th>
-                        <th>Jabatan</th>
-                        <th>JC</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="memberData"></tbody>
-            </table>
+        <div class="portal-menu-grid">
+            <a href="informasi-kegiatan.html" class="menu-box">
+                <i class="fas fa-broadcast-tower" style="color: #e74c3c;"></i>
+                <h3>Info Kegiatan</h3>
+            </a>
+            <a href="statistik.html" class="menu-box">
+                <i class="fas fa-chart-line" style="color: var(--primary);"></i>
+                <h3>Statistik</h3>
+            </a>
+            <a href="absensi.html" class="menu-box">
+                <i class="fas fa-calendar-check" style="color: var(--success);"></i>
+                <h3>Absensi</h3>
+            </a>
+            <a href="portal-media.html" class="menu-box">
+                <i class="fas fa-clapperboard" style="color: var(--warning);"></i>
+                <h3>Portal Media</h3>
+            </a>
         </div>
     </div>
 
-    <div class="portal-menu-grid">
-        <a href="informasi-kegiatan.html" class="menu-box">
-            <i class="fas fa-broadcast-tower" style="color: #e74c3c;"></i>
-            <h3>Informasi Kegiatan</h3>
-            <p>Update jadwal dan info terbaru</p>
-        </a>
-
-        <a href="statistik.html" class="menu-box">
-            <i class="fas fa-chart-line" style="color: var(--primary);"></i>
-            <h3>Statistik</h3>
-            <p>Lihat data pertumbuhan anggota</p>
-        </a>
-
-        <a href="absensi.html" class="menu-box">
-            <i class="fas fa-calendar-check" style="color: var(--success);"></i>
-            <h3>Absensi</h3>
-            <p>Kelola kehadiran komsel</p>
-        </a>
-
-        <a href="portal-media.html" class="menu-box">
-            <i class="fas fa-clapperboard" style="color: var(--warning);"></i>
-            <h3>Portal Media</h3>
-            <p>Kelola konten berita dan pengumuman</p>
-        </a>
+    <div class="footer-action-bar">
+        <div class="info-data">
+            <i class="fas fa-users"></i> Menampilkan <span id="countData" style="font-weight: bold; color: var(--primary);">0</span> Anggota
+        </div>
+        <div class="pagination-controls">
+            <button class="btn-nav" title="Halaman Sebelumnya"><i class="fas fa-chevron-left"></i></button>
+            <span style="margin: 0 15px; font-size: 13px; font-weight: 600;">Halaman 1</span>
+            <button class="btn-nav" title="Halaman Selanjutnya"><i class="fas fa-chevron-right"></i></button>
+        </div>
     </div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 <script>
-    // Konfigurasi Firebase tetap sama
+    // Konfigurasi Firebase Boby
     const firebaseConfig = {
         apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM",
         authDomain: "boby-apps-project.firebaseapp.com",
@@ -177,44 +268,82 @@
         messagingSenderId: "125984859692",
         appId: "1:125984859692:web:09f75df5d2e4b6e3bcd389"
     };
+    
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+    // Tampilkan Tanggal Hari Ini
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // FUNGSI LOAD DATA DARI FIREBASE
     async function loadData() {
         const tableBody = document.getElementById("memberData");
+        const countSpan = document.getElementById("countData");
+        
         try {
-            const snapshot = await db.collection("users").get();
+            // Ambil data dari koleksi "users"
+            const snapshot = await db.collection("users").orderBy("nama", "asc").get();
             tableBody.innerHTML = "";
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                tableBody.innerHTML += `
-                    <tr>
-                        <td class="freeze-col"><input type="checkbox"></td>
-                        <td style="left: 45px;" class="freeze-col"><b>${data.nomor_komsel || '-'}</b></td>
-                        <td>${data.nama || '-'}</td>
-                        <td>${data.whatsapp || '-'}</td>
-                        <td>${data.email || '-'}</td>
-                        <td><code>${data.password || '-'}</code></td>
-                        <td>${data.alamat || '-'}</td>
-                        <td>${data.golDarah || '-'}</td>
-                        <td>${data.jabatan || '-'}</td>
-                        <td>JC ${data.komsel || '-'}</td>
-                        <td>Aktif</td>
-                        <td>
-                            <i class="fas fa-edit" style="cursor:pointer; color:var(--primary); margin-right:10px;"></i>
-                            <i class="fas fa-trash" style="cursor:pointer; color:#dc3545;"></i>
-                        </td>
-                    </tr>`;
-            });
+            let count = 0;
+
+            if (snapshot.empty) {
+                tableBody.innerHTML = "<tr><td colspan='12' style='text-align:center;'>Tidak ada data anggota ditemukan.</td></tr>";
+            } else {
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    count++;
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td class="freeze-col-1"><input type="checkbox"></td>
+                            <td class="freeze-col-2"><b>${data.nomor_komsel || '-'}</b></td>
+                            <td>${data.nama || '-'}</td>
+                            <td>${data.whatsapp || '-'}</td>
+                            <td>${data.email || '-'}</td>
+                            <td><small><code>${data.password || '-'}</code></small></td>
+                            <td>${data.alamat || '-'}</td>
+                            <td style="text-align:center">${data.golDarah || '-'}</td>
+                            <td><span class="badge">${data.jabatan || '-'}</span></td>
+                            <td>JC ${data.komsel || '-'}</td>
+                            <td><b style="color:var(--success)">● Aktif</b></td>
+                            <td>
+                                <i class="fas fa-edit" style="cursor:pointer; color:var(--primary); margin-right:12px;" title="Edit"></i>
+                                <i class="fas fa-trash" style="cursor:pointer; color:var(--danger);" title="Hapus"></i>
+                            </td>
+                        </tr>`;
+                });
+            }
+
+            countSpan.innerText = count;
             document.getElementById("loading-state").style.display = "none";
             document.getElementById("adminTable").style.display = "table";
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e);
+            document.getElementById("loading-state").innerHTML = `<span style="color:red">Gagal memuat data: ${e.message}</span>`;
+        }
     }
 
+    // FUNGSI PENCARIAN REAL-TIME
     function filterTable() {
         let input = document.getElementById("searchInput").value.toLowerCase();
         let rows = document.querySelectorAll("#memberData tr");
-        rows.forEach(row => { row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none"; });
+        let visibleCount = 0;
+
+        rows.forEach(row => { 
+            // Mencari di semua teks dalam baris tersebut
+            if(row.innerText.toLowerCase().includes(input)) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+        document.getElementById("countData").innerText = visibleCount;
+    }
+
+    function logout() {
+        if(confirm("Apakah Anda yakin ingin keluar?")) {
+            window.location.href = 'login_cyber.html';
+        }
     }
 
     window.onload = loadData;
