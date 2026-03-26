@@ -187,29 +187,50 @@
         const db = firebase.firestore();
         let ytPlayer; 
 
-        // --- TAMBAHAN: FUNGSI PEMUTAR YOUTUBE ---
+        // --- FUNGSI PEMUTAR YOUTUBE DENGAN AUTO-EXTRACT ID (VERSI TERBARU) ---
         function onYouTubeIframeAPIReady() {
             db.collection("portal_media").limit(1).onSnapshot(snapshot => {
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
-                    const videoId = data.url; // Pastikan di Firestore isi field 'url' adalah ID Video (contoh: dQw4w9WgXcQ)
-                    
-                    if (ytPlayer) {
-                        ytPlayer.loadVideoById(videoId);
+                    let rawUrl = data.url || ""; 
+                    let videoId = "";
+
+                    // Logika pendeteksi link atau ID
+                    if (rawUrl.includes("v=")) {
+                        videoId = rawUrl.split("v=")[1].split("&")[0];
+                    } else if (rawUrl.includes("youtu.be/")) {
+                        videoId = rawUrl.split("youtu.be/")[1].split("?")[0];
                     } else {
-                        ytPlayer = new YT.Player('player', {
-                            height: '100%',
-                            width: '100%',
-                            videoId: videoId,
-                            playerVars: { 'autoplay': 1, 'mute': 1, 'loop': 1, 'playlist': videoId },
-                            events: { 'onReady': (event) => event.target.playVideo() }
-                        });
+                        videoId = rawUrl; 
+                    }
+                    
+                    if (videoId && videoId !== "") {
+                        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+                            ytPlayer.loadVideoById(videoId);
+                        } else {
+                            ytPlayer = new YT.Player('player', {
+                                height: '100%',
+                                width: '100%',
+                                videoId: videoId,
+                                playerVars: { 
+                                    'autoplay': 1, 
+                                    'mute': 1, 
+                                    'loop': 1, 
+                                    'playlist': videoId,
+                                    'controls': 0,
+                                    'rel': 0
+                                },
+                                events: { 
+                                    'onReady': (event) => event.target.playVideo() 
+                                }
+                            });
+                        }
                     }
                 }
             });
         }
 
-        // --- FUNGSI INBOX ASLI ---
+        // --- FUNGSI INBOX ---
         function monitorEmailInbox(userJC, userEmail) {
             localStorage.setItem("userKomsel", userJC);
             db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot(snapshot => {
@@ -238,7 +259,6 @@
             });
         }
 
-        // --- FUNGSI DETAIL PESAN ASLI ---
         async function bacaDetailPesan(docId, userEmail) {
             await db.collection("pengumuman_komsel").doc(docId).update({ sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail) });
             const doc = await db.collection("pengumuman_komsel").doc(docId).get();
