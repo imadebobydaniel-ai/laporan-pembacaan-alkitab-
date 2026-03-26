@@ -41,6 +41,11 @@
         .profile-card.closed { transform: translateX(-100%); }
         .btn-toggle-side { position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 10; background: #ff0000; color: white; border: none; width: 30px; height: 60px; border-radius: 0 15px 15px 0; cursor: pointer; transition: 0.3s; }
 
+        /* Media Display Styles */
+        #media-display-area { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; }
+        #other-media { width: 100%; height: 100%; display: none; align-items: center; justify-content: center; color: white; text-align: center; }
+        #other-media img, #other-media video { width: 100%; height: 100%; object-fit: contain; }
+
         .email-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; z-index: 20; }
         .email-icon { font-size: 22px; color: var(--biru-tua); transition: 0.3s; }
         #email-badge { position: absolute; top: -8px; right: -8px; background: red; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; font-weight: bold; display: none; }
@@ -114,8 +119,9 @@
                 <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
             </button>
 
-            <div id="media-display-area" style="width: 100%; height: 100%;">
-                <div id="player"></div> 
+            <div id="media-display-area">
+                <div id="player" style="width: 100%; height: 100%;"></div> 
+                <div id="other-media"></div>
             </div>
         </div>
 
@@ -153,56 +159,65 @@
         const db = firebase.firestore();
         let ytPlayer; 
 
-        // --- FUNGSI PEMUTAR YOUTUBE (VERSI FIX DENGAN EXTRACTOR) ---
+        // --- MULTI-MEDIA PLAYER LOGIC ---
         function onYouTubeIframeAPIReady() {
             db.collection("portal_media").limit(1).onSnapshot(snapshot => {
+                const otherMedia = document.getElementById('other-media');
+                const ytContainer = document.getElementById('player');
+
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
-                    let rawUrl = data.url || ""; 
-                    let videoId = "";
+                    const type = data.type || "youtube"; // Ambil tipe dari Firestore
+                    const content = data.url || data.linkVideo || data.content || "";
 
-                    // Logika pembersihan link untuk mengambil ID
-                    if (rawUrl.includes("v=")) {
-                        videoId = rawUrl.split("v=")[1].split("&")[0];
-                    } else if (rawUrl.includes("youtu.be/")) {
-                        videoId = rawUrl.split("youtu.be/")[1].split("?")[0];
-                    } else if (rawUrl.length === 11) {
-                        videoId = rawUrl; 
-                    }
+                    // Reset Visibility
+                    otherMedia.style.display = 'none';
+                    ytContainer.style.display = 'none';
+                    otherMedia.innerHTML = '';
 
-                    if (videoId) {
-                        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-                            ytPlayer.loadVideoById(videoId);
-                        } else {
-                            ytPlayer = new YT.Player('player', {
-                                height: '100%',
-                                width: '100%',
-                                videoId: videoId,
-                                playerVars: { 
-                                    'autoplay': 1, 
-                                    'mute': 1, 
-                                    'loop': 1, 
-                                    'playlist': videoId,
-                                    'controls': 0,
-                                    'rel': 0,
-                                    'modestbranding': 1
-                                },
-                                events: { 
-                                    'onReady': (event) => event.target.playVideo() 
-                                }
-                            });
-                        }
-                    } else {
-                        console.error("ID Video tidak ditemukan!");
-                        document.getElementById('player').innerHTML = "<div style='color:white;padding:20px;'>Link YouTube tidak valid</div>";
+                    if (type === "youtube") {
+                        ytContainer.style.display = 'block';
+                        playYouTube(content);
+                    } 
+                    else if (type === "video") {
+                        otherMedia.style.display = 'flex';
+                        otherMedia.innerHTML = `<video src="${content}" autoplay muted loop style="width:100%; height:100%; object-fit:cover;"></video>`;
+                    } 
+                    else if (type === "image") {
+                        otherMedia.style.display = 'flex';
+                        otherMedia.innerHTML = `<img src="${content}" style="width:100%; height:100%; object-fit:contain;">`;
+                    } 
+                    else if (type === "text") {
+                        otherMedia.style.display = 'flex';
+                        otherMedia.innerHTML = `<div style="color:white; padding:20px; font-weight:bold; font-size:16px; text-align:center;">${content}</div>`;
                     }
                 } else {
-                    document.getElementById('player').innerHTML = "<div style='color:white;padding:20px;'>Belum ada media aktif</div>";
+                    otherMedia.style.display = 'flex';
+                    otherMedia.innerHTML = "<div style='color:white;'>Belum ada media aktif</div>";
                 }
             });
         }
 
-        // --- FUNGSI INBOX & USER SYNC ---
+        function playYouTube(rawUrl) {
+            let videoId = "";
+            if (rawUrl.includes("v=")) videoId = rawUrl.split("v=")[1].split("&")[0];
+            else if (rawUrl.includes("youtu.be/")) videoId = rawUrl.split("youtu.be/")[1].split("?")[0];
+            else if (rawUrl.length === 11) videoId = rawUrl;
+
+            if (videoId) {
+                if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+                    ytPlayer.loadVideoById(videoId);
+                } else {
+                    ytPlayer = new YT.Player('player', {
+                        videoId: videoId,
+                        playerVars: { 'autoplay': 1, 'mute': 1, 'loop': 1, 'playlist': videoId, 'controls': 0, 'rel': 0, 'modestbranding': 1 },
+                        events: { 'onReady': (e) => e.target.playVideo() }
+                    });
+                }
+            }
+        }
+
+        // --- FUNGSI INBOX & USER SYNC (TETAP SAMA) ---
         function monitorEmailInbox(userJC, userEmail) {
             db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 let unreadCount = 0;
