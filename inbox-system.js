@@ -4,7 +4,7 @@ const InboxSystem = {
     monitor: function(userJC, userEmail) {
         if (typeof db === 'undefined') return console.error("Firestore belum terinisialisasi!");
 
-        // Kuncinya: Membaca 'pengumuman_komsel' agar tidak tercampur video dari portal_media
+        // Membaca 'pengumuman_komsel' agar sinkron dengan portal input kegiatan
         db.collection("pengumuman_komsel")
             .orderBy("timestamp", "desc")
             .onSnapshot(snapshot => {
@@ -23,10 +23,11 @@ const InboxSystem = {
                     const data = doc.data();
                     const docId = doc.id;
                     
-                    // Filter berdasarkan Target JC
-                    const target = data.target || "Semua JC";
+                    // --- BAGIAN FILTER YANG DIPERBAIKI ---
+                    const target = (data.target || "Semua JC").toLowerCase();
+                    const userGroup = (userJC || "").toLowerCase();
 
-                    if (target === "Semua JC" || String(target) === String(userJC)) {
+                    if (target === "semua jc" || target === userGroup) {
                         const readBy = data.readBy || [];
                         const isUnread = !readBy.includes(userEmail);
 
@@ -61,7 +62,7 @@ const InboxSystem = {
                     }
                 });
 
-                // Update badge notifikasi jika ada
+                // Update badge notifikasi
                 const badge = document.getElementById('email-badge');
                 if (badge) {
                     badge.innerText = unreadCount;
@@ -77,7 +78,6 @@ const InboxSystem = {
                 const data = doc.data();
                 const listDiv = document.getElementById('list-pesan');
                 
-                // Animasi sederhana dan ganti isi container
                 listDiv.innerHTML = `
                     <div style="padding:15px; animation: fadeIn 0.3s ease;">
                         <button onclick="InboxSystem.monitor('${data.target}', '${userEmail}')" style="border:none; background:none; color:#007bff; font-weight:bold; cursor:pointer; margin-bottom:10px; padding:0;">
@@ -96,7 +96,7 @@ const InboxSystem = {
                         </div>
                     </div>`;
 
-                // Tandai sudah dibaca di database
+                // Tandai sudah dibaca
                 db.collection("pengumuman_komsel").doc(docId).update({
                     readBy: firebase.firestore.FieldValue.arrayUnion(userEmail)
                 });
