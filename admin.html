@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrator - Pondok Pemulihan Papua</title>
+    <title>Administrator - Pondok Pemulihan Regional</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { 
@@ -36,8 +36,8 @@
         .freeze-col { position: sticky; left: 0; z-index: 2; background: white !important; border-right: 2px solid #eee; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { padding: 15px; border-radius: 12px; color: white; position: relative; cursor: pointer; transition: transform 0.2s; height: 100%; box-sizing: border-box; }
-        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card { padding: 15px; border-radius: 12px; color: white; position: relative; cursor: pointer; transition: transform 0.2s; height: 100%; box-sizing: border-box; text-decoration: none; display: block; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .stat-card i { position: absolute; right: 10px; bottom: 10px; font-size: 2rem; opacity: 0.3; }
         .stat-card p { margin: 5px 0 0; font-size: 22px; font-weight: bold; }
 
@@ -68,20 +68,18 @@
             <h4 style="margin:0; font-size:11px;">POKOK DOA</h4><p id="stat_doa">0</p><i class="fas fa-hands-praying"></i>
         </div>
         
-        <a href="portal-media.html" style="text-decoration: none; color: inherit;">
-            <div class="stat-card" style="background: linear-gradient(135deg, var(--purple), #4e2a84);">
-                <h4 style="margin:0; font-size:11px;">PORTAL MEDIA</h4><p id="stat_media">0</p><i class="fas fa-photo-video"></i>
-            </div>
+        <a href="portal-media.html" class="stat-card" style="background: linear-gradient(135deg, var(--purple), #4e2a84);">
+            <h4 style="margin:0; font-size:11px;">PORTAL MEDIA</h4><p id="stat_media">0</p><i class="fas fa-photo-video"></i>
         </a>
 
-        <a href="informasi-kegiatan.html" style="text-decoration: none; color: inherit;">
-            <div class="stat-card" style="background: linear-gradient(135deg, var(--orange), #c46210);">
-                <h4 style="margin:0; font-size:11px;">INFORMASI KEGIATAN</h4><p id="stat_kegiatan">0</p><i class="fas fa-calendar-alt"></i>
-            </div>
+        <a href="informasi-kegiatan.html" class="stat-card" style="background: linear-gradient(135deg, var(--orange), #c46210);">
+            <h4 style="margin:0; font-size:11px;">INFORMASI KEGIATAN</h4><p id="stat_kegiatan">0</p><i class="fas fa-calendar-alt"></i>
         </a>
 
-        <div class="stat-card" style="background: linear-gradient(135deg, var(--teal), #178a6b);">
-            <h4 style="margin:0; font-size:11px;">STATISTIK BIG DATA</h4><p id="stat_bigdata">0</p><i class="fas fa-chart-line"></i>
+        <div class="stat-card" id="btn-statistik-bigdata" style="background: linear-gradient(135deg, var(--teal), #178a6b);" onclick="bukaStatistik()">
+            <h4 style="margin:0; font-size:11px;">STATISTIK BIG DATA</h4>
+            <p id="stat_bigdata">LIHAT</p>
+            <i class="fas fa-chart-line"></i>
         </div>
     </div>
 
@@ -127,29 +125,23 @@
                 <div class="form-group"><label>WhatsApp</label><input type="text" id="edit_wa" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></div>
                 <div class="form-group"><label>Email</label><input type="email" id="edit_email" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></div>
                 <div class="form-group"><label>Password Akun</label><input type="text" id="edit_password" placeholder="Password anggota" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></div>
-                <div class="form-group"><label>Golongan Darah</label>
+                <div class="form-group">
+                    <label>Golongan Darah</label>
                     <select id="edit_goldar" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                         <option value="-">-</option>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="AB">AB</option>
-                        <option value="O">O</option>
+                        <option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Jabatan</label>
+                <div class="form-group">
+                    <label>Jabatan</label>
                     <select id="edit_jabatan" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                        <option value="Anggota">Anggota</option>
-                        <option value="Ketua Komsel">Ketua Komsel</option>
-                        <option value="Pengurus">Pengurus</option>
+                        <option value="Anggota">Anggota</option><option value="Ketua Komsel">Ketua Komsel</option><option value="Pengurus">Pengurus</option>
                     </select>
                 </div>
-                <div class="form-group"><label>JC (Komsel)</label>
+                <div class="form-group">
+                    <label>JC (Komsel)</label>
                     <select id="edit_jc" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                        <option value="1">JC 1</option>
-                        <option value="2">JC 2</option>
-                        <option value="3">JC 3</option>
-                        <option value="4">JC 4</option>
-                        <option value="5">JC 5</option>
+                        <option value="1">JC 1</option><option value="2">JC 2</option><option value="3">JC 3</option><option value="4">JC 4</option><option value="5">JC 5</option>
                     </select>
                 </div>
                 <div class="form-group full-width"><label>Alamat Lengkap</label><textarea id="edit_alamat" rows="2" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></textarea></div>
@@ -179,6 +171,11 @@
         updateStats(); 
     };
 
+    // FUNGSI NAVIGASI BIG DATA
+    function bukaStatistik() {
+        window.location.href = "statistik-bigdata.html"; 
+    }
+
     function updateStats() {
         db.collection("users").onSnapshot(snap => {
             document.getElementById("stat_total").innerText = snap.size;
@@ -193,14 +190,12 @@
             document.getElementById("stat_media").innerText = snap.size; 
         });
 
-        // UPDATE OTOMATIS JUMLAH KEGIATAN
         db.collection("informasi_kegiatan").onSnapshot(snap => { 
             document.getElementById("stat_kegiatan").innerText = snap.size; 
         });
-
-        document.getElementById("stat_bigdata").innerText = "0";
     }
 
+    // Fungsi-fungsi tabel (load, filter, select, edit, delete) tetap sama
     function loadUsers() {
         db.collection("users").onSnapshot((snapshot) => {
             const tableBody = document.getElementById("memberData");
@@ -245,11 +240,9 @@
     async function editSelected() {
         const selected = document.querySelectorAll(".user-checkbox:checked");
         if (selected.length !== 1) { alert("Pilih satu anggota saja untuk diedit."); return; }
-        
         const id = selected[0].value;
         const doc = await db.collection("users").doc(id).get();
         const data = doc.data();
-        
         document.getElementById("edit_id").value = id;
         document.getElementById("edit_nama").value = data.nama || "";
         document.getElementById("edit_wa").value = data.whatsapp || "";
@@ -259,7 +252,6 @@
         document.getElementById("edit_jabatan").value = data.jabatan || "Anggota";
         document.getElementById("edit_jc").value = data.komsel || "1";
         document.getElementById("edit_alamat").value = data.alamat || "";
-        
         document.getElementById("editModal").style.display = "block";
     }
 
@@ -276,7 +268,6 @@
             komsel: document.getElementById("edit_jc").value,
             alamat: document.getElementById("edit_alamat").value
         };
-
         try {
             await db.collection("users").doc(id).update(updatedData);
             alert("Berhasil memperbarui data anggota!");
