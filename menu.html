@@ -301,7 +301,7 @@
             document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID') + " WIT";
         }
 
-        function confirmLogout() { document.getElementById('modal-logout').style.display = 'flex'; }
+        function confirmLogout() { document.getElementById('modal-logout').style.display = 'flex'; } 
         function closeLogoutModal() { document.getElementById('modal-logout').style.display = 'none'; }
         function executeLogout() { localStorage.clear(); window.location.href = "login.html"; }
         function bukaInbox() { document.getElementById('popup-inbox').style.display = 'flex'; }
