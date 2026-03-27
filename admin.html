@@ -41,7 +41,6 @@
         .stat-card i { position: absolute; right: 10px; bottom: 10px; font-size: 2rem; opacity: 0.3; }
         .stat-card p { margin: 5px 0 0; font-size: 22px; font-weight: bold; }
 
-        /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
         .modal-content { background: white; margin: 30px auto; padding: 25px; border-radius: 15px; width: 90%; max-width: 550px; position: relative; }
         .close-modal { position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; }
@@ -75,9 +74,12 @@
             </div>
         </a>
 
-        <div class="stat-card" style="background: linear-gradient(135deg, var(--orange), #c46210);">
-            <h4 style="margin:0; font-size:11px;">INFORMASI KEGIATAN</h4><p id="stat_kegiatan">0</p><i class="fas fa-calendar-alt"></i>
-        </div>
+        <a href="informasi-kegiatan.html" style="text-decoration: none; color: inherit;">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--orange), #c46210);">
+                <h4 style="margin:0; font-size:11px;">INFORMASI KEGIATAN</h4><p id="stat_kegiatan">0</p><i class="fas fa-calendar-alt"></i>
+            </div>
+        </a>
+
         <div class="stat-card" style="background: linear-gradient(135deg, var(--teal), #178a6b);">
             <h4 style="margin:0; font-size:11px;">STATISTIK BIG DATA</h4><p id="stat_bigdata">0</p><i class="fas fa-chart-line"></i>
         </div>
@@ -187,12 +189,15 @@
         
         db.collection("doa_global").onSnapshot(snap => { document.getElementById("stat_doa").innerText = snap.size; });
 
-        // Update stat portal media berdasarkan collection portal_media
         db.collection("portal_media").onSnapshot(snap => { 
             document.getElementById("stat_media").innerText = snap.size; 
         });
 
-        document.getElementById("stat_kegiatan").innerText = "0";
+        // UPDATE OTOMATIS JUMLAH KEGIATAN
+        db.collection("informasi_kegiatan").onSnapshot(snap => { 
+            document.getElementById("stat_kegiatan").innerText = snap.size; 
+        });
+
         document.getElementById("stat_bigdata").innerText = "0";
     }
 
