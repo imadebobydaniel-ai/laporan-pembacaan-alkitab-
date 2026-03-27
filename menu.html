@@ -343,36 +343,31 @@
             });
         }
 
-        // --- FUNGSI BUKA DETAIL PESAN ---
-        async function bacaDetailPesan(docId, userEmail) {
-            const listDiv = document.getElementById('list-pesan');
-            const detailDiv = document.getElementById('detail-pesan-konten');
-            const judulInbox = document.getElementById('inbox-title');
+       async function bukaDetailPesan(docId, userEmail) {
+    try {
+        const doc = await db.collection("pengumuman_komsel").doc(docId).get();
+        if (doc.exists) {
+            const data = doc.data();
+            console.log("Data diterima dari Firebase:", data); // Cek di Inspect Element -> Console
 
-            try {
-                const doc = await db.collection("pengumuman_komsel").doc(docId).get();
-                if (doc.exists) {
-                    const data = doc.data();
+            // Mencari isi pesan di berbagai kemungkinan nama field
+            const isiPesan = data.isiDetail || data.isi || data.pesan || data.content || "Isi pesan tidak ditemukan di database.";
 
-                    // Sinkronkan Nama Field (isiDetail adalah yang ada di form Anda)
-                    const isiPesan = data.isiDetail || data.isi || data.pesan || "Isi pesan tidak ditemukan.";
-                    
-                    document.getElementById('detail-judul').innerText = data.judul || "Tanpa Judul";
-                    document.getElementById('detail-isi').innerText = isiPesan;
+            document.getElementById('detail-judul').innerText = data.judul || "Tanpa Judul";
+            document.getElementById('detail-isi').innerText = isiPesan;
 
-                    // Update status sudah dibaca ke Firebase
-                    await db.collection("pengumuman_komsel").doc(docId).update({
-                        sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
-                    });
+            // Update status baca
+            await db.collection("pengumuman_komsel").doc(docId).update({
+                sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
+            });
 
-                    // Tukar Tampilan
-                    listDiv.style.display = "none";
-                    detailDiv.style.display = "block";
-                    judulInbox.innerHTML = '<i class="fas fa-envelope-open-text"></i> Isi Pesan';
-                }
-            } catch (e) { console.error("Gagal memuat detail:", e); }
+            document.getElementById('list-pesan').style.display = "none";
+            document.getElementById('detail-pesan-konten').style.display = "block";
         }
-
+    } catch (e) {
+        console.error("Error detail pesan:", e);
+    }
+}
         function kembaliKeList() {
             document.getElementById('list-pesan').style.display = "block";
             document.getElementById('detail-pesan-konten').style.display = "none";
