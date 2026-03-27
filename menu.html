@@ -53,12 +53,10 @@
         .inbox-content { background: white; width: 90%; max-width: 380px; border-radius: 20px; padding: 20px; max-height: 80vh; display: flex; flex-direction: column; }
         #list-pesan { flex: 1; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
         
-        /* Gaya Item Pesan */
         .msg-item { display: flex; align-items: center; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; text-align: left; transition: 0.2s; cursor: pointer; border-radius: 10px; margin-bottom: 5px; }
         .msg-item:active { background-color: #f0f0f0; }
         .badge-baru { background: #ff0000; color: white; font-size: 9px; padding: 2px 6px; border-radius: 10px; font-weight: bold; margin-left: 5px; }
 
-        /* MODAL DETAIL CUSTOM (BARU) */
         .modal-detail { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 5000; justify-content: center; align-items: center; padding: 20px; }
         .modal-detail-content { background: white; width: 100%; max-width: 400px; border-radius: 20px; overflow: hidden; animation: zoomIn 0.3s ease; }
         .modal-header { background: var(--biru-tua); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
@@ -190,23 +188,22 @@
         let ytPlayer; 
         const userEmail = localStorage.getItem("userEmail");
 
-        // --- UTILITY YOUTUBE ---
-        function extractYouTubeID(url) {
-            if (!url) return null;
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+        // --- MEDIA PLAYER REPAIR (FIXED) ---
+        function onYouTubeIframeAPIReady() {
+            initMediaPlayer();
         }
 
-        // --- MULTI-MEDIA PLAYER LOGIC ---
-        function onYouTubeIframeAPIReady() {
+        function initMediaPlayer() {
             db.collection("portal_media").orderBy("urutan", "asc").limit(1).onSnapshot(snapshot => {
                 const otherMedia = document.getElementById('other-media');
                 const ytContainer = document.getElementById('player');
+                
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
                     const type = data.tipe || "video_youtube";
                     const content = data.url || "";
+                    
+                    // Reset View
                     otherMedia.style.display = 'none';
                     ytContainer.style.display = 'none';
                     otherMedia.innerHTML = '';
@@ -228,23 +225,35 @@
             });
         }
 
+        function extractYouTubeID(url) {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
         function playYouTube(rawUrl) {
             const videoId = extractYouTubeID(rawUrl);
-            if (videoId) {
-                if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-                    ytPlayer.loadVideoById({ videoId: videoId, startSeconds: 0 });
-                    ytPlayer.unMute();
-                } else {
-                    ytPlayer = new YT.Player('player', {
-                        videoId: videoId,
-                        playerVars: { 'autoplay': 1, 'mute': 0, 'controls': 1, 'loop': 1, 'playlist': videoId },
-                        events: { 'onReady': (event) => { event.target.playVideo(); setTimeout(() => { event.target.unMute(); }, 1000); } }
-                    });
-                }
+            if (!videoId) return;
+
+            if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+                ytPlayer.loadVideoById({ videoId: videoId, startSeconds: 0 });
+                ytPlayer.unMute();
+            } else {
+                ytPlayer = new YT.Player('player', {
+                    videoId: videoId,
+                    playerVars: { 'autoplay': 1, 'mute': 0, 'controls': 1, 'loop': 1, 'playlist': videoId },
+                    events: { 
+                        'onReady': (event) => { 
+                            event.target.playVideo(); 
+                            setTimeout(() => { event.target.unMute(); }, 1000); 
+                        } 
+                    }
+                });
             }
         }
 
-        // --- UPDATE FUNGSI MONITOR INBOX (BARU) ---
+        // --- INBOX SYSTEM (KEEP SUCCESSFUL VERSION) ---
         function monitorEmailInbox(userJC, emailUser) {
             db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 let unreadCount = 0;
@@ -292,7 +301,6 @@
             });
         }
 
-        // --- FUNGSI BUKA DETAIL (MODAL CUSTOM) ---
         async function bukaDetailPesan(id) {
             try {
                 const docRef = db.collection("pengumuman_komsel").doc(id);
@@ -313,27 +321,22 @@
         }
 
         function tutupDetail() { document.getElementById('modal-pesan').style.display = 'none'; }
-
-        // --- FITUR HAPUS & CHECKBOX ---
         function toggleSelectAll(source) {
             const checkboxes = document.querySelectorAll('.msg-check');
             checkboxes.forEach(cb => cb.checked = source.checked);
             updateDeleteBtn();
         }
-
         function updateDeleteBtn() {
             const checkedCount = document.querySelectorAll('.msg-check:checked').length;
             document.getElementById('btnHapusMassal').style.display = checkedCount > 0 ? 'block' : 'none';
         }
-
         async function hapusSatuPesan(id) {
-            if(confirm("Hapus pesan ini dari pandangan Anda?")) {
+            if(confirm("Hapus pesan ini?")) {
                 await db.collection("pengumuman_komsel").doc(id).update({ target: "Sembunyikan_" + userEmail });
             }
         }
-
         async function hapusPesanTerpilih() {
-            if(confirm("Hapus semua pesan yang dipilih?")) {
+            if(confirm("Hapus pesan yang dipilih?")) {
                 const ids = Array.from(document.querySelectorAll('.msg-check:checked')).map(cb => cb.value);
                 for(const id of ids) {
                     await db.collection("pengumuman_komsel").doc(id).update({ target: "Sembunyikan_" + userEmail });
@@ -341,6 +344,7 @@
             }
         }
 
+        // --- USER SYNC & LOGOUT ---
         function syncUser() {
             const email = localStorage.getItem("userEmail");
             const isAdmin = localStorage.getItem("adminLoggedIn");
@@ -381,6 +385,9 @@
         window.onload = () => { 
             updateTime(); setInterval(updateTime, 1000); 
             syncUser(); 
+            // Cek jika API YouTube sudah siap (untuk jaga-jaga jika reload lambat)
+            if (typeof YT !== 'undefined' && YT.Player) { initMediaPlayer(); }
+
             const btnToggle = document.getElementById('toggleProfile');
             const profileCard = document.getElementById('profileCard');
             btnToggle.addEventListener('click', () => {
