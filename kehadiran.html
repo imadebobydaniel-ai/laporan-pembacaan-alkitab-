@@ -45,8 +45,17 @@
     <div id="extention-container" class="extention-form">
         <label>NAMA ANGGOTA KOMSEL:</label>
         <input type="text" id="ext-nama" placeholder="Nama anggota yang dibantu...">
-        <label>JC BERAPA:</label>
-        <input type="text" id="ext-jc" placeholder="Contoh: JC 01">
+        
+        <label>PILIH UNIT JC:</label>
+        <select id="ext-jc">
+            <option value="" disabled selected>-- Pilih JC --</option>
+            <option value="JC 01">JC 01</option>
+            <option value="JC 02">JC 02</option>
+            <option value="JC 03">JC 03</option>
+            <option value="JC 04">JC 04</option>
+            <option value="JC 05">JC 05</option>
+        </select>
+
         <label>ABSEN UNTUK KEGIATAN:</label>
         <select id="ext-kegiatan-target">
             <option value="Ibadah Raya">Ibadah Raya</option>
@@ -123,7 +132,7 @@
             const jcLevel = document.getElementById("ext-jc").value;
             const kegTarget = document.getElementById("ext-kegiatan-target").value;
             
-            if (!namaAnggota || !jcLevel) return alert("Mohon isi Nama Anggota dan JC.");
+            if (!namaAnggota || !jcLevel) return alert("Mohon isi Nama Anggota dan Pilih JC.");
             
             dataLaporan.nama = namaAnggota;
             dataLaporan.jc = jcLevel;
@@ -137,7 +146,6 @@
 
         if (tipe === 'TIDAK HADIR') dataLaporan.alasan = document.getElementById("alasan").value;
 
-        // Proses GPS
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const { latitude: lat, longitude: lon } = pos.coords;
@@ -150,7 +158,6 @@
 
                 await db.collection("kehadiran").add(dataLaporan);
                 
-                // Tampilkan Modal
                 document.getElementById("modal-global").style.display = "flex";
                 document.getElementById("kegiatan-modal").innerText = dataLaporan.kegiatan;
                 document.getElementById("status-laporan").innerText = "SAYA " + tipe;
@@ -158,7 +165,9 @@
                 document.getElementById("helper-modal").innerText = menu === "Absen Extention" ? "Dibantu oleh: " + leaderName : "";
                 document.getElementById("display-alamat-global").innerText = alamat;
                 document.getElementById("display-gps-global").innerText = `Waktu: ${tglLengkap}`;
-            });
+            }, (error) => {
+                alert("Gagal mengambil lokasi. Mohon nyalakan GPS Anda.");
+            }, { enableHighAccuracy: true });
         }
     }
 </script>
