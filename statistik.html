@@ -33,9 +33,10 @@
         .user-jc { font-size: 11px; color: #666; margin: 0; font-weight: bold; }
         .btn-back { display: block; text-align: center; padding: 14px; background: white; color: var(--biru-utama); text-decoration: none; font-weight: bold; border-radius: 12px; border: 1px solid #ddd; margin-top: 10px; font-size: 13px; width: 100%; box-sizing: border-box; }
         
-        /* Style Tambahan untuk Analisa 12 Bulan */
-        .container-analisa { margin-top: 20px; border-top: 1px dashed #ddd; padding-top: 15px; }
-        .analisa-header { text-align: center; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 15px; text-transform: uppercase; }
+        /* Style Analisa */
+        .container-analisa { margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 15px; }
+        .analisa-header { text-align: center; font-size: 11px; font-weight: bold; color: #555; margin-bottom: 12px; text-transform: uppercase; }
+        #notif-backup { display: none; background: #fff3cd; color: #856404; font-size: 10px; padding: 8px; border-radius: 8px; margin-top: 10px; text-align: center; border: 1px solid #ffeeba; }
     </style>
 </head>
 <body>
@@ -86,14 +87,9 @@
         </div>
 
         <div class="container-analisa">
-            <div class="analisa-header">
-                <i class="fa-solid fa-clock-rotate-left"></i> ANALISA 12 BULAN TERAKHIR
-            </div>
-            <div id="notif-backup" style="display:none; background:#fff3cd; color:#856404; padding:10px; border-radius:8px; font-size:11px; margin-bottom:10px; border:1px solid #ffeeba;">
-                <i class="fa-solid fa-triangle-exclamation"></i> <b>PERINGATAN:</b> Data bulan ke-12 ditemukan. Segera backup data.
-            </div>
-            <div id="list-analisa-bulanan">
-                </div>
+            <div class="analisa-header">Analisa Keaktifan 12 Bulan Terakhir</div>
+            <div id="list-analisa-bulanan"></div>
+            <div id="notif-backup"><i class="fa-solid fa-triangle-exclamation"></i> Data lama terdeteksi. Disarankan backup laporan berkala.</div>
         </div>
     </div>
 
@@ -172,11 +168,9 @@ function syncCapaianRealtime() {
     const listAnalisa = document.getElementById('list-analisa-bulanan');
     const notifBackup = document.getElementById('notif-backup');
     
-    // Batas filter aktif (untuk bar utama)
     const limitFilter = new Date();
     limitFilter.setDate(limitFilter.getDate() - (periodeBulan * 30));
 
-    // Batas maksimal analisa (365 hari / 12 bulan)
     const limit365 = new Date();
     limit365.setDate(limit365.getDate() - 365);
 
@@ -190,7 +184,7 @@ function syncCapaianRealtime() {
             if (parseInt(jcUser).toString() === selKomselAngka) targetKomsel++;
         });
 
-        if (targetKomsel === 0) targetKomsel = 1; // Cegah pembagian nol
+        if (targetKomsel === 0) targetKomsel = 1;
 
         db.collection("laporan_bacaan")
             .where("tanggal", ">=", limit365)
@@ -209,13 +203,11 @@ function syncCapaianRealtime() {
                     const jcLaporan = String(d.komsel || d.jc || "").replace(/\D/g, "");
                     const isTargetKomsel = (parseInt(jcLaporan).toString() === selKomselAngka);
 
-                    // Logika Bar Utama
                     if (tgl >= limitFilter) {
                         doneGlobal.add(userEmail);
                         if (isTargetKomsel) doneKomsel.add(userEmail);
                     }
 
-                    // Logika Analisa 12 Bulan (khusus Komsel terpilih)
                     for (let i = 1; i <= 12; i++) {
                         const rEnd = new Date(); rEnd.setDate(rEnd.getDate() - ((i-1)*30));
                         const rStart = new Date(); rStart.setDate(rStart.getDate() - (i*30));
@@ -224,16 +216,13 @@ function syncCapaianRealtime() {
                         }
                     }
                     
-                    // Deteksi data di atas 11 bulan (untuk notif backup)
                     const diffDays = (new Date() - tgl) / (1000 * 3600 * 24);
                     if (diffDays >= 330) hasDataOld = true;
                 });
 
-                // Update Progress Bar Utama
                 updateBarUI('text-capaian-komsel', 'bar-capaian-komsel', targetKomsel, doneKomsel.size);
                 updateBarUI('text-capaian-global', 'bar-capaian-global', targetGlobal, doneGlobal.size);
 
-                // Render List Analisa 12 Bulan
                 listAnalisa.innerHTML = "";
                 monthlySets.forEach((set, idx) => {
                     const count = set.size;
@@ -255,7 +244,6 @@ function syncCapaianRealtime() {
     });
 }
 
-// 2. REALTIME GOLONGAN DARAH
 function syncGoldarRealtime() {
     const filter = document.getElementById('select-komsel-goldar').value.trim();
     db.collection("users").onSnapshot(snap => {
@@ -282,7 +270,6 @@ function syncGoldarRealtime() {
     });
 }
 
-// 3. REALTIME DOA (SLA)
 function syncDoaRealtime() {
     const selKomsel = document.getElementById('select-komsel-doa').value.trim();
     db.collection("laporan_doa").onSnapshot(snap => {
@@ -309,7 +296,6 @@ function syncDoaRealtime() {
     });
 }
 
-// Fungsi Modal Detail
 function openUserDetail(type, data) {
     const list = document.getElementById('modal-list-user');
     document.getElementById('modal-title').innerText = "Golongan Darah " + type;
@@ -333,7 +319,6 @@ function openUserDetail(type, data) {
     document.getElementById('modal-goldar').style.display = 'flex';
 }
 
-// Jalankan Semua Saat Load
 window.onload = () => {
     syncCapaianRealtime();
     syncGoldarRealtime();
