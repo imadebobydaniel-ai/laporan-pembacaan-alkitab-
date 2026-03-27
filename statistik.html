@@ -148,7 +148,7 @@ function updateBarUI(textId, barId, total, done) {
     if(barEl) barEl.style.width = persen + "%";
 }
 
-// --- FUNGSI syncCapaianRealtime (VERSI TERBARU) ---
+// --- FUNGSI syncCapaianRealtime (LOGIKA PEMBAGI GLOBAL) ---
 function syncCapaianRealtime() {
     const selKomselRaw = document.getElementById('select-komsel-alkitab').value;
     const selKomselAngka = parseInt(selKomselRaw.replace(/\D/g, "")).toString();
@@ -157,22 +157,11 @@ function syncCapaianRealtime() {
     const limitFilter = new Date();
     limitFilter.setDate(limitFilter.getDate() - (periodeBulan * 30));
 
-    // 1. Ambil data user terlebih dahulu untuk menentukan TARGET (Total Anggota)
+    // 1. Ambil TOTAL USER GLOBAL (sebagai pembagi tetap/bobot)
     db.collection("users").get().then(userSnap => {
-        let totalUserGlobal = userSnap.size;
-        let totalUserKomsel = 0;
+        const totalUserGlobal = userSnap.size || 1; 
 
-        userSnap.forEach(uDoc => {
-            const u = uDoc.data();
-            const jcUser = String(u.komsel || u.jc || "").replace(/\D/g, "");
-            if (parseInt(jcUser).toString() === selKomselAngka) {
-                totalUserKomsel++;
-            }
-        });
-
-        if (totalUserKomsel === 0) totalUserKomsel = 1;
-
-        // 2. Ambil data laporan dengan snapshot agar realtime
+        // 2. Ambil data laporan bacaan
         db.collection("laporan_bacaan")
             .where("tanggal", ">=", limitFilter)
             .onSnapshot(snap => {
@@ -181,18 +170,25 @@ function syncCapaianRealtime() {
 
                 snap.forEach(doc => {
                     const d = doc.data();
+                    if (!d.pasal_utama) return;
+
                     const userEmail = d.email;
                     const jcLaporan = String(d.komsel || d.jc || "").replace(/\D/g, "");
 
+                    // Masukkan ke set global
                     doneGlobal.add(userEmail);
 
+                    // Masukkan ke set komsel jika sesuai pilihan
                     if (parseInt(jcLaporan).toString() === selKomselAngka) {
                         doneKomsel.add(userEmail);
                     }
                 });
 
-                updateBarUI('text-capaian-komsel', 'bar-capaian-komsel', totalUserKomsel, doneKomsel.size);
+                // Kalkulasi berdasarkan Total User Global
+                updateBarUI('text-capaian-komsel', 'bar-capaian-komsel', totalUserGlobal, doneKomsel.size);
                 updateBarUI('text-capaian-global', 'bar-capaian-global', totalUserGlobal, doneGlobal.size);
+                
+                console.log("Update Dashboard: JC " + selKomselAngka + " berkontribusi " + doneKomsel.size + " dari " + totalUserGlobal + " total user.");
             });
     });
 }
