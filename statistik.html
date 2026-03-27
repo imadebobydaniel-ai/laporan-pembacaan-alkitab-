@@ -47,17 +47,19 @@
                     <option value="JC 05" selected>JC 05</option>
                 </select>
             </div>
-            <div class="input-box" style="display:none;"><label>Periode</label>
-                <select id="select-periode-alkitab" onchange="syncCapaianRealtime()">
-                    <option value="12">12 Bulan (Avg)</option>
-                </select>
-            </div>
         </div>
-        <div class="stat-item">
-            <div class="stat-label-flex"><span>Rata-rata Capaian Komsel (1 Thn)</span><span id="text-capaian-komsel" style="color:var(--biru-utama)">0%</span></div>
-            <div class="progress-bar"><div id="bar-capaian-komsel" class="progress-fill" style="width: 0%; background: var(--biru-utama);"></div></div>
-            <div class="stat-label-flex"><span>Rata-rata Seluruh Komsel (1 Thn)</span><span id="text-capaian-global" style="color:var(--ungu-global)">0%</span></div>
-            <div class="progress-bar"><div id="bar-capaian-global" class="progress-fill" style="width: 0%; background: var(--ungu-global);"></div></div>
+
+        <div style="margin-top:10px; border-top: 1px dashed #ddd; padding-top:15px;">
+            <div class="card-header" style="border:none; margin-bottom:10px;">
+                <i class="fa-solid fa-clock-rotate-left"></i> ANALISA 12 BULAN TERAKHIR
+            </div>
+            
+            <div id="notif-backup" style="display:none; background:#fff3cd; color:#856404; padding:10px; border-radius:8px; font-size:11px; margin-bottom:10px; border:1px solid #ffeeba;">
+                <i class="fa-solid fa-triangle-exclamation"></i> <b>PERINGATAN:</b> Data bulan ke-12 ditemukan. Segera backup data sebelum pembersihan otomatis.
+            </div>
+
+            <div class="stat-item" id="container-12-bulan">
+                </div>
         </div>
     </div>
 
@@ -117,72 +119,72 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Helper Progress Bar
-function updateBar(textId, barId, total, done) {
-    const persen = total > 0 ? ((done / total) * 100).toFixed(1) : "0.0";
-    document.getElementById(textId).innerText = persen + "%";
-    document.getElementById(barId).style.width = persen + "%";
-}
-
-// 1. REALTIME BACA ALKITAB (LOGIKA 12 BULAN TERAKHIR)
+// 1. ANALISA 12 BULAN TERAKHIR (BACA ALKITAB)
 function syncCapaianRealtime() {
     const selKomselRaw = document.getElementById('select-komsel-alkitab').value;
     const selKomselAngka = parseInt(selKomselRaw.replace(/\D/g, "")).toString();
+    const container = document.getElementById('container-12-bulan');
+    const notifBackup = document.getElementById('notif-backup');
     
-    // Set rentang waktu 12 bulan ke belakang
-    const limitDate = new Date();
-    limitDate.setFullYear(limitDate.getFullYear() - 1); 
-
     db.collection("users").get().then(userSnap => {
-        let targetGlobal = userSnap.size;
         let targetKomsel = 0;
-
         userSnap.forEach(uDoc => {
             const u = uDoc.data();
             const jcUser = String(u.komsel || u.jc || "").replace(/\D/g, "");
             if (parseInt(jcUser).toString() === selKomselAngka) targetKomsel++;
         });
+        if (targetKomsel === 0) targetKomsel = 1;
 
-        db.collection("laporan_bacaan").where("tanggal", ">=", limitDate).onSnapshot(snap => {
-            let monthlyData = {}; 
+        const limit365 = new Date();
+        limit365.setDate(limit365.getDate() - 365);
 
-            snap.forEach(doc => {
-                const d = doc.data();
-                const tgl = d.tanggal?.toDate();
-                if (tgl) {
-                    const bulanTahun = tgl.getFullYear() + "-" + (tgl.getMonth() + 1);
-                    const userEmail = d.email;
+        db.collection("laporan_bacaan")
+            .where("tanggal", ">=", limit365)
+            .onSnapshot(snap => {
+                container.innerHTML = "";
+                let hasDataOld = false;
+                
+                // Render 12 Periode (Mundur 30 hari per periode)
+                for (let i = 1; i <= 12; i++) {
+                    let doneInPeriod = new Set();
+                    const rangeEnd = new Date();
+                    rangeEnd.setDate(rangeEnd.getDate() - ((i - 1) * 30));
+                    const rangeStart = new Date();
+                    rangeStart.setDate(rangeStart.getDate() - (i * 30));
 
-                    if (!monthlyData[bulanTahun]) {
-                        monthlyData[bulanTahun] = { doneGlobal: new Set(), doneKomsel: new Set() };
-                    }
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        const tgl = d.tanggal?.toDate();
+                        
+                        if (tgl && tgl >= rangeStart && tgl <= rangeEnd) {
+                            const jcLaporan = String(d.komsel || d.jc || "").replace(/\D/g, "");
+                            if (parseInt(jcLaporan).toString() === selKomselAngka && d.pasal_utama) {
+                                doneInPeriod.add(d.email);
+                            }
+                            
+                            const diffDays = (new Date() - tgl) / (1000 * 3600 * 24);
+                            if (diffDays >= 330) hasDataOld = true;
+                        }
+                    });
 
-                    monthlyData[bulanTahun].doneGlobal.add(userEmail);
+                    const totalLapor = doneInPeriod.size;
+                    const persen = ((totalLapor / targetKomsel) * 100).toFixed(1);
                     
-                    const jcLaporan = String(d.komsel || d.jc || "").replace(/\D/g, "");
-                    if (parseInt(jcLaporan).toString() === selKomselAngka) {
-                        monthlyData[bulanTahun].doneKomsel.add(userEmail);
-                    }
+                    container.innerHTML += `
+                        <div style="margin-bottom: 12px;">
+                            <div class="stat-label-flex">
+                                <span style="font-size:11px; color:#666;">Bulan Ke-${i} Lalu</span>
+                                <span style="font-size:11px; font-weight:bold; color:var(--biru-utama);">${persen}%</span>
+                            </div>
+                            <div class="progress-bar" style="height:6px; margin-top:4px;">
+                                <div class="progress-fill" style="width: ${persen}%; background: var(--biru-utama);"></div>
+                            </div>
+                            <div style="font-size:9px; color:#aaa;">${totalLapor} dari ${targetKomsel} Anggota Aktif</div>
+                        </div>
+                    `;
                 }
+                notifBackup.style.display = hasDataOld ? 'block' : 'none';
             });
-
-            let totalDoneGlobal = 0;
-            let totalDoneKomsel = 0;
-            let jumlahBulanAdaData = Object.keys(monthlyData).length || 1;
-
-            for (let bulan in monthlyData) {
-                totalDoneGlobal += monthlyData[bulan].doneGlobal.size;
-                totalDoneKomsel += monthlyData[bulan].doneKomsel.size;
-            }
-
-            const avgDoneGlobal = totalDoneGlobal / jumlahBulanAdaData;
-            const avgDoneKomsel = totalDoneKomsel / jumlahBulanAdaData;
-
-            updateBar('text-capaian-komsel', 'bar-capaian-komsel', targetKomsel, avgDoneKomsel);
-            updateBar('text-capaian-global', 'bar-capaian-global', targetGlobal, avgDoneGlobal);
-            
-            console.log("Rincian 12 Bulan:", monthlyData); 
-        });
     });
 }
 
@@ -192,11 +194,9 @@ function syncGoldarRealtime() {
     db.collection("users").onSnapshot(snap => {
         let counts = { A: 0, B: 0, O: 0, AB: 0 };
         let usersData = [];
-        
         snap.forEach(doc => {
             const d = doc.data();
             const jcUser = String(d.jc || d.komsel || "").trim();
-            
             if (filter === "Semua Komsel" || jcUser === filter) {
                 const g = String(d.golongan_darah || d.golDarah || "").toUpperCase().trim();
                 if (counts.hasOwnProperty(g)) {
@@ -205,7 +205,6 @@ function syncGoldarRealtime() {
                 }
             }
         });
-
         ["A", "B", "O", "AB"].forEach(type => {
             const el = document.getElementById('count-' + type);
             if (el) {
@@ -221,11 +220,9 @@ function syncDoaRealtime() {
     const selKomsel = document.getElementById('select-komsel-doa').value.trim();
     db.collection("laporan_doa").onSnapshot(snap => {
         let count = 0, totalSLA = 0, dijawab = 0;
-
         snap.forEach(doc => {
             const d = doc.data();
             const jcData = String(d.jc || d.komsel || "").trim();
-
             if (selKomsel === "Semua" || jcData === selKomsel) {
                 count++;
                 if (d.status === "Dijawab") {
@@ -238,7 +235,6 @@ function syncDoaRealtime() {
                 }
             }
         });
-
         const pDijawab = count > 0 ? ((dijawab / count) * 100).toFixed(1) : "0.0";
         document.getElementById('stat-sla-hari').innerText = dijawab > 0 ? (totalSLA / dijawab).toFixed(1) + " Hari" : "0 Hari";
         document.getElementById('stat-persen-dijawab').innerText = pDijawab + "%";
@@ -250,9 +246,7 @@ function openUserDetail(type, data) {
     const list = document.getElementById('modal-list-user');
     document.getElementById('modal-title').innerText = "Golongan Darah " + type;
     list.innerHTML = "";
-    
     const filtered = data.filter(u => String(u.golongan_darah || u.golDarah || "").toUpperCase().trim() === type);
-    
     if (filtered.length === 0) {
         list.innerHTML = "<p style='padding:20px;'>Tidak ada data.</p>";
     } else {
