@@ -52,7 +52,11 @@
         .popup-inbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; }
         .inbox-content { background: white; width: 90%; max-width: 380px; border-radius: 20px; padding: 20px; max-height: 80vh; display: flex; flex-direction: column; }
         #list-pesan { flex: 1; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
-        .msg-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid #eee; text-align: left; transition: 0.2s; }
+        
+        /* Gaya Item Pesan */
+        .msg-item { display: flex; align-items: center; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; text-align: left; transition: 0.2s; cursor: pointer; border-radius: 10px; margin-bottom: 5px; }
+        .msg-item:active { background-color: #f0f0f0; }
+        .badge-baru { background: #ff0000; color: white; font-size: 9px; padding: 2px 6px; border-radius: 10px; font-weight: bold; margin-left: 5px; }
 
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .menu-box { background: white; padding: 20px 10px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--biru-tua); font-weight: 800; font-size: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.05); transition: 0.3s; }
@@ -157,8 +161,9 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
         let ytPlayer; 
+        const userEmail = localStorage.getItem("userEmail");
 
-        // --- UTILITY SAKTI UNTUK YOUTUBE ---
+        // --- UTILITY YOUTUBE ---
         function extractYouTubeID(url) {
             if (!url) return null;
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -168,16 +173,13 @@
 
         // --- MULTI-MEDIA PLAYER LOGIC ---
         function onYouTubeIframeAPIReady() {
-            // Kita gunakan orderBy urutan agar yang muncul pertama adalah urutan ke-1
             db.collection("portal_media").orderBy("urutan", "asc").limit(1).onSnapshot(snapshot => {
                 const otherMedia = document.getElementById('other-media');
                 const ytContainer = document.getElementById('player');
-
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
-                    const type = data.tipe || "video_youtube"; // Mendukung key dari Portal Media
+                    const type = data.tipe || "video_youtube";
                     const content = data.url || "";
-
                     otherMedia.style.display = 'none';
                     ytContainer.style.display = 'none';
                     otherMedia.innerHTML = '';
@@ -185,89 +187,93 @@
                     if (type === "video_youtube" || type === "youtube") {
                         ytContainer.style.display = 'block';
                         playYouTube(content);
-                    } 
-                    else if (type === "video_player" || type === "video") {
+                    } else if (type === "video_player" || type === "video") {
                         otherMedia.style.display = 'flex';
                         otherMedia.innerHTML = `<video src="${content}" autoplay controls style="width:100%; height:100%; object-fit:contain;"></video>`;
-                    } 
-                    else if (type === "gambar") {
+                    } else if (type === "gambar") {
                         otherMedia.style.display = 'flex';
                         otherMedia.innerHTML = `<img src="${content}" style="width:100%; height:100%; object-fit:contain;">`;
-                    } 
-                    else if (type === "teks") {
+                    } else if (type === "teks") {
                         otherMedia.style.display = 'flex';
                         otherMedia.innerHTML = `<div style="color:white; padding:20px; font-weight:bold; font-size:16px; text-align:center;">${data.isi_artikel || content}</div>`;
                     }
-                } else {
-                    otherMedia.style.display = 'flex';
-                    otherMedia.innerHTML = "<div style='color:white;'>Belum ada media aktif</div>";
                 }
             });
         }
 
         function playYouTube(rawUrl) {
             const videoId = extractYouTubeID(rawUrl);
-
             if (videoId) {
                 if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-                    // Jika player sudah ada, tinggal ganti video ID nya
-                    // mute: 0 agar suara defaultnya ada jika browser mengizinkan
-                    ytPlayer.loadVideoById({
-                        videoId: videoId,
-                        startSeconds: 0
-                    });
-                    ytPlayer.unMute(); // Coba paksa unmute
+                    ytPlayer.loadVideoById({ videoId: videoId, startSeconds: 0 });
+                    ytPlayer.unMute();
                 } else {
-                    // Buat player baru
                     ytPlayer = new YT.Player('player', {
                         videoId: videoId,
-                        playerVars: { 
-                            'autoplay': 1, 
-                            'mute': 0, // Set ke 0 agar suara muncul
-                            'controls': 1, // Munculkan kontrol agar user bisa klik unmute sendiri jika terblokir
-                            'loop': 1, 
-                            'playlist': videoId, 
-                            'rel': 0, 
-                            'modestbranding': 1 
-                        },
-                        events: { 
-                            'onReady': (event) => {
-                                event.target.playVideo();
-                                // Beberapa browser butuh interaksi user sebelum suara keluar
-                                // Kita coba pancing unmute setelah video mulai
-                                setTimeout(() => { event.target.unMute(); }, 1000);
-                            } 
-                        }
+                        playerVars: { 'autoplay': 1, 'mute': 0, 'controls': 1, 'loop': 1, 'playlist': videoId },
+                        events: { 'onReady': (event) => { event.target.playVideo(); setTimeout(() => { event.target.unMute(); }, 1000); } }
                     });
                 }
-            } else {
-                document.getElementById('player').innerHTML = "<div style='color:white;text-align:center;padding:20px;'>Link YouTube tidak valid</div>";
             }
         }
 
-        // --- FUNGSI INBOX & USER SYNC ---
-        function monitorEmailInbox(userJC, userEmail) {
+        // --- FUNGSI INBOX SAKTI ---
+        function monitorEmailInbox(userJC, emailUser) {
             db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 let unreadCount = 0;
                 const listDiv = document.getElementById('list-pesan');
                 if(!listDiv) return;
                 listDiv.innerHTML = "";
+                
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const target = data.target || data.target_jc; 
-                    if (target === "Semua JC" || target === userJC) {
+                    const target = data.target_jc || data.target; 
+                    
+                    if (target === "Semua JC" || target === userJC || target === ("JC"+userJC)) {
                         const sudahDibaca = data.sudahDibaca || [];
-                        const isUnread = !sudahDibaca.includes(userEmail);
+                        const isUnread = !sudahDibaca.includes(emailUser);
                         if (isUnread) unreadCount++;
-                        listDiv.innerHTML += `<div class="msg-item" style="${isUnread ? 'background:#fff9e6; border-left:4px solid var(--emas-lux);' : 'background:#fff;'}"><div class="msg-content-wrapper"><b>${data.judul || 'Pesan'}</b><br><small>${isUnread ? 'Baru' : 'Sudah dibaca'}</small></div></div>`;
+                        
+                        listDiv.innerHTML += `
+                            <div class="msg-item" onclick="bukaDetailPesan('${doc.id}')" style="${isUnread ? 'background:#fff9e6; border-left:4px solid var(--emas-lux);' : 'background:#fff;'}">
+                                <div class="msg-content-wrapper">
+                                    <b style="font-size:14px;">${data.judul || 'Pesan'}</b><br>
+                                    <small style="color:#888;">${data.kategori || 'Info'}</small>
+                                    ${isUnread ? '<span class="badge-baru">Baru</span>' : ''}
+                                </div>
+                            </div>`;
                     }
                 });
+                
                 const badge = document.getElementById('email-badge');
                 if (badge) {
                     if (unreadCount > 0) { badge.style.display = 'block'; badge.innerText = unreadCount; } 
                     else { badge.style.display = 'none'; }
                 }
             });
+        }
+
+        // --- FUNGSI BUKA DETAIL (YANG ANDA MINTA) ---
+        async function bukaDetailPesan(id) {
+            try {
+                const docRef = db.collection("pengumuman_komsel").doc(id);
+                const doc = await docRef.get();
+                const data = doc.data();
+                
+                const detailIsi = data.isi || data.isi_pesan || "Tidak ada detail pesan.";
+                
+                // Tampilkan Detail (Bisa diganti Modal Cantik nanti)
+                alert(`--- ${data.kategori || 'PENGUMUMAN'} ---\n\n${data.judul}\n\nIsi Pesan:\n${detailIsi}`);
+                
+                // Update Status Baca ke Firebase
+                if(!data.sudahDibaca || !data.sudahDibaca.includes(userEmail)) {
+                    await docRef.update({
+                        sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
+                    });
+                }
+            } catch (e) {
+                console.error("Gagal membuka detail:", e);
+            }
         }
 
         function syncUser() {
@@ -308,8 +314,7 @@
         function tutupInbox() { document.getElementById('popup-inbox').style.display = 'none'; }
 
         window.onload = () => { 
-            updateTime(); 
-            setInterval(updateTime, 1000); 
+            updateTime(); setInterval(updateTime, 1000); 
             syncUser(); 
             const btnToggle = document.getElementById('toggleProfile');
             const profileCard = document.getElementById('profileCard');
