@@ -1,11 +1,11 @@
 // inbox-system.js
 const InboxSystem = {
-    // Fungsi Monitor Pesan Secara Realtime
+    // 1. FUNGSI MONITOR DAFTAR PESAN
     monitor: function(userJC, userEmail) {
-        if (!db) return console.error("Firestore belum terinisialisasi!");
+        if (typeof db === 'undefined') return console.error("Firestore belum terinisialisasi!");
 
-        // DISESUAIKAN: Mengarah ke portal_media sesuai link Firebase Anda
-        db.collection("portal_media")
+        // Kuncinya: Membaca 'pengumuman_komsel' agar tidak tercampur video dari portal_media
+        db.collection("pengumuman_komsel")
             .orderBy("timestamp", "desc")
             .onSnapshot(snapshot => {
                 let unreadCount = 0;
@@ -15,7 +15,7 @@ const InboxSystem = {
                 listDiv.innerHTML = "";
 
                 if (snapshot.empty) {
-                    listDiv.innerHTML = "<p style='text-align:center; color:#999; padding:20px; font-size:12px;'>Belum ada pesan untuk Anda.</p>";
+                    listDiv.innerHTML = "<p style='text-align:center; color:#999; padding:20px; font-size:12px;'>Belum ada informasi terbaru.</p>";
                     return;
                 }
 
@@ -23,12 +23,12 @@ const InboxSystem = {
                     const data = doc.data();
                     const docId = doc.id;
                     
-                    // Filter berdasarkan target atau JC
-                    const target = data.target || data.target_jc || "Semua JC";
+                    // Filter berdasarkan Target JC
+                    const target = data.target || "Semua JC";
 
                     if (target === "Semua JC" || String(target) === String(userJC)) {
-                        const sudahDibaca = data.sudahDibaca || [];
-                        const isUnread = !sudahDibaca.includes(userEmail);
+                        const readBy = data.readBy || [];
+                        const isUnread = !readBy.includes(userEmail);
 
                         if (isUnread) unreadCount++;
 
@@ -38,8 +38,9 @@ const InboxSystem = {
                             tgl = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
                         }
 
+                        // Membuat elemen item pesan
                         const item = document.createElement('div');
-                        item.className = 'msg-item';
+                        item.className = `msg-item ${isUnread ? 'unread' : ''}`;
                         item.style = `
                             display: flex; align-items: center; padding: 12px; 
                             border-bottom: 1px solid #eee; cursor: pointer;
@@ -50,7 +51,7 @@ const InboxSystem = {
                         item.innerHTML = `
                             <div style="flex:1">
                                 <div style="font-weight:bold; font-size:13px; color:#003366;">${data.judul || 'Info Terbaru'}</div>
-                                <div style="font-size:11px; color:#888;">${tgl} • ${isUnread ? '<b style="color:red;">BARU</b>' : 'Sudah dibaca'}</div>
+                                <div style="font-size:11px; color:#888;">${tgl} • ${data.kategori || 'Umum'} ${isUnread ? '• <b style="color:red;">BARU</b>' : ''}</div>
                             </div>
                             <i class="fas fa-chevron-right" style="font-size:10px; color:#ccc;"></i>
                         `;
@@ -60,40 +61,46 @@ const InboxSystem = {
                     }
                 });
 
+                // Update badge notifikasi jika ada
                 const badge = document.getElementById('email-badge');
                 if (badge) {
-                    if (unreadCount > 0) {
-                        badge.style.display = 'block';
-                        badge.innerText = unreadCount;
-                    } else {
-                        badge.style.display = 'none';
-                    }
+                    badge.innerText = unreadCount;
+                    badge.style.display = unreadCount > 0 ? 'block' : 'none';
                 }
             });
     },
 
+    // 2. FUNGSI BUKA DETAIL PESAN
     bukaDetail: function(docId, userEmail) {
-        // DISESUAIKAN: Mengarah ke portal_media
-        db.collection("portal_media").doc(docId).get().then((doc) => {
+        db.collection("pengumuman_komsel").doc(docId).get().then((doc) => {
             if (doc.exists) {
                 const data = doc.data();
+                const listDiv = document.getElementById('list-pesan');
                 
-                document.getElementById('list-pesan').style.display = 'none';
-                document.getElementById('detail-pesan-konten').style.display = 'block';
+                // Animasi sederhana dan ganti isi container
+                listDiv.innerHTML = `
+                    <div style="padding:15px; animation: fadeIn 0.3s ease;">
+                        <button onclick="InboxSystem.monitor('${data.target}', '${userEmail}')" style="border:none; background:none; color:#007bff; font-weight:bold; cursor:pointer; margin-bottom:10px; padding:0;">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </button>
+                        <h3 style="margin:0 0 5px 0; font-size:18px; color:#003366;">${data.judul}</h3>
+                        <div style="font-size:11px; color:#888; margin-bottom:15px;">
+                            ${data.kategori} | ${data.timestamp ? data.timestamp.toDate().toLocaleString('id-ID') : ''}
+                        </div>
+                        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                        
+                        <div style="white-space:pre-wrap; color:#333; line-height:1.6; font-size:14px;">${data.isi_pesan || "Isi pesan kosong."}</div>
+                        
+                        <div style="margin-top:40px; font-size:10px; color:#bbb; border-top:1px solid #f9f9f9; padding-top:10px;">
+                            ID Pesan: ${docId}
+                        </div>
+                    </div>`;
 
-                document.getElementById('detail-judul').innerText = data.judul || "Detail Pesan";
-                // Mendukung field 'isi' atau 'pesan' sesuai input Anda
-                document.getElementById('detail-isi').innerText = data.isi || data.pesan || "Konten tidak tersedia.";
-
-                db.collection("portal_media").doc(docId).update({
-                    sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
+                // Tandai sudah dibaca di database
+                db.collection("pengumuman_komsel").doc(docId).update({
+                    readBy: firebase.firestore.FieldValue.arrayUnion(userEmail)
                 });
             }
-        });
+        }).catch(err => console.error("Gagal memuat pesan:", err));
     }
 };
-
-function kembaliKeList() {
-    document.getElementById('list-pesan').style.display = 'block';
-    document.getElementById('detail-pesan-konten').style.display = 'none';
-}
