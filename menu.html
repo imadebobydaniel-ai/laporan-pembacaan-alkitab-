@@ -52,6 +52,7 @@
         .popup-inbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; }
         .inbox-content { background: white; width: 90%; max-width: 380px; border-radius: 20px; padding: 20px; max-height: 80vh; display: flex; flex-direction: column; }
         #list-pesan { flex: 1; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
+        .msg-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid #eee; text-align: left; transition: 0.2s; }
 
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .menu-box { background: white; padding: 20px 10px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--biru-tua); font-weight: 800; font-size: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.05); transition: 0.3s; }
@@ -81,7 +82,7 @@
                 <h3 style="margin:0; color:var(--biru-tua);"><i class="fas fa-envelope-open"></i> Inbox JC</h3>
                 <i class="fas fa-times" onclick="tutupInbox()" style="cursor:pointer; font-size:20px; color:red;"></i>
             </div>
-            <div id="list-pesan"><p style="font-size:12px; color:#999; text-align:center;">Memuat pesan...</p></div>
+            <div id="list-pesan"><p style="font-size:12px; color:#999;">Memuat pesan...</p></div>
         </div>
     </div>
 
@@ -144,7 +145,6 @@
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
-        // CONFIG FIREBASE
         const firebaseConfig = { 
             apiKey: "AIzaSyDU2rk0rIF-sos_Sj7C5IMM9dU8z8p_VJM", 
             authDomain: "boby-apps-project.firebaseapp.com", 
@@ -158,147 +158,7 @@
         const db = firebase.firestore();
         let ytPlayer; 
 
-        // --- FUNGSI INBOX & USER SYNC ---
-
-        function monitorEmailInbox(userJC, userEmail) {
-            db.collection("portal_media").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-                let unreadCount = 0;
-                const listDiv = document.getElementById('list-pesan');
-                if(!listDiv) return;
-                
-                listDiv.innerHTML = "";
-                
-                if (snapshot.empty) {
-                    listDiv.innerHTML = "<p style='font-size:12px; color:#999; text-align:center;'>Belum ada pesan.</p>";
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const docId = doc.id;
-                    const target = data.target || data.target_jc || "Semua JC"; 
-
-                    if (target === "Semua JC" || String(target) === String(userJC)) {
-                        const sudahDibaca = data.sudahDibaca || [];
-                        const isUnread = !sudahDibaca.includes(userEmail);
-                        if (isUnread) unreadCount++;
-
-                        const item = document.createElement('div');
-                        item.className = "msg-item";
-                        item.style = `display:flex; align-items:center; padding:12px; border-bottom:1px solid #eee; cursor:pointer; gap:10px; ${isUnread ? 'background:#fff9e6; border-left:4px solid var(--emas-lux);' : 'background:#fff;'}`;
-                        
-                        item.innerHTML = `
-                            <div style="flex:1; text-align:left;">
-                                <b style="font-size:13px; color:var(--biru-tua);">${data.judul || 'Pesan Baru'}</b><br>
-                                <small style="color:#888;">${isUnread ? '<span style="color:red;">BARU</span>' : 'Sudah dibaca'}</small>
-                            </div>
-                            <i class="fas fa-chevron-right" style="font-size:10px; color:#ccc;"></i>
-                        `;
-                        
-                        item.onclick = () => bukaPesan(docId, userEmail);
-                        listDiv.appendChild(item);
-                    }
-                });
-
-                const badge = document.getElementById('email-badge');
-                if (badge) {
-                    if (unreadCount > 0) { 
-                        badge.style.display = 'block'; 
-                        badge.innerText = unreadCount; 
-                    } else { 
-                        badge.style.display = 'none'; 
-                    }
-                }
-            });
-        }
-
-        // FUNGSI REVISI: Buka Detail Isi Pesan
-        function bukaPesan(docId, userEmail) {
-            db.collection("portal_media").doc(docId).get().then((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    const listDiv = document.getElementById('list-pesan');
-                    
-                    // LOGIKA PINTAR: Cek isi_artikel dulu, kalau kosong pakai pesan/isi
-                    const kontenTeks = data.isi_artikel || data.isi || data.pesan || "";
-                    const videoUrl = data.url || "";
-                    const tipe = data.tipe || "";
-
-                    // Template untuk menampilkan video jika tipenya youtube
-                    let mediaHtml = "";
-                    if ((tipe === "video_youtube" || tipe === "youtube") && videoUrl) {
-                        const videoId = extractYouTubeID(videoUrl);
-                        if (videoId) {
-                            mediaHtml = `
-                                <div style="margin-top:15px; border-radius:10px; overflow:hidden; aspect-ratio:16/9;">
-                                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-                                </div>`;
-                        }
-                    }
-
-                    // Ubah tampilan list menjadi detail pesan
-                    listDiv.innerHTML = `
-                        <div style="padding:10px; text-align:left;">
-                            <button onclick="refreshInbox('${userEmail}')" style="background:none; border:none; color:var(--biru-safir); font-weight:bold; cursor:pointer; padding:0; margin-bottom:15px;">
-                                <i class="fas fa-arrow-left"></i> Kembali
-                            </button>
-                            <h4 style="margin:0; color:var(--biru-tua); font-size:16px;">${data.judul || 'Detail Pesan'}</h4>
-                            <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
-                            
-                            <div style="font-size:14px; line-height:1.6; color:#333; white-space:pre-wrap;">${kontenTeks || (mediaHtml ? 'Lihat video di bawah:' : 'Tidak ada isi pesan.')}</div>
-                            
-                            ${mediaHtml}
-                            
-                            <div style="margin-top:20px; font-size:10px; color:#bbb;">ID: ${docId}</div>
-                        </div>
-                    `;
-
-                    // Tandai sudah dibaca di Firebase
-                    db.collection("portal_media").doc(docId).update({
-                        sudahDibaca: firebase.firestore.FieldValue.arrayUnion(userEmail)
-                    });
-                } else {
-                    alert("Pesan tidak ditemukan atau sudah dihapus.");
-                }
-            }).catch((error) => {
-                console.error("Error getting document:", error);
-                alert("Gagal memuat pesan.");
-            });
-        }
-
-        function refreshInbox(email) {
-            const komselText = document.getElementById('disp_komsel').innerText;
-            const userJC = komselText.replace("JC ", "").trim();
-            monitorEmailInbox(userJC, email);
-        }
-
-        function syncUser() {
-            const email = localStorage.getItem("userEmail");
-            const isAdmin = localStorage.getItem("adminLoggedIn");
-            if (isAdmin === "true") {
-                document.getElementById('disp_nama').innerText = "Administrator";
-                document.getElementById('admin-badge').style.display = "inline-block";
-                monitorEmailInbox("Semua JC", "admin@system.com");
-            } else if (email) {
-                document.getElementById('disp_email').innerText = email;
-                db.collection("users").where("email", "==", email).onSnapshot(s => {
-                    if (!s.empty) {
-                        const d = s.docs[0].data();
-                        document.getElementById('disp_nama').innerText = d.nama || "User";
-                        document.getElementById('disp_komsel').innerText = d.komsel ? "JC " + d.komsel : "KOMSEL JC";
-                        monitorEmailInbox(String(d.komsel), email);
-                        if (d.fotoUrl) { 
-                            document.getElementById('user-photo').src = d.fotoUrl; 
-                            document.getElementById('user-photo').style.display = "block"; 
-                            document.getElementById('default-icon').style.display = "none"; 
-                        }
-                    }
-                });
-            }
-        }
-
-        // --- MULTI-MEDIA & UTILITY ---
-
+        // --- UTILITY SAKTI UNTUK YOUTUBE ---
         function extractYouTubeID(url) {
             if (!url) return null;
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -306,14 +166,16 @@
             return (match && match[2].length === 11) ? match[2] : null;
         }
 
+        // --- MULTI-MEDIA PLAYER LOGIC ---
         function onYouTubeIframeAPIReady() {
+            // Kita gunakan orderBy urutan agar yang muncul pertama adalah urutan ke-1
             db.collection("portal_media").orderBy("urutan", "asc").limit(1).onSnapshot(snapshot => {
                 const otherMedia = document.getElementById('other-media');
                 const ytContainer = document.getElementById('player');
 
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
-                    const type = data.tipe || "video_youtube";
+                    const type = data.tipe || "video_youtube"; // Mendukung key dari Portal Media
                     const content = data.url || "";
 
                     otherMedia.style.display = 'none';
@@ -345,22 +207,91 @@
 
         function playYouTube(rawUrl) {
             const videoId = extractYouTubeID(rawUrl);
+
             if (videoId) {
                 if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-                    ytPlayer.loadVideoById({ videoId: videoId, startSeconds: 0 });
-                    ytPlayer.unMute();
+                    // Jika player sudah ada, tinggal ganti video ID nya
+                    // mute: 0 agar suara defaultnya ada jika browser mengizinkan
+                    ytPlayer.loadVideoById({
+                        videoId: videoId,
+                        startSeconds: 0
+                    });
+                    ytPlayer.unMute(); // Coba paksa unmute
                 } else {
+                    // Buat player baru
                     ytPlayer = new YT.Player('player', {
                         videoId: videoId,
-                        playerVars: { 'autoplay': 1, 'mute': 0, 'controls': 1, 'loop': 1, 'playlist': videoId, 'rel': 0, 'modestbranding': 1 },
+                        playerVars: { 
+                            'autoplay': 1, 
+                            'mute': 0, // Set ke 0 agar suara muncul
+                            'controls': 1, // Munculkan kontrol agar user bisa klik unmute sendiri jika terblokir
+                            'loop': 1, 
+                            'playlist': videoId, 
+                            'rel': 0, 
+                            'modestbranding': 1 
+                        },
                         events: { 
                             'onReady': (event) => {
                                 event.target.playVideo();
+                                // Beberapa browser butuh interaksi user sebelum suara keluar
+                                // Kita coba pancing unmute setelah video mulai
                                 setTimeout(() => { event.target.unMute(); }, 1000);
                             } 
                         }
                     });
                 }
+            } else {
+                document.getElementById('player').innerHTML = "<div style='color:white;text-align:center;padding:20px;'>Link YouTube tidak valid</div>";
+            }
+        }
+
+        // --- FUNGSI INBOX & USER SYNC ---
+        function monitorEmailInbox(userJC, userEmail) {
+            db.collection("pengumuman_komsel").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+                let unreadCount = 0;
+                const listDiv = document.getElementById('list-pesan');
+                if(!listDiv) return;
+                listDiv.innerHTML = "";
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const target = data.target || data.target_jc; 
+                    if (target === "Semua JC" || target === userJC) {
+                        const sudahDibaca = data.sudahDibaca || [];
+                        const isUnread = !sudahDibaca.includes(userEmail);
+                        if (isUnread) unreadCount++;
+                        listDiv.innerHTML += `<div class="msg-item" style="${isUnread ? 'background:#fff9e6; border-left:4px solid var(--emas-lux);' : 'background:#fff;'}"><div class="msg-content-wrapper"><b>${data.judul || 'Pesan'}</b><br><small>${isUnread ? 'Baru' : 'Sudah dibaca'}</small></div></div>`;
+                    }
+                });
+                const badge = document.getElementById('email-badge');
+                if (badge) {
+                    if (unreadCount > 0) { badge.style.display = 'block'; badge.innerText = unreadCount; } 
+                    else { badge.style.display = 'none'; }
+                }
+            });
+        }
+
+        function syncUser() {
+            const email = localStorage.getItem("userEmail");
+            const isAdmin = localStorage.getItem("adminLoggedIn");
+            if (isAdmin === "true") {
+                document.getElementById('disp_nama').innerText = "Administrator";
+                document.getElementById('admin-badge').style.display = "inline-block";
+                monitorEmailInbox("Semua JC", "admin@system.com");
+            } else if (email) {
+                document.getElementById('disp_email').innerText = email;
+                db.collection("users").where("email", "==", email).onSnapshot(s => {
+                    if (!s.empty) {
+                        const d = s.docs[0].data();
+                        document.getElementById('disp_nama').innerText = d.nama || "User";
+                        document.getElementById('disp_komsel').innerText = d.komsel ? "JC " + d.komsel : "KOMSEL JC";
+                        monitorEmailInbox(String(d.komsel), email);
+                        if (d.fotoUrl) { 
+                            document.getElementById('user-photo').src = d.fotoUrl; 
+                            document.getElementById('user-photo').style.display = "block"; 
+                            document.getElementById('default-icon').style.display = "none"; 
+                        }
+                    }
+                });
             }
         }
 
