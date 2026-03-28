@@ -159,7 +159,7 @@
 
     let listNamaGoldar = { 'A': [], 'B': [], 'O': [], 'AB': [] };
 
-    // --- FUNGSI BARU: LOGIKA HITUNG PROGRES SIKLUS ---
+    // --- UTILITY FUNCTIONS ---
     function hitungProgresSiklus(jumlahLaporan, target = 100) {
         let sisaProgres = jumlahLaporan % target;
         if (jumlahLaporan > 0 && sisaProgres === 0) return 100; 
@@ -176,6 +176,7 @@
         document.getElementById(barId).style.width = barValue + "%";
     }
 
+    // --- CORE SYNC FUNCTIONS ---
     function syncStatistikAlkitab() {
         const jcRaw = document.getElementById('select-komsel-alkitab').value; 
         const numJC = ambilAngkaJC(jcRaw);
@@ -193,28 +194,23 @@
                 let tglData = (d.tglInput && d.tglInput.toDate) ? d.tglInput.toDate() : new Date();
                 
                 if (tglData >= limitTgl) {
-                    totalDataGlobal++; // Hitung total untuk Global (Big Data)
-
+                    totalDataGlobal++; 
                     const cleanK = ambilAngkaJC(d.komsel || d.jc || "");
                     if (cleanK === numJC) countJC++;
                 }
             });
 
-            // 1. Progres Per Komsel (Target Statis misal 30)
             const targetKomsel = 30; 
             let persenJC = ((countJC / targetKomsel) * 100).toFixed(1);
             updateStatistikBar('txt-alkitab-komsel', 'bar-alkitab-komsel', Math.min(persenJC, 100));
 
-            // 2. Progres Global (Menggunakan Logika Siklus 0-100%)
-            // Progress akan reset ke 0 setiap mencapai kelipatan 100 laporan
             let progresVisualGlobal = hitungProgresSiklus(totalDataGlobal, 100);
             updateStatistikBar('txt-alkitab-global', 'bar-alkitab-global', progresVisualGlobal);
             
-            console.log(`Trace: Alkitab. JC Count: ${countJC}, Global Total: ${totalDataGlobal}, Siklus: ${progresVisualGlobal}%`);
+            console.log(`Trace: Alkitab. JC Count: ${countJC}, Global: ${totalDataGlobal}, Siklus: ${progresVisualGlobal}%`);
         });
     }
 
-    // Fungsi lainnya (syncStatistikDoa, Hadir, Izin, Golongan Darah)
     function syncStatistikDoa() {
         const jcRaw = document.getElementById('select-jc-doa').value;
         const periodeBulan = parseInt(document.getElementById('select-periode-doa').value) || 12;
@@ -295,6 +291,7 @@
         });
     }
 
+    // --- POPUP LOGIC ---
     function bukaPopupNamaGoldar(tipe) {
         const modal = document.getElementById('pop-detail-nama-darah');
         const containerNama = document.getElementById('list-nama-darah');
