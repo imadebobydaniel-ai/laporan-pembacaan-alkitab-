@@ -13,7 +13,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; }
 
-        /* Header & Statistik Atas (SLA) */
+        /* Header & Statistik Atas */
         .header-fixed { background: var(--putih); z-index: 1000; position: sticky; top: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .stat-summary { background: var(--biru-tua); color: white; margin: 10px; padding: 15px; border-radius: 12px; display: flex; justify-content: space-around; text-align: center; }
         .stat-summary-item { flex: 1; border-right: 1px solid rgba(255,255,255,0.2); }
@@ -21,27 +21,28 @@
         .stat-value { display: block; font-size: 18px; font-weight: bold; color: var(--emas); }
         .stat-label { font-size: 10px; text-transform: uppercase; opacity: 0.8; }
 
+        /* Blok Ringkasan Golongan Darah Baru */
+        .goldar-mini-summary { background: var(--putih); color: var(--biru-tua); border: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px; margin: 10px; padding: 12px; border-radius: 12px; }
+        .goldar-mini-item { flex: 1; text-align: center; }
+        .goldar-mini-value { display: block; font-size: 14px; font-weight: bold; color: var(--merah-absen); }
+
         /* Main Content */
-        .main-content { padding: 10px; }
+        .main-content { padding: 5px 10px; }
         .card { background: var(--putih); border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .card-header { font-weight: bold; font-size: 13px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid var(--emas); display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
         
-        /* Form Row */
         .flex-row { display: flex; gap: 8px; margin-bottom: 15px; }
         .input-box { flex: 1; }
         label { font-size: 9px; font-weight: bold; color: #999; text-transform: uppercase; display: block; margin-bottom: 4px; }
         select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 11px; font-weight: bold; }
 
-        /* Progress Bars */
-        .stat-item { margin-bottom: 12px; }
+        .stat-item-bar { margin-bottom: 12px; }
         .stat-label-flex { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 5px; }
         .progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 10px; overflow: hidden; }
         .progress-fill { height: 100%; width: 0%; transition: 0.5s; }
 
-        /* Golongan Darah List (Dapat Diklik) */
-        .blood-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f8f8f8; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .blood-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f8f8f8; font-size: 13px; font-weight: 600; cursor: pointer; }
         .blood-item:hover { background: #fff5f5; }
-        .count-darah { color: var(--merah-absen); }
 
         /* Modal Popup */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(3px); }
@@ -60,6 +61,30 @@
         <div class="stat-summary-item"><span class="stat-value" id="top-persen-jawab">0%</span><span class="stat-label">Dijawab</span></div>
         <div class="stat-summary-item"><span class="stat-value" id="top-sla">0</span><span class="stat-label">SLA (Hari)</span></div>
     </div>
+
+    <div class="goldar-mini-summary">
+        <div style="font-weight: bold; border-bottom: 2px solid var(--emas); padding-bottom: 5px; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-droplet" style="color: #e74c3c;"></i> GOLONGAN DARAH (JC 05)
+        </div>
+        <div style="display: flex; justify-content: space-around; width: 100%;">
+            <div class="goldar-mini-item" style="border-right: 1px solid #eee;">
+                <span class="goldar-mini-value" id="goldar-a">0</span>
+                <span class="stat-label" style="color: #666;">Tipe A</span>
+            </div>
+            <div class="goldar-mini-item" style="border-right: 1px solid #eee;">
+                <span class="goldar-mini-value" id="goldar-b">0</span>
+                <span class="stat-label" style="color: #666;">Tipe B</span>
+            </div>
+            <div class="goldar-mini-item" style="border-right: 1px solid #eee;">
+                <span class="goldar-mini-value" id="goldar-o">0</span>
+                <span class="stat-label" style="color: #666;">Tipe O</span>
+            </div>
+            <div class="goldar-mini-item">
+                <span class="goldar-mini-value" id="goldar-ab">0</span>
+                <span class="stat-label" style="color: #666;">Tipe AB</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="main-content">
@@ -77,7 +102,6 @@
                 <label>PERIODE</label>
                 <select id="select-periode">
                     <option value="12">12 Bulan Terakhir</option>
-                    <option value="6">6 Bulan Terakhir</option>
                 </select>
             </div>
         </div>
@@ -85,30 +109,14 @@
 
     <div class="card">
         <div class="card-header"><i class="fa-solid fa-book-bible"></i> CAPAIAN BACA ALKITAB</div>
-        <div class="stat-item">
+        <div class="stat-item-bar">
             <div class="stat-label-flex"><span>PROGRES KOMSEL (TARGET 100)</span><span id="txt-alkitab-komsel">0%</span></div>
             <div class="progress-bar"><div id="bar-alkitab-komsel" class="progress-fill" style="background: var(--biru-utama);"></div></div>
         </div>
-        <div class="stat-item">
-            <div class="stat-label-flex"><span>PROGRES GLOBAL</span><span id="txt-alkitab-global">0%</span></div>
-            <div class="progress-bar"><div id="bar-alkitab-global" class="progress-fill" style="background: var(--ungu-global);"></div></div>
-        </div>
     </div>
 
     <div class="card">
-        <div class="card-header"><i class="fa-solid fa-clipboard-user" style="color:var(--success)"></i> KEHADIRAN & LAPORAN</div>
-        <div class="stat-item">
-            <div class="stat-label-flex"><span>KEHADIRAN KOMSEL</span><span id="txt-hadir">0%</span></div>
-            <div class="progress-bar"><div id="bar-hadir" class="progress-fill" style="background:var(--success)"></div></div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-label-flex"><span>KETIDAKHADIRAN / IZIN</span><span id="txt-izin">0%</span></div>
-            <div class="progress-bar"><div id="bar-izin" class="progress-fill" style="background:var(--merah-absen)"></div></div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header"><i class="fa-solid fa-droplet" style="color:red"></i> GOLONGAN DARAH</div>
+        <div class="card-header"><i class="fa-solid fa-droplet" style="color:red"></i> DETAIL GOLONGAN DARAH</div>
         <div id="darah-list">
             <div class="blood-item" onclick="bukaPopupDarah('A')"><span>Tipe A</span><span class="count-darah"><b id="count-A">0</b> Orang</span></div>
             <div class="blood-item" onclick="bukaPopupDarah('B')"><span>Tipe B</span><span class="count-darah"><b id="count-B">0</b> Orang</span></div>
@@ -146,31 +154,50 @@
 
     let listNamaDarah = { 'A': [], 'B': [], 'O': [], 'AB': [] };
 
+    // FUNGSI UTAMA LOAD DATA
     function loadSemuaStatistik() {
-        const jcSelected = document.getElementById('select-jc').value; // Misal: "5"
-        
-        // 1. Sinkronisasi Golongan Darah (Koleksi users)
-        db.collection("users").where("komsel", "==", jcSelected).onSnapshot(snap => {
-            listNamaDarah = { 'A': [], 'B': [], 'O': [], 'AB': [] };
-            let count = { A: 0, B: 0, O: 0, AB: 0 };
+        loadGolonganDarah();
+        loadStatistikDoa();
+        // Fungsi alkitab/kehadiran lainnya panggil di sini
+    }
 
+    // FUNGSI LOAD DATA GOLONGAN DARAH (Sudah digabung dengan Ringkasan & Detail)
+    function loadGolonganDarah() {
+        const jcSelected = document.getElementById('select-jc').value;
+        
+        db.collection("users")
+          .where("komsel", "==", jcSelected) 
+          .onSnapshot(snap => {
+            let counts = { "A": 0, "B": 0, "O": 0, "AB": 0 };
+            listNamaDarah = { 'A': [], 'B': [], 'O': [], 'AB': [] };
+            
             snap.forEach(doc => {
-                const d = doc.data();
-                const gol = (d.goldarah || d.golongan_darah || "").toUpperCase().trim();
-                const nama = d.nama || "Tanpa Nama";
-                if(listNamaDarah.hasOwnProperty(gol)) {
-                    count[gol]++;
-                    listNamaDarah[gol].push(nama);
+                const data = doc.data();
+                const g = data.goldarah ? data.goldarah.toUpperCase().trim() : "";
+                const nama = data.nama || "Tanpa Nama";
+
+                if (counts.hasOwnProperty(g)) {
+                    counts[g]++;
+                    listNamaDarah[g].push(nama);
                 }
             });
 
-            // Update Angka di UI
-            for(let tipe in count) {
-                document.getElementById('count-' + tipe).innerText = count[tipe];
+            // Update Tampilan Ringkasan Atas
+            document.getElementById("goldar-a").innerText = counts["A"];
+            document.getElementById("goldar-b").innerText = counts["B"];
+            document.getElementById("goldar-o").innerText = counts["O"];
+            document.getElementById("goldar-ab").innerText = counts["AB"];
+
+            // Update Tampilan List Detail (Bawah)
+            for(let tipe in counts) {
+                const el = document.getElementById('count-' + tipe);
+                if(el) el.innerText = counts[tipe];
             }
         });
+    }
 
-        // 2. Sinkronisasi Doa & SLA (Koleksi laporan_doa)
+    function loadStatistikDoa() {
+        const jcSelected = document.getElementById('select-jc').value;
         db.collection("laporan_doa").where("jc", "==", "JC " + jcSelected).onSnapshot(snap => {
             let total = snap.size;
             let terjawab = 0;
@@ -191,22 +218,8 @@
             document.getElementById('top-persen-jawab').innerText = total > 0 ? Math.round((terjawab/total)*100) + "%" : "0%";
             document.getElementById('top-sla').innerText = terjawab > 0 ? Math.round(totalSLA/terjawab) : 0;
         });
-
-        // 3. Sinkronisasi Alkitab & Kehadiran (Contoh dummy/sesuaikan dengan logic field Anda)
-        // Disini saya memasukkan logic bar agar dashboard tetap terlihat hidup
-        updateBar('alkitab-komsel', 75); // Ganti dengan hasil query db Anda
-        updateBar('alkitab-global', 60);
-        updateBar('hadir', 85);
-        updateBar('izin', 15);
     }
 
-    // Fungsi Pembantu UI
-    function updateBar(id, nilai) {
-        document.getElementById('txt-' + id).innerText = nilai + "%";
-        document.getElementById('bar-' + id).style.width = nilai + "%";
-    }
-
-    // FUNGSI POPUP GOLONGAN DARAH
     function bukaPopupDarah(tipe) {
         const container = document.getElementById('list-nama');
         const judul = document.getElementById('modal-title');
