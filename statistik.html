@@ -223,47 +223,64 @@
         });
     }
  
-    // 2. SINKRONISASI KEHADIRAN (HADIR)
+    // 2. SINKRONISASI KEHADIRAN KOMSEL (LOGIC TERBARU)
     function syncStatistikHadir() {
         const jcRaw = document.getElementById('select-jc-laporan').value;
         const numJC = ambilAngkaJC(jcRaw);
+        
         db.collection("kehadiran").onSnapshot(snap => {
-            let totalHadirJC = 0, totalHadirGlobal = 0;
+            let totalHadirJC = 0;
+            let totalHadirGlobal = 0;
+
             snap.forEach(doc => {
                 const d = doc.data();
                 if(d.status === "HADIR") {
                     totalHadirGlobal++;
-                    if(ambilAngkaJC(d.jc || d.komsel) === numJC) totalHadirJC++;
+                    
+                    const dataKomsel = ambilAngkaJC(d.jc || d.komsel);
+                    if(dataKomsel === numJC) {
+                        totalHadirJC++;
+                    }
                 }
             });
+
             const persenJC = ((totalHadirJC / 100) * 100).toFixed(1);
             const persenGlobal = ((totalHadirGlobal / 100) * 100).toFixed(1);
+
             updateStatistikBar('txt-hadir-jc', 'bar-hadir-jc', persenJC);
             updateStatistikBar('txt-hadir-global', 'bar-hadir-global', persenGlobal);
         });
     }
  
-    // 3. SINKRONISASI KETIDAK HADIRAN (IZIN/DLL)
+    // 3. SINKRONISASI KETIDAK HADIRAN (LOGIC TERBARU)
     function syncStatistikIzin() {
         const jcRaw = document.getElementById('select-jc-izin').value;
         const numJC = ambilAngkaJC(jcRaw);
+        
         db.collection("kehadiran").onSnapshot(snap => {
-            let totalIzinJC = 0, totalIzinGlobal = 0;
+            let totalIzinJC = 0;
+            let totalIzinGlobal = 0;
+
             snap.forEach(doc => {
                 const d = doc.data();
-                if(d.status !== "HADIR") {
+                if(d.status && d.status !== "HADIR") { 
                     totalIzinGlobal++;
-                    if(ambilAngkaJC(d.jc || d.komsel) === numJC) totalIzinJC++;
+                    const dataKomsel = ambilAngkaJC(d.jc || d.komsel);
+                    if(dataKomsel === numJC) {
+                        totalIzinJC++;
+                    }
                 }
             });
+
             const persenIzinJC = ((totalIzinJC / 100) * 100).toFixed(1);
             updateStatistikBar('txt-izin-jc', 'bar-izin-jc', persenIzinJC);
+            
             document.getElementById('txt-izin-global').innerText = totalIzinGlobal;
             document.getElementById('bar-izin-global').style.width = Math.min(totalIzinGlobal, 100) + "%";
         });
     }
  
-    // 4. SINKRONISASI BACA ALKITAB (PERBAIKAN DINAMIS)
+    // 4. SINKRONISASI BACA ALKITAB
     function syncStatistikAlkitab() {
         const jcRaw = document.getElementById('select-komsel-alkitab').value; 
         const periodeBulan = parseInt(document.getElementById('select-periode-alkitab').value);
@@ -275,15 +292,13 @@
 
             snap.forEach(doc => {
                 const d = doc.data();
-                // Mencocokkan input JC dari dropdown dengan data di Firestore
                 if (d.jc === jcRaw) {
                     countJC++;
                 }
             });
 
-            // Rumus Target 100
             const persenJC = ((countJC / 100) * 100).toFixed(1);
-            const persenGlobal = ((countGlobal / 500) * 100).toFixed(1); // Target global misal 500
+            const persenGlobal = ((countGlobal / 500) * 100).toFixed(1);
 
             updateStatistikBar('txt-alkitab-komsel', 'bar-alkitab-komsel', persenJC);
             updateStatistikBar('txt-alkitab-global', 'bar-alkitab-global', persenGlobal);
