@@ -70,7 +70,7 @@
             </div>
         </div>
         <div class="stat-item">
-            <div class="stat-label-flex"><span>HADIR KOMSEL (TARGET 100)</span><span id="text-laporan-jc" style="color: var(--success);">0%</span></div>
+            <div class="stat-label-flex"><span>HADIR KOMSEL (TARGET 100)</span><span id="text-laporan-jc" style="color: var(--success);">0.0%</span></div>
             <div class="progress-bar"><div id="bar-laporan-jc" class="progress-fill" style="width: 0%; background: var(--success);"></div></div>
         </div>
         <div class="stat-item">
@@ -96,11 +96,11 @@
             </div>
         </div>
         <div class="stat-item">
-            <div class="stat-label-flex"><span>TIDAK HADIR (TOTAL INPUT)</span><span id="text-laporan-izin" style="color: var(--merah-absen);">0</span></div>
+            <div class="stat-label-flex"><span>PROGRES TIDAK HADIR (TARGET 100)</span><span id="text-laporan-izin" style="color: var(--merah-absen);">0.0%</span></div>
             <div class="progress-bar"><div id="bar-laporan-izin" class="progress-fill" style="width: 0%; background: var(--merah-absen);"></div></div>
         </div>
         <div class="stat-item">
-            <div class="stat-label-flex"><span>TOTAL TIDAK HADIR GLOBAL</span><span id="text-global-tidak-hadir">0</span></div>
+            <div class="stat-label-flex"><span>PROGRES TIDAK HADIR GLOBAL</span><span id="text-global-tidak-hadir">0.0%</span></div>
             <div class="progress-bar"><div id="bar-global-tidak-hadir" class="progress-fill" style="width: 0%; background: #ff4d4d;"></div></div>
         </div>
     </div>
@@ -169,7 +169,20 @@ function updateProgressBar(textId, barId, value, isCount = false) {
     if(barEl) barEl.style.width = Math.min(isCount ? (value * 10) : value, 100) + "%";
 }
 
-// --- FUNGSI BARU: SYNC CAPAIAN DOA ---
+// --- LOGIC PERIODE DROPDOWN ---
+function setupDropdownPeriode() {
+    const ids = ['select-periode-alkitab', 'select-periode-laporan', 'select-periode-izin', 'select-periode-doa'];
+    ids.forEach(id => {
+        const select = document.getElementById(id);
+        if(!select) return;
+        let options = "";
+        for (let i = 1; i <= 12; i++) options += `<option value="${i}">${i} Bulan terakhir</option>`;
+        select.innerHTML = options;
+        select.value = "12";
+    });
+}
+
+// --- SYNC CAPAIAN DOA ---
 function syncCapaianDoa() {
     const jcTargetRaw = document.getElementById('select-jc-doa').value;
     const jcTargetAngka = ambilAngka(jcTargetRaw);
@@ -187,7 +200,6 @@ function syncCapaianDoa() {
                 totalDoaJC++;
                 if (d.terjawab === true) {
                     terjawabJC++;
-                    // Hitung SLA (Selisih Hari)
                     const ts = d.tglInput ? d.tglInput.toDate() : new Date();
                     const tglTampil = d.tglTerjawab ? d.tglTerjawab.toDate() : new Date();
                     const diffDays = Math.floor(Math.abs(tglTampil - ts) / (1000 * 60 * 60 * 24));
@@ -200,13 +212,12 @@ function syncCapaianDoa() {
         const rataSLA = terjawabJC > 0 ? Math.round(totalSLA / terjawabJC) : 0;
 
         updateProgressBar('text-doa-jc', 'bar-doa-jc', persenTerjawab);
-        
-        // Untuk SLA, kita gunakan bar untuk visualisasi skala 0-30 hari
         document.getElementById('text-sla-doa').innerText = rataSLA + " Hari";
         document.getElementById('bar-sla-doa').style.width = Math.min((rataSLA / 30) * 100, 100) + "%";
     });
 }
 
+// --- SYNC KEHADIRAN (HADIR) ---
 function syncLaporanKehadiranJC() {
     const jcTargetRaw = document.getElementById('select-jc-laporan').value; 
     const jcTargetAngka = ambilAngka(jcTargetRaw);
@@ -225,24 +236,37 @@ function syncLaporanKehadiranJC() {
     });
 }
 
+// --- SYNC IZIN/TIDAK HADIR (UPDATED KE PERSENTASE) ---
 function syncLaporanIzinJC() {
     const jcTargetRaw = document.getElementById('select-jc-izin').value;
     const jcTargetAngka = ambilAngka(jcTargetRaw);
+    
     db.collection("kehadiran").onSnapshot(snap => {
-        let countIzin = 0, countGlobalIzin = 0;
+        let countIzinJC = 0;
+        let countGlobalIzin = 0;
+
         snap.forEach(doc => {
             const data = doc.data();
             if(String(data.status).toUpperCase() !== "HADIR") {
                 countGlobalIzin++;
                 const dbAngka = ambilAngka(data.jc || data.komsel);
-                if(dbAngka === jcTargetAngka) countIzin++;
+                if(dbAngka === jcTargetAngka) {
+                    countIzinJC++;
+                }
             }
         });
-        updateProgressBar('text-laporan-izin', 'bar-laporan-izin', countIzin, true);
-        updateProgressBar('text-global-tidak-hadir', 'bar-global-tidak-hadir', countGlobalIzin, true);
+
+        // Rumus Persentase berbasis Target 100
+        const persenJC = ((countIzinJC / 100) * 100).toFixed(1);
+        const persenGlobal = ((countGlobalIzin / 100) * 100).toFixed(1);
+
+        // Update UI (Tanpa parameter isCount agar menampilkan %)
+        updateProgressBar('text-laporan-izin', 'bar-laporan-izin', persenJC);
+        updateProgressBar('text-global-tidak-hadir', 'bar-global-tidak-hadir', persenGlobal);
     });
 }
 
+// --- SYNC BACA ALKITAB ---
 function syncCapaianRealtime() {
     const selKomselRaw = document.getElementById('select-komsel-alkitab').value;
     const jcTargetAngka = ambilAngka(selKomselRaw);
@@ -259,6 +283,7 @@ function syncCapaianRealtime() {
     });
 }
 
+// --- SYNC GOLONGAN DARAH ---
 function syncGoldarRealtime() {
     db.collection("users").where("komsel", "==", "5").onSnapshot(snap => {
         let c = { A: 0, B: 0, O: 0, AB: 0 };
@@ -273,24 +298,12 @@ function syncGoldarRealtime() {
     });
 }
 
-function setupDropdownPeriode() {
-    const ids = ['select-periode-alkitab', 'select-periode-laporan', 'select-periode-izin', 'select-periode-doa'];
-    ids.forEach(id => {
-        const select = document.getElementById(id);
-        if(!select) return;
-        let options = "";
-        for (let i = 1; i <= 12; i++) options += `<option value="${i}">${i} Bulan terakhir</option>`;
-        select.innerHTML = options;
-        select.value = "12";
-    });
-}
-
 window.onload = () => {
     setupDropdownPeriode();
     syncCapaianRealtime();
     syncLaporanKehadiranJC();
     syncLaporanIzinJC();
-    syncCapaianDoa(); // Panggil fungsi sinkronisasi doa
+    syncCapaianDoa();
     syncGoldarRealtime();
 };
 </script>
