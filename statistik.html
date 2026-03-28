@@ -74,6 +74,10 @@
             <div class="stat-label-flex"><span>HADIR KOMSEL (TARGET 100)</span><span id="text-laporan-jc" style="color: var(--success);">0%</span></div>
             <div class="progress-bar"><div id="bar-laporan-jc" class="progress-fill" style="width: 0%; background: var(--success);"></div></div>
         </div>
+        <div class="stat-item">
+            <div class="stat-label-flex"><span>PROGRES HADIR GLOBAL</span><span id="text-global-hadir">0.0%</span></div>
+            <div class="progress-bar"><div id="bar-global-hadir" class="progress-fill" style="width: 0%; background: var(--ungu-global);"></div></div>
+        </div>
     </div>
 
     <div class="card">
@@ -95,6 +99,10 @@
         <div class="stat-item">
             <div class="stat-label-flex"><span>TIDAK HADIR (TOTAL INPUT)</span><span id="text-laporan-izin" style="color: var(--merah-absen);">0</span></div>
             <div class="progress-bar"><div id="bar-laporan-izin" class="progress-fill" style="width: 0%; background: var(--merah-absen);"></div></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label-flex"><span>TOTAL TIDAK HADIR GLOBAL</span><span id="text-global-tidak-hadir">0</span></div>
+            <div class="progress-bar"><div id="bar-global-tidak-hadir" class="progress-fill" style="width: 0%; background: #ff4d4d;"></div></div>
         </div>
     </div>
 
@@ -130,7 +138,6 @@ function setupDropdownPeriode() {
         const select = document.getElementById(id);
         let options = "";
         for (let i = 1; i <= 12; i++) {
-            let isSelected = i === 12 ? "selected" : "";
             options += `<option value="${i}">${i} Bulan terakhir</option>`;
         }
         select.innerHTML = options;
@@ -145,7 +152,7 @@ function updateProgressBar(textId, barId, value, isCount = false) {
     if(barEl) barEl.style.width = Math.min(isCount ? (value * 10) : value, 100) + "%";
 }
 
-// 1. Logika Kehadiran - TERBARU (Menggunakan Koleksi 'kehadiran')
+// 1. Logika Kehadiran + Global
 function syncLaporanKehadiranJC() {
     const jcTarget = document.getElementById('select-jc-laporan').value; 
     const bulan = parseInt(document.getElementById('select-periode-laporan').value);
@@ -153,37 +160,41 @@ function syncLaporanKehadiranJC() {
 
     db.collection("kehadiran").where("tanggal", ">=", dLimit).onSnapshot(snap => {
         let countJC = 0;
+        let countGlobal = 0;
         snap.forEach(doc => {
             const data = doc.data();
-            let dbJC = data.jc || ""; 
-            
-            if(dbJC === jcTarget && data.status === "HADIR") {
-                countJC++;
+            if(data.status === "HADIR") {
+                countGlobal++;
+                if(data.jc === jcTarget) {
+                    countJC++;
+                }
             }
         });
-        const persen = ((countJC/100)*100).toFixed(1);
-        updateProgressBar('text-laporan-jc', 'bar-laporan-jc', persen);
+        updateProgressBar('text-laporan-jc', 'bar-laporan-jc', ((countJC/100)*100).toFixed(1));
+        updateProgressBar('text-global-hadir', 'bar-global-hadir', ((countGlobal/100)*100).toFixed(1));
     });
 }
 
-// 2. Logika Ketidak Hadiran
+// 2. Logika Ketidakhadiran + Global
 function syncLaporanIzinJC() {
     const jcTarget = document.getElementById('select-jc-izin').value;
-    const jcAngkaOnly = jcTarget.replace(/\D/g, "").replace(/^0+/, "");
     const bulan = parseInt(document.getElementById('select-periode-izin').value);
     const dLimit = new Date(); dLimit.setMonth(dLimit.getMonth() - bulan);
 
-    db.collection("administrator_bigdata").where("timestamp_server", ">=", dLimit).onSnapshot(snap => {
+    db.collection("kehadiran").where("tanggal", ">=", dLimit).onSnapshot(snap => {
         let countIzin = 0;
+        let countGlobalIzin = 0;
         snap.forEach(doc => {
             const data = doc.data();
-            let dbJC = data.komsel || ""; 
-            
-            if((dbJC === jcAngkaOnly || dbJC === jcTarget) && data.status !== "Hadir") {
-                countIzin++;
+            if(data.status !== "HADIR") {
+                countGlobalIzin++;
+                if(data.jc === jcTarget) {
+                    countIzin++;
+                }
             }
         });
         updateProgressBar('text-laporan-izin', 'bar-laporan-izin', countIzin, true);
+        updateProgressBar('text-global-tidak-hadir', 'bar-global-tidak-hadir', countGlobalIzin, true);
     });
 }
 
