@@ -147,6 +147,11 @@ async function bersihkanDataDatabase() {
         let updateObj = {};
         let perluUpdate = false;
 
+        // Tambahkan di dalam snap.forEach
+if (!data.jc && !data.komsel && data.status === "HADIR") {
+    console.log("Data tanpa JC ditemukan! Nama: " + data.nama);
+}
+
         // 1. Perbaiki Status (hadir -> HADIR)
         if (data.status && data.status !== "HADIR" && data.status.toUpperCase() === "HADIR") {
             updateObj.status = "HADIR";
