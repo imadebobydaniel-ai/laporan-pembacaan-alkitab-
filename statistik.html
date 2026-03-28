@@ -42,8 +42,7 @@
             <div class="input-box">
                 <label>PERIODE</label>
                 <select id="select-periode-alkitab" onchange="syncCapaianRealtime()">
-                    <option value="1">1 Bulan</option><option value="12" selected>12 Bulan</option>
-                </select>
+                    </select>
             </div>
         </div>
         <div class="stat-item">
@@ -70,8 +69,7 @@
             <div class="input-box">
                 <label>PERIODE</label>
                 <select id="select-periode-laporan" onchange="syncLaporanKehadiranJC()">
-                    <option value="1">1 Bulan</option><option value="12" selected>12 Bulan</option>
-                </select>
+                    </select>
             </div>
         </div>
         <div class="stat-item">
@@ -94,8 +92,7 @@
             <div class="input-box">
                 <label>PERIODE</label>
                 <select id="select-periode-izin" onchange="syncLaporanIzinJC()">
-                    <option value="1">1 Bulan</option><option value="12" selected>12 Bulan</option>
-                </select>
+                    </select>
             </div>
         </div>
         <div class="stat-item">
@@ -136,6 +133,21 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// --- FUNGSI BARU UNTUK MENGISI DROPDOWN SECARA OTOMATIS ---
+function setupDropdownPeriode() {
+    const ids = ['select-periode-alkitab', 'select-periode-laporan', 'select-periode-izin'];
+    ids.forEach(id => {
+        const select = document.getElementById(id);
+        let options = "";
+        for (let i = 1; i <= 12; i++) {
+            // Kita set 12 bulan sebagai 'selected' secara default
+            let isSelected = i === 12 ? "selected" : "";
+            options += `<option value="${i}" ${isSelected}>${i} Bulan terakhir</option>`;
+        }
+        select.innerHTML = options;
+    });
+}
+
 function updateProgressBar(textId, barId, value, isCount = false) {
     const textEl = document.getElementById(textId);
     const barEl = document.getElementById(barId);
@@ -143,7 +155,7 @@ function updateProgressBar(textId, barId, value, isCount = false) {
     if(barEl) barEl.style.width = Math.min(isCount ? (value * 10) : value, 100) + "%";
 }
 
-// 1. Logika Baca Alkitab
+// 1. Logika Alkitab
 function syncCapaianRealtime() {
     const selKomselRaw = document.getElementById('select-komsel-alkitab').value;
     const selKomselAngka = selKomselRaw.replace(/\D/g, "");
@@ -155,8 +167,8 @@ function syncCapaianRealtime() {
     db.collection("laporan_bacaan").where("tanggal", ">=", limitFilter).onSnapshot(snap => {
         let countJC = 0, countGlobal = 0;
         snap.forEach(doc => {
-            const d = doc.data();
             countGlobal++;
+            const d = doc.data();
             const jcLaporanAngka = String(d.komsel || d.jc || "").replace(/\D/g, "");
             if (jcLaporanAngka !== "" && parseInt(jcLaporanAngka) === parseInt(selKomselAngka)) countJC++;
         });
@@ -165,7 +177,7 @@ function syncCapaianRealtime() {
     });
 }
 
-// 2. Logika Kehadiran (Hadir)
+// 2. Logika Kehadiran
 function syncLaporanKehadiranJC() {
     const jcTarget = document.getElementById('select-jc-laporan').value;
     const bulan = parseInt(document.getElementById('select-periode-laporan').value);
@@ -175,14 +187,13 @@ function syncLaporanKehadiranJC() {
         let countJC = 0;
         snap.forEach(doc => {
             const data = doc.data();
-            // Hanya hitung yang statusnya 'Hadir'
             if(data.jc === jcTarget && data.status === "Hadir") countJC++;
         });
         updateProgressBar('text-laporan-jc', 'bar-laporan-jc', ((countJC/100)*100).toFixed(1));
     });
 }
 
-// 3. Logika Ketidak Hadiran (Izin, Sakit, Alpa)
+// 3. Logika Ketidak Hadiran
 function syncLaporanIzinJC() {
     const jcTarget = document.getElementById('select-jc-izin').value;
     const bulan = parseInt(document.getElementById('select-periode-izin').value);
@@ -192,15 +203,13 @@ function syncLaporanIzinJC() {
         let countIzin = 0;
         snap.forEach(doc => {
             const data = doc.data();
-            // Hitung yang statusnya BUKAN 'Hadir'
             if(data.jc === jcTarget && data.status !== "Hadir") countIzin++;
         });
-        // Tampilkan angka jumlah orang (isCount = true)
         updateProgressBar('text-laporan-izin', 'bar-laporan-izin', countIzin, true);
     });
 }
 
-// 4. Logika Golongan Darah & Doa
+// 4. Logika Lainnya
 function syncGoldarRealtime() {
     db.collection("users").where("jc", "==", "JC 05").onSnapshot(snap => {
         let c = { A: 0, B: 0, O: 0, AB: 0 };
@@ -223,6 +232,7 @@ function syncDoaRealtime() {
 }
 
 window.onload = () => {
+    setupDropdownPeriode(); // Jalankan pengisian dropdown dulu
     syncCapaianRealtime();
     syncLaporanKehadiranJC();
     syncLaporanIzinJC();
