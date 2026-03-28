@@ -145,29 +145,28 @@ function updateProgressBar(textId, barId, value, isCount = false) {
     if(barEl) barEl.style.width = Math.min(isCount ? (value * 10) : value, 100) + "%";
 }
 
-// 1. Logika Kehadiran - PERBAIKAN KOLOM KOMSEL
+// 1. Logika Kehadiran - TERBARU (Menggunakan Koleksi 'kehadiran')
 function syncLaporanKehadiranJC() {
-    const jcTarget = document.getElementById('select-jc-laporan').value;
-    const jcAngkaOnly = jcTarget.replace(/\D/g, "").replace(/^0+/, ""); // Mengubah "JC 05" jadi "5"
+    const jcTarget = document.getElementById('select-jc-laporan').value; 
     const bulan = parseInt(document.getElementById('select-periode-laporan').value);
     const dLimit = new Date(); dLimit.setMonth(dLimit.getMonth() - bulan);
 
-    db.collection("administrator_bigdata").where("timestamp_server", ">=", dLimit).onSnapshot(snap => {
+    db.collection("kehadiran").where("tanggal", ">=", dLimit).onSnapshot(snap => {
         let countJC = 0;
         snap.forEach(doc => {
             const data = doc.data();
-            let dbJC = data.komsel || ""; // Ubah dari data.jc ke data.komsel
+            let dbJC = data.jc || ""; 
             
-            // Logika pengecekan: mendukung angka "5" atau string "JC 05"
-            if((dbJC === jcAngkaOnly || dbJC === jcTarget) && data.status === "Hadir") {
+            if(dbJC === jcTarget && data.status === "HADIR") {
                 countJC++;
             }
         });
-        updateProgressBar('text-laporan-jc', 'bar-laporan-jc', ((countJC/100)*100).toFixed(1));
+        const persen = ((countJC/100)*100).toFixed(1);
+        updateProgressBar('text-laporan-jc', 'bar-laporan-jc', persen);
     });
 }
 
-// 2. Logika Ketidak Hadiran - PERBAIKAN KOLOM KOMSEL
+// 2. Logika Ketidak Hadiran
 function syncLaporanIzinJC() {
     const jcTarget = document.getElementById('select-jc-izin').value;
     const jcAngkaOnly = jcTarget.replace(/\D/g, "").replace(/^0+/, "");
@@ -178,7 +177,7 @@ function syncLaporanIzinJC() {
         let countIzin = 0;
         snap.forEach(doc => {
             const data = doc.data();
-            let dbJC = data.komsel || ""; // Ubah ke data.komsel
+            let dbJC = data.komsel || ""; 
             
             if((dbJC === jcAngkaOnly || dbJC === jcTarget) && data.status !== "Hadir") {
                 countIzin++;
@@ -188,7 +187,7 @@ function syncLaporanIzinJC() {
     });
 }
 
-// 3. Logika Alkitab (Tetap menggunakan filter angka)
+// 3. Logika Alkitab
 function syncCapaianRealtime() {
     const selKomselRaw = document.getElementById('select-komsel-alkitab').value;
     const selKomselAngka = selKomselRaw.replace(/\D/g, "");
