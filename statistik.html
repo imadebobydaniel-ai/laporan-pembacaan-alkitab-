@@ -171,7 +171,7 @@ function syncCapaianRealtime() {
     });
 }
 
-// 2. LOGIKA KEHADIRAN (SINKRON DENGAN KOLEKSI KEHADIRAN)
+// 2. LOGIKA KEHADIRAN (SINKRON DENGAN KOLEKSI KEHADIRAN) - VERSI PERBAIKAN
 function syncLaporanKehadiranJC() {
     const selKomselRaw = document.getElementById('select-jc-laporan').value;
     const selKomselAngka = selKomselRaw.replace(/\D/g, ""); 
@@ -187,11 +187,15 @@ function syncLaporanKehadiranJC() {
             snap.forEach(doc => {
                 const data = doc.data();
                 const isHadir = (data.status && data.status.toUpperCase() === "HADIR");
+                
+                // Ambil data JC dari database
                 let jcDataRaw = String(data.jc || ""); 
                 let jcDataAngka = jcDataRaw.replace(/\D/g, "");
 
                 if (isHadir) {
-                    if (jcDataAngka === "" || jcDataAngka === selKomselAngka) {
+                    // PERBAIKAN: Hanya hitung jika jcDataAngka TIDAK KOSONG 
+                    // dan cocok dengan dropdown yang dipilih
+                    if (jcDataAngka !== "" && parseInt(jcDataAngka) === parseInt(selKomselAngka)) {
                         countHadir++;
                     }
                 }
