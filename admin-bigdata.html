@@ -14,6 +14,7 @@
             --dark: #343a40;
             --light: #f8f9fa;
             --border: #dee2e6;
+            --purple-3d: #6f42c1;
         }
 
         body {
@@ -29,7 +30,7 @@
             margin: auto;
         }
 
-        /* Header Dashboard */
+        /* Stat Cards */
         .header-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -41,11 +42,13 @@
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
             text-align: center;
             border-bottom: 4px solid var(--primary);
+            transition: transform 0.3s;
         }
-
+        
+        .stat-card:hover { transform: translateY(-5px); }
         .stat-card h3 { margin: 0; font-size: 14px; color: #888; text-transform: uppercase; }
         .stat-card p { margin: 10px 0 0; font-size: 24px; font-weight: bold; color: var(--dark); }
 
@@ -61,88 +64,49 @@
 
         .chart-container {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
         }
 
         .chart-title {
             font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 15px;
+            margin-bottom: 20px;
+            font-size: 16px;
             width: 100%;
             border-bottom: 1px solid var(--border);
             padding-bottom: 10px;
+            color: var(--dark);
         }
 
-        /* Tabel Big Data */
+        canvas { filter: drop-shadow(0px 10px 8px rgba(0,0,0,0.15)); }
+
+        /* Tabel */
         .table-container {
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             overflow-x: auto;
         }
 
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .btn-export {
-            background: var(--success);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        th {
-            background: var(--light);
-            text-align: left;
-            padding: 12px;
-            border-bottom: 2px solid var(--border);
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--light); text-align: left; padding: 12px; border-bottom: 2px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .bg-valid { background: #d4edda; color: #155724; }
-        .bg-late { background: #fff3cd; color: #856404; }
-
-        .jc-tag {
-            font-weight: bold;
-            color: var(--primary);
-        }
+        .jc-tag { font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-chart-line"></i> Statistik Big Data Administrator</h2>
+    <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-chart-pie"></i> Statistik Big Data Administrator</h2>
 
     <div class="header-stats">
         <div class="stat-card">
@@ -162,19 +126,18 @@
     <div class="charts-section">
         <div class="chart-container">
             <div class="chart-title">Partisipasi Hari Ini</div>
-            <canvas id="pieChart" width="200" height="200"></canvas>
+            <div style="width: 250px; height: 250px; padding: 10px;">
+                <canvas id="pieChart"></canvas>
+            </div>
         </div>
         <div class="chart-container">
-            <div class="chart-title">Perbandingan Laporan Per JC (12 Bulan Terakhir)</div>
+            <div class="chart-title">Perbandingan Laporan Per JC</div>
             <canvas id="barChart"></canvas>
         </div>
     </div>
 
     <div class="table-container">
-        <div class="table-header">
-            <div class="chart-title" style="border:none; margin:0;">Riwayat Extract Nama & Pasal</div>
-            
-        </div>
+        <div class="chart-title" style="border:none;">Riwayat Extract Nama & Pasal</div>
         <table>
             <thead>
                 <tr>
@@ -197,64 +160,81 @@
                     <td>Kejadian 1-4 & Amsal 27</td>
                     <td><span class="status-badge bg-valid">Valid</span></td>
                 </tr>
-                <tr>
-                    <td>2</td>
-                    <td><strong>Petrus Ngutra</strong></td>
-                    <td class="jc-tag">JC 01</td>
-                    <td>Jumat, 06:15</td>
-                    <td>27/03/2026</td>
-                    <td>Kejadian 1-4 & Amsal 27</td>
-                    <td><span class="status-badge bg-valid">Valid</span></td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td><strong>Boby Daniel</strong></td>
-                    <td class="jc-tag">JC 05</td>
-                    <td>Kamis, 21:00</td>
-                    <td>26/03/2026</td>
-                    <td>Ayub 5-8 & Amsal 26</td>
-                    <td><span class="status-badge bg-valid">Valid</span></td>
-                </tr>
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // Inisialisasi Diagram Lingkaran (Pie Chart)
+    // --- KONFIGURASI GRADIENT & SHADOW ---
+    
+    // 1. Diagram Lingkaran (Pie Chart) dengan Efek Kedalaman
     const ctxPie = document.getElementById('pieChart').getContext('2d');
+    
+    // Buat Gradient untuk warna Biru
+    const blueGrad = ctxPie.createLinearGradient(0, 0, 0, 200);
+    blueGrad.addColorStop(0, '#00bfff');
+    blueGrad.addColorStop(1, '#004e92');
+
     new Chart(ctxPie, {
-        type: 'pie',
+        type: 'doughnut', // Menggunakan Doughnut agar lebih modern & 3D
         data: {
             labels: ['Sudah Lapor', 'Belum Lapor'],
             datasets: [{
                 data: [78, 22],
-                backgroundColor: ['#007bff', '#e9ecef'],
-                borderWidth: 1
+                backgroundColor: [blueGrad, '#e9ecef'],
+                hoverOffset: 20,
+                borderWidth: 0,
+                weight: 2
             }]
         },
         options: {
+            cutout: '60%', // Membuat lubang di tengah
             responsive: true,
-            plugins: { legend: { position: 'bottom' } }
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
         }
     });
 
-    // Inisialisasi Diagram Batang (Bar Chart)
+    // 2. Diagram Batang (Bar Chart) dengan Efek 3D Shadow
     const ctxBar = document.getElementById('barChart').getContext('2d');
+    
+    // Buat Gradient untuk warna Ungu
+    const purpleGrad = ctxBar.createLinearGradient(0, 0, 0, 400);
+    purpleGrad.addColorStop(0, '#a855f7');
+    purpleGrad.addColorStop(1, '#6b21a8');
+
     new Chart(ctxBar, {
         type: 'bar',
         data: {
             labels: ['JC 01', 'JC 02', 'JC 03', 'JC 04', 'JC 05'],
             datasets: [{
-                label: 'Jumlah Laporan Masuk',
+                label: 'Jumlah Laporan',
                 data: [210, 185, 160, 240, 290],
-                backgroundColor: '#6f42c1',
-                borderRadius: 5
+                backgroundColor: purpleGrad,
+                borderRadius: 8, // Sudut batang membulat
+                borderSkipped: false,
+                barThickness: 35
             }]
         },
         options: {
             responsive: true,
-            scales: { y: { beginAtZero: true } }
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { display: false },
+                    border: { display: false }
+                },
+                x: {
+                    grid: { display: false },
+                    border: { display: false }
+                }
+            }
         }
     });
 </script>
