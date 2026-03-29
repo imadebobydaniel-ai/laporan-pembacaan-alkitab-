@@ -59,7 +59,7 @@
             <div class="input-box">
                 <label>KOMSEL</label>
                 <select id="select-komsel-alkitab" onchange="syncStatistikAlkitab()">
-                    <option value="JC 01">JC 1</option><option value="JC 02">JC 2</option><option value="JC 03">JC 3</option><option value="JC 04">JC 4</option><option value="JC 05" selected>JC 5</option>
+                    <option value="JC 1">JC 1</option><option value="JC 2">JC 2</option><option value="JC 3">JC 3</option><option value="JC 4">JC 4</option><option value="JC 5" selected>JC 5</option>
                 </select>
             </div>
             <div class="input-box"><label>PERIODE</label><select id="select-periode-alkitab" onchange="syncStatistikAlkitab()"></select></div>
@@ -75,8 +75,8 @@
             <div id="progres-komsel-text-alkitab" style="font-size: 10px; color: #888; margin-top: 5px; font-weight: bold;">0 Orang Melapor</div>
         </div>
         <div class="stat-item">
-            <div class="stat-label-flex"><span>PROGRES KOMSEL (TARGET 100)</span><span id="txt-alkitab-komsel">75.0%</span></div>
-            <div class="progress-bar"><div id="bar-alkitab-komsel" class="progress-fill" style="background: var(--biru-utama); width: 75%;"></div></div>
+            <div class="stat-label-flex"><span>PROGRES KOMSEL (TARGET 100)</span><span id="txt-alkitab-komsel">0.0%</span></div>
+            <div class="progress-bar"><div id="bar-alkitab-komsel" class="progress-fill" style="background: var(--biru-utama); width: 0%;"></div></div>
         </div>
     </div>
 
@@ -204,19 +204,51 @@
         if(elBar) elBar.style.width = barValue + "%";
     }
 
+    // --- INTEGRASI SCRIPT BARU (Alkitab Realtime) ---
     function syncStatistikAlkitab() {
-        const jcTerpilih = document.getElementById("select-komsel-alkitab").value;
-        db.collection("users").where("komsel", "==", jcTerpilih).onSnapshot(snap => {
-            let totalAnggota = snap.size;
-            let sudahLapor = 0;
-            snap.forEach(doc => { if (doc.data().progres_alkitab > 0) sudahLapor++; });
+        const jcTerpilih = document.getElementById("select-komsel-alkitab").value; 
+        
+        db.collection("laporan_baca").onSnapshot((snapshot) => {
+            // Filter berdasarkan Komsel yang dipilih
+            const docs = snapshot.docs.filter(doc => {
+                const data = doc.data();
+                return data.komsel && data.komsel.trim() === jcTerpilih;
+            });
+
+            // Menghitung jumlah orang unik (berdasarkan nama)
+            let daftarNama = new Set();
+            docs.forEach(doc => {
+                if (doc.data().nama) {
+                    daftarNama.add(doc.data().nama.trim());
+                }
+            });
+
+            const jumlahLaporan = docs.length; 
+            const jumlahOrang = daftarNama.size; 
+
+            // 1. Update Laporan Masuk Per Orang
+            const txtOrang = document.getElementById("text-laporan-orang-alkitab");
+            const barOrang = document.getElementById("bar-laporan-orang-alkitab");
+            const txtDetail = document.getElementById("progres-komsel-text-alkitab");
+
+            if(txtOrang) txtOrang.innerText = jumlahOrang + " Orang";
             
-            document.getElementById("text-laporan-orang-alkitab").innerText = sudahLapor + " Orang";
-            let visualBar = totalAnggota > 0 ? (sudahLapor / totalAnggota) * 100 : 0;
-            document.getElementById("bar-laporan-orang-alkitab").style.width = visualBar + "%";
-            
-            document.getElementById("progres-komsel-text-alkitab").innerText = sudahLapor + " Orang Melapor";
-            updateStatistikBar('txt-alkitab-komsel', 'bar-alkitab-komsel', 75.0); 
+            // Progress bar orang (asumsi target 10 orang per komsel)
+            let persenOrang = (jumlahOrang / 10) * 100;
+            if(barOrang) barOrang.style.width = Math.min(persenOrang, 100) + "%";
+            if(txtDetail) txtDetail.innerText = jumlahOrang + " Orang Melapor";
+
+            // 2. Update Progres Komsel (Target 100 Laporan)
+            let targetLaporan = 100;
+            let persenProgres = (jumlahLaporan / targetLaporan) * 100;
+
+            const txtPersen = document.getElementById("txt-alkitab-komsel");
+            const barPersen = document.getElementById("bar-alkitab-komsel");
+
+            if (txtPersen) txtPersen.innerText = persenProgres.toFixed(1) + "%";
+            if (barPersen) barPersen.style.width = Math.min(persenProgres, 100) + "%";
+
+            console.log(`Update Realtime Alkitab: ${jcTerpilih} | Total: ${jumlahLaporan} | Orang: ${jumlahOrang}`);
         });
     }
 
