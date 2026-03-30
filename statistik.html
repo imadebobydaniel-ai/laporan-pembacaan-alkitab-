@@ -192,21 +192,25 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // FUNGSI STANDAR TERINTEGRASI
+    /** * 1. RUMUS INTI: PENJUMLAHAN KOLEKTIF & FILTER SPESIFIK
+     * Digunakan untuk Alkitab, Kehadiran, dan Ketidakhadiran.
+     */
     function updateStatistik(koleksi, idSelect, idTeksOrang, idTeksPersen, idBarPersen, statusFilter = null) {
-        const jcTerpilih = document.getElementById(idSelect).value;
+        const dropdown = document.getElementById(idSelect);
+        if (!dropdown) return;
+        const jcTerpilih = dropdown.value;
 
         db.collection(koleksi).onSnapshot((snapshot) => {
             let dataPerJC = {}; 
-            let totalLaporanGlobal = 0;
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                
+
                 // Logika Filter Status (untuk membedakan hadir/tidak hadir di koleksi yang sama)
                 if (statusFilter === "HADIR" && data.status !== "HADIR") return;
                 if (statusFilter === "TIDAK_HADIR" && (data.status === "HADIR" || !data.status)) return;
 
+                // Membersihkan spasi (trim) agar " JC 5 " terbaca sebagai "JC 5".
                 const namaJC = (data.komsel || data.jc || "Unknown").trim();
                 const namaOrang = data.nama ? data.nama.trim() : "Unknown";
 
@@ -217,45 +221,63 @@
                 dataPerJC[namaJC].totalDoc++;
             });
 
-            // 1. Ambil Data JC Terpilih
-            const dataJC = dataPerJC[jcTerpilih] || { orang: new Set(), totalDoc: 0 };
-            const jmlOrangUnik = dataJC.orang.size;
-            const jmlLaporan = dataJC.totalDoc;
+            // TAHAP 1: HITUNG TOTAL GLOBAL (Sesuai Logika Set Unik per JC)
+            let totalOrangGlobal = 0;
+            Object.keys(dataPerJC).forEach(key => {
+                totalOrangGlobal += dataPerJC[key].orang.size;
+            });
 
-            // 2. Update UI Teks & Progres Orang (Visual Bar Atas)
-            document.getElementById(idTeksOrang).innerText = jmlOrangUnik + " Orang";
+            // TAHAP 2: AMBIL DATA KHUSUS JC YANG DIPILIH
+            const dataJCTerpilih = dataPerJC[jcTerpilih] || { orang: new Set(), totalDoc: 0 };
+            const jmlOrangUnik = dataJCTerpilih.orang.size;
+
+            // TAHAP 3: UPDATE TAMPILAN
+            // A. Update Teks Orang
+            const elTeksOrang = document.getElementById(idTeksOrang);
+            if (elTeksOrang) elTeksOrang.innerText = jmlOrangUnik + " Orang";
+
+            // B. Update Detail Melapor (Label bawah bar kecil)
             const idDetail = idTeksOrang.replace("txt", "txt").replace("orang", "detail");
             if(document.getElementById(idDetail)) document.getElementById(idDetail).innerText = jmlOrangUnik + " Orang Melapor";
-            
-            // Bar Kecil (Visualisasi partisipasi orang, target 10)
-            const idBarOrang = idTeksOrang.replace("txt", "bar") + "-visual";
-            if(document.getElementById(idBarOrang)) {
-                document.getElementById(idBarOrang).style.width = Math.min((jmlOrangUnik / 10) * 100, 100) + "%";
+
+            // C. Bar Visual Kecil (Target 10 orang untuk visualisasi bar tengah)
+            const idBarOrangVisual = idTeksOrang.replace("txt", "bar") + "-visual";
+            if(document.getElementById(idBarOrangVisual)) {
+                document.getElementById(idBarOrangVisual).style.width = Math.min((jmlOrangUnik / 10) * 100, 100) + "%";
             }
 
-            // 3. Update Progres Persentase (Target 100 Laporan)
-            let persenProgres = (jmlLaporan / 100) * 100;
-            document.getElementById(idTeksPersen).innerText = persenProgres.toFixed(1) + "%";
-            document.getElementById(idBarPersen).style.width = Math.min(persenProgres, 100) + "%";
+            // D. Update Persentase Progres Utama (Target 100)
+            // Menggunakan dataJCTerpilih.totalDoc jika ingin menghitung total laporan masuk, 
+            // atau totalOrangGlobal jika ingin melihat total seluruh JC. Di sini saya arahkan ke target 100.
+            let target = 100;
+            let persenProgres = (jmlOrangUnik / target) * 100; 
+
+            const elTeksPersen = document.getElementById(idTeksPersen);
+            const elBarPersen = document.getElementById(idBarPersen);
+
+            if (elTeksPersen) elTeksPersen.innerText = persenProgres.toFixed(1) + "%";
+            if (elBarPersen) elBarPersen.style.width = Math.min(persenProgres, 100) + "%";
         });
     }
 
+    /** * 2. KONFIGURASI DAN INITIALISASI
+     */
     function syncSemuaDashboard() {
-        // Alkitab
+        // A. KATEGORI: PEMBACAAN ALKITAB
         updateStatistik("laporan_baca", "sel-alkitab", "txt-alkitab-orang", "txt-alkitab-persen", "bar-alkitab-persen");
-        
-        // Kehadiran (Filter Status HADIR)
+
+        // B. KATEGORI: KEHADIRAN JC
         updateStatistik("kehadiran", "sel-hadir", "txt-hadir-orang", "txt-hadir-persen", "bar-hadir-persen", "HADIR");
-        
-        // Ketidakhadiran (Filter Status selain HADIR)
+
+        // C. KATEGORI: KETIDAKHADIRAN (IZIN/SAKIT)
         updateStatistik("kehadiran", "sel-tidak-hadir", "txt-tidak-hadir-orang", "txt-tidak-hadir-persen", "bar-tidak-hadir-persen", "TIDAK_HADIR");
         
-        // Tetap jalankan Doa dan Darah (karena strukturnya berbeda)
+        // Tetap jalankan Doa dan Darah
         syncStatistikDoa();
         syncGolonganDarah();
     }
 
-    // Fungsi Tambahan tetap dipertahankan
+    // Fungsi Pendukung Lainnya (Doa, Darah, Dropdown)
     function syncStatistikDoa() {
         const jcRaw = document.getElementById('select-jc-doa').value;
         db.collection("laporan_doa").where("jc", "==", jcRaw).onSnapshot(snap => {
@@ -313,6 +335,7 @@
         });
     }
 
+    // Jalankan saat halaman dimuat
     window.onload = () => {
         setupPeriodeDropdown();
         syncSemuaDashboard();
